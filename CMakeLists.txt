@@ -143,6 +143,7 @@ endif()
 # Add Modules
 #########################################################################################################
 message( STATUS "Deploying project modules...")
+include( ${PRJ_TOP}/cmn/cmn.cmake)
 # include( ${PRJ_TOP}/app/rh_app.cmake)
 # include( ${PRJ_TOP}/bsp/rh_bsp.cmake)
 # include( ${PRJ_TOP}/cmn/rh_cmn.cmake)
