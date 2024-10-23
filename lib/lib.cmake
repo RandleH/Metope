@@ -20,7 +20,7 @@ set( CPU_FLAG_STM32 "")
 set( LINK_FLAG_STM32 "")
 
 if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
-    set( DEF_STM32   "-DSTM32F411xE"
+    list(APPEND DEF_STM32       "-DSTM32F411xE"
                                 "-DUSE_HAL_DRIVER" )
     aux_source_directory( ${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src  SRC_STM32)
     list(APPEND SRC_LIST        "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s"
@@ -35,7 +35,7 @@ if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
     list(APPEND CPU_FLAG_STM32  "-mcpu=cortex-m4")
 
 elseif((CHIP STREQUAL "STM32F405RGT6"))
-    set( DEF_STM32   "-DSTM32F405xx"
+    list(APPEND DEF_STM32       "-DSTM32F405xx"
                                 "-DUSE_HAL_DRIVER" )
     aux_source_directory( ${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src  SRC_STM32)
     list(APPEND SRC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f405xx.s"
@@ -44,7 +44,10 @@ elseif((CHIP STREQUAL "STM32F405RGT6"))
     list(APPEND INC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc" )
-    list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F405RGT6_FLASH.ld")
+    
+    list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F405RGTx_FLASH.ld")
+    
+    list(APPEND CPU_FLAG_STM32  "-mcpu=cortex-m4")
 else()
     message(FATAL_ERROR "Unknown system target")
 endif()
