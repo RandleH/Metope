@@ -30,7 +30,7 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    // Error_Handler();
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
@@ -44,7 +44,7 @@ static void SystemClock_Config(void)
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
-    Error_Handler();
+    // Error_Handler();
   }
 }
 
@@ -73,6 +73,5 @@ void hw_init(void){
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-
 
 }

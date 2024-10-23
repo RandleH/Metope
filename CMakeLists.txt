@@ -38,7 +38,6 @@ set( PRJ_TOP                        ${CMAKE_SOURCE_DIR})
 set( DEF_LIST                       "")
 set( SRC_LIST                       "")
 set( INC_DIR_LIST                   "")
-
 set( TARGET_LIST                    "")
 
 
@@ -46,86 +45,35 @@ set( TARGET_LIST                    "")
 # Target Definition
 #########################################################################################################
 
-if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
-    set(CHIP "STM32F411CEU6" CACHE INTERNAL "")
-    list(APPEND DEF_LIST  "-DSTM32F411xE=1")
-    list(APPEND SRC_LIST                ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s
-                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c )
-
-    list(APPEND INC_DIR_LIST            ${PRJ_TOP}
-                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/
-                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/)
-elseif (CHIP STREQUAL "STM32F405RGT6")
-    set(CHIP "STM32F405RGT6" CACHE INTERNAL "")
-    list(APPEND DEF_LIST  "-DSTM32F405xx=1")
-    list(APPEND SRC_LIST                ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f405xx.s
-                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c )
-
-    list(APPEND INC_DIR_LIST            ${PRJ_TOP}
-                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/
-                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/)
-
-else()
-    message(FATAL_ERROR "Unknown system target")
-endif()
-
-
-list(APPEND SRC_LIST ${PRJ_TOP}/main.c )
-
-
-# if(CFG_DITCH_STM32HAL EQUAL 1)
-#     list(APPEND DEF_LIST  "-DCFG_DITCH_STM32HAL=1")
-# endif()
-
-# if(NOT FLASH)
-#     set(FLASH "W25Q32" CACHE INTERNAL "")
-# endif()
-# if(FLASH STREQUAL "W25Q32")
-#     list(APPEND DEF_LIST  "-DCFG_FLASH_W25Q32=1")
-# elseif(FLASH STREQUAL "W25Q128")
-#     list(APPEND DEF_LIST  "-DCFG_FLASH_W25Q128=1")
-# endif()
-
-# if(NOT CFG_SERVICE)
-#     set( CFG_SERVICE "MODEL1" CACHE INTERNAL "")
-# endif()
-# if(CFG_SERVICE STREQUAL "MODEL1")
-#     list(APPEND DEF_LIST "-DCFG_SERVICE_MODEL1=1")
-# elseif(CFG_SERVICE STREQUAL "BAREMETAL")
-#     list(APPEND DEF_LIST "-DCFG_SERVICE_BAREMETAL=1")
-# endif()
-
+list(APPEND INC_DIR_LIST            "${PRJ_TOP}")
+list(APPEND SRC_LIST                "${PRJ_TOP}/main.c" 
+                                    "${PRJ_TOP}/init.c")
 
 #########################################################################################################
 # Target Compile Option Flag
 #########################################################################################################
-set( CXX_FLAG                       -fdata-sections
-                                    -ffunction-sections
-                                    -Wall
-                                    -Wno-pedantic
-                                    )
+set( CXX_FLAG                       "-fdata-sections"
+                                    "-ffunction-sections"
+                                    "-Wall"
+                                    "-Wno-pedantic")
 
-set( CPU_FLAG                       -mcpu=cortex-m4
-                                    -mthumb
-                                    -mfloat-abi=hard
-                                    -mfpu=fpv4-sp-d16
-                                    )
+set( CPU_FLAG                       "-mthumb"
+                                    "-mfloat-abi=hard"
+                                    "-mfpu=fpv4-sp-d16")
 
 
 #########################################################################################################
 # Target Linking Option Flag
 #########################################################################################################
-set( LINK_FLAG                      -T${PRJ_TOP}/STM32F405RGT6_FLASH.ld
-                                    -specs=nosys.specs
-                                    -lc
-                                    -lm
-                                    -lnosys
-                                    -Wl,-Map=${PROJECT_NAME}.map,--cref
-                                    -Wl,--gc-sections
+set( LINK_FLAG                      "-specs=nosys.specs"
+                                    "-lc"
+                                    "-lm"
+                                    "-lnosys"
+                                    "-Wl,-Map=${PROJECT_NAME}.map,--cref"
+                                    "-Wl,--gc-sections"
                                     )
 
-add_compile_options( ${CPU_FLAG})
-add_link_options( ${CPU_FLAG})
+
 
 #########################################################################################################
 # Additional Setting for Debug or Release
@@ -143,12 +91,19 @@ endif()
 # Add Modules
 #########################################################################################################
 message( STATUS "Deploying project modules...")
+if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
+    set(CHIP "STM32F411CEU6" CACHE INTERNAL "")
+elseif (CHIP STREQUAL "STM32F405RGT6")
+    set(CHIP "STM32F405RGT6" CACHE INTERNAL "")
+else()
+    message(FATAL_ERROR "Unknown system target")
+endif()
 include( ${PRJ_TOP}/cmn/cmn.cmake)
-# include( ${PRJ_TOP}/app/rh_app.cmake)
-# include( ${PRJ_TOP}/bsp/rh_bsp.cmake)
-# include( ${PRJ_TOP}/cmn/rh_cmn.cmake)
-# include( ${PRJ_TOP}/lib/rh_lib.cmake)
+include( ${PRJ_TOP}/lib/lib.cmake)
 
+
+add_compile_options( ${CPU_FLAG})
+add_link_options( ${CPU_FLAG})
 
 #########################################################################################################
 # Final Execution 
@@ -163,13 +118,6 @@ target_compile_options ( ${PROJECT_NAME}.elf  PUBLIC      ${CMAKE_CXX_FLAGS} ${C
 target_link_options    ( ${PROJECT_NAME}.elf  PUBLIC      ${LINK_FLAG} ${CPU_FLAG} )
 target_link_libraries( ${PROJECT_NAME}.elf PUBLIC  ${TARGET_LIST})
 
-# include( ${PRJ_TOP}/cmake/utility.cmake)
-# foreach( target ${TARGET_LIST})
-#     message("================================================================================")
-#     message( "Library Target property: ${target}")
-#     message("================================================================================")
-#     print_target_properties( ${target})
-# endforeach()
 
 message("================================================================================")
 message( "Executable target property: ${PROJECT_NAME}.elf")
@@ -186,8 +134,6 @@ add_custom_command(     TARGET  ${PROJECT_NAME}.elf POST_BUILD
                         COMMAND ${CMAKE_OBJCOPY} -Oihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
                         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
                         COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}")
-
-
 
 
 
