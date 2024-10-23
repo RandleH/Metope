@@ -43,3 +43,23 @@ git clone --recursive https://github.com/STMicroelectronics/STM32CubeF4.git
 
 
 
+
+
+**STM32F411CEU6**
+
+![image-20241023112821906](/Users/randleh/Library/Application Support/typora-user-images/image-20241023112821906.png)
+
+
+
+
+
+**STM32F405RGT6**
+
+![image-20241023113302453](/Users/randleh/Library/Application Support/typora-user-images/image-20241023113302453.png)
+
+
+
+
+
+
+

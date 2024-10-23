@@ -27,10 +27,12 @@ int main(int argc, char *argv[]){
    * @note
    *  Hardware Initialization
    *  @cpu: CortexM4 STM32F411CEU6 96MHz
+   *  @timer: SYSTICK=84MHz APB1=96MHz APB2=96MHz 
    *  @periphral: AHB=96MHz APB1=48MHz APB2=96MHz USB=48MHz HSE=25MHz LSE=32.768KHz
    * 
-   *  @cpu: CortexM4 STM32F405RGT6 96MHz
-   *  @periphral: 
+   *  @cpu: CortexM4 STM32F405RGT6 84MHz
+   *  @timer: SYSTICK=84MHz APB1=84MHz APB2=84MHz 
+   *  @periphral: AHB=84MHz APB1=42MHz APB2=84MHz HSE=25MHz LSE=32.768KHz
    * 
   */
   hw_init();
