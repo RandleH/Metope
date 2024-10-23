@@ -8,7 +8,7 @@ cd ${DIR_CWD}
 mkdir build
 cd ./build
 
-cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F411CEU6  ..
 make -j32
 
 

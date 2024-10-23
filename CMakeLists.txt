@@ -35,15 +35,6 @@ set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Cross-compiling" FORCE)
 # Project Path & Source Files Definition
 #########################################################################################################
 set( PRJ_TOP                        ${CMAKE_SOURCE_DIR})
-
-set( SRC_LIST                       ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f405xx.s
-                                    ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c
-                                    ${PRJ_TOP}/main.c )
-
-set( INC_DIR_LIST                   ${PRJ_TOP}
-                                    ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/
-                                    ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/)
-
 set( DEF_LIST                       "")
 set( SRC_LIST                       "")
 set( INC_DIR_LIST                   "")
@@ -55,23 +46,32 @@ set( TARGET_LIST                    "")
 # Target Definition
 #########################################################################################################
 
-if(NOT SYSTARGET)
-    set(SYSTARGET "STM32F405RGT6" CACHE INTERNAL "")
-    list(APPEND DEF_LIST  "-DSTM32F405xx=1")
-    list(APPEND SRC_LIST                ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f405xx.s
-                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c
-                                        ${PRJ_TOP}/main.c )
+if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
+    set(CHIP "STM32F411CEU6" CACHE INTERNAL "")
+    list(APPEND DEF_LIST  "-DSTM32F411xE=1")
+    list(APPEND SRC_LIST                ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s
+                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c )
 
     list(APPEND INC_DIR_LIST            ${PRJ_TOP}
                                         ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/
                                         ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/)
-# elseif(SYSTARGET STREQUAL "NEPTUNE_V1")
-#     list(APPEND DEF_LIST  "-DSYS_TARGET_NEPTUNE_V1=1")
-# elseif(SYSTARGET STREQUAL "NEPTUNE_V2")
-#     list(APPEND DEF_LIST  "-DSYS_TARGET_NEPTUNE_V2=1")
+elseif (CHIP STREQUAL "STM32F405RGT6")
+    set(CHIP "STM32F405RGT6" CACHE INTERNAL "")
+    list(APPEND DEF_LIST  "-DSTM32F405xx=1")
+    list(APPEND SRC_LIST                ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f405xx.s
+                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c )
+
+    list(APPEND INC_DIR_LIST            ${PRJ_TOP}
+                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/
+                                        ${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/)
+
 else()
     message(FATAL_ERROR "Unknown system target")
 endif()
+
+
+list(APPEND SRC_LIST ${PRJ_TOP}/main.c )
+
 
 # if(CFG_DITCH_STM32HAL EQUAL 1)
 #     list(APPEND DEF_LIST  "-DCFG_DITCH_STM32HAL=1")
