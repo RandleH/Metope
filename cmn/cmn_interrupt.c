@@ -18,6 +18,8 @@
 */
 
 
+#include "cmn_device.h"
+
 
 #ifdef __cplusplus
 extern "C"{
@@ -100,7 +102,11 @@ void I2C2_ER_IRQHandler(void){}
 void SPI1_IRQHandler(void){}              
 void SPI2_IRQHandler(void){}
 void USART1_IRQHandler(void){}            
-void EXTI15_10_IRQHandler( void){}
+
+void EXTI15_10_IRQHandler( void){
+  HAL_GPIO_EXTI_IRQHandler(KEY_L_Pin);
+}
+
 void RTC_Alarm_IRQHandler( void){}
 void OTG_FS_WKUP_IRQHandler( void){}
 void SDIO_IRQHandler( void){}
@@ -116,8 +122,16 @@ void TAMP_STAMP_IRQHandler( void){}
 void RTC_WKUP_IRQHandler( void){}
 void FLASH_IRQHandler( void){}       
 void RCC_IRQHandler( void){}         
-void EXTI0_IRQHandler( void){}       
-void EXTI1_IRQHandler( void){}       
+
+void EXTI0_IRQHandler( void){
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+}
+
+void EXTI1_IRQHandler( void){
+  HAL_GPIO_EXTI_IRQHandler(KEY_R_Pin);
+}
+
+
 void EXTI2_IRQHandler( void){}       
 void EXTI3_IRQHandler( void){}       
 void EXTI4_IRQHandler( void){}       

@@ -29,6 +29,10 @@ if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
     list(APPEND INC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc" )
+                                
+    # set( INC_STM32CUBE "")
+    # GET_SUBDIR( INC_STM32CUBE   "${PRJ_TOP}/STM32CubeMX")
+    list(APPEND INC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F411CEU6/Core/Inc/")
     
     list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F411CEUX_FLASH.ld")
 
@@ -44,6 +48,10 @@ elseif((CHIP STREQUAL "STM32F405RGT6"))
     list(APPEND INC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc" )
+
+    # set( INC_STM32CUBE "")
+    # GET_SUBDIR( INC_STM32CUBE   "${PRJ_TOP}/STM32CubeMX")
+    list(APPEND INC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/Core/Inc/")
     
     list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F405RGTx_FLASH.ld")
     

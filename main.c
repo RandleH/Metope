@@ -19,6 +19,15 @@
 
 
 #include "init.h"
+#include "cmn_type.h"
+#include "bsp_led.h"
+
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+  bsp_led__toggle();
+}
+
 
 
 int main(int argc, char *argv[]){
@@ -36,8 +45,11 @@ int main(int argc, char *argv[]){
    * 
   */
   hw_init();
-
+  
+  bsp_led__switch(ON);
+  
   while(1){
-      
+
+    
   }
 }
