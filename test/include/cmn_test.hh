@@ -25,7 +25,7 @@ extern uint32_t cmn_interrupt_top( void);
 }
 #endif
 
-extern Test tb_infra;
+extern LocalProjectTest tb_infra;
 
 
 

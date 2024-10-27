@@ -5,6 +5,8 @@
 #include "cmn_math.h"
 
 
+
+
 uint32_t cmn_math_gcd( uint32_t a, uint32_t b){
   if( b>a )  return cmn_math_gcd(b,a);
   
@@ -19,3 +21,5 @@ uint32_t cmn_math_gcd( uint32_t a, uint32_t b){
   }
   return 0;
 }
+
+

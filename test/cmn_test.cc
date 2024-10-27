@@ -12,7 +12,7 @@
 
 
 
-
+#include <bitset>
 
 
 
@@ -110,7 +110,31 @@ public:
   }
 };
 
+class TestCmnMathBit : public TestUnitWrapper<std::array<uint32_t,10>,std::array<uint32_t,10>>{
+public:
+  TestCmnMathBit():TestUnitWrapper("test_cmn_math_bit"){}
 
+  bool run(std::array<uint32_t,10> &input,std::array<uint32_t,10> &ref) override{
+    uint32_t  x8 =input[0], r8;
+    r8 = CMN_CLZ_U32(x8);
+    if( r8!=ref[0] ){
+      this->_err_msg<<"Mismatch in CMN_CLZ_U32()."<<" input="<<"0b"<<std::bitset<32>{input[0]}<<" dut="<<r8<<" ref="<<ref[0]<<std::endl;
+      return false;
+    }
+
+    // uint16_t x16=input[0];
+    // uint32_t x32=input[0];
+    // r8 = CMN_BIT_EXT_U8( x8, 2,3);
+    // CMN_BIT_EXT_U16( x16, 2,3);
+    // CMN_BIT_EXT_U32( x32, 2,3);
+    // if( x8!= ((input[0]&(((1<<3)-1)<<2))>>2) ){
+      // this->_err_msg<<"Mismatch in CMN_BIT_EXT()."<<" dut="<<"0b"<< std::bitset<8>{x8}<<" ref="<<"0b"<<std::bitset<8>{(uint8_t)input[0]}<<endl;
+      // return false;
+    // }
+    
+    return true;
+  }
+};
 
 void add_cmn_test(void){
   tb_infra
@@ -164,6 +188,16 @@ void add_cmn_test(void){
         6,
         128
       }}
+    )
+
+    .insert(
+      TestCmnMathBit(),
+      std::array<uint32_t,10>{
+        {0x007B2A52}    /*!< Input: Counting Leading Zero */
+      },
+      std::array<uint32_t,10>{
+        {9}             /*!< Ref: Counting Leading Zero */
+      }
     )
   ;
 

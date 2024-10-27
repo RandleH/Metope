@@ -175,19 +175,19 @@ void cmn_interrupt_execute( void){
 /*                    Interrupt Service Routine Function                      */
 /* ************************************************************************** */
 
-void NMI_Handler( void){
+void DEFAULT NMI_Handler( void){
   while(1){
 
   }
 }
 
-void HardFault_Handler( void){
+void DEFAULT HardFault_Handler( void){
   while(1){
 
   }
 }
 
-void MemManage_Handler( void){
+void DEFAULT MemManage_Handler( void){
   while(1){
 
   }
@@ -241,7 +241,7 @@ void SPI1_IRQHandler(void){}
 void SPI2_IRQHandler(void){}
 void USART1_IRQHandler(void){}            
 
-void EXTI15_10_IRQHandler( void){
+void DEFAULT EXTI15_10_IRQHandler( void){
   HAL_GPIO_EXTI_IRQHandler(KEY_L_Pin);
 }
 
@@ -261,11 +261,11 @@ void RTC_WKUP_IRQHandler( void){}
 void FLASH_IRQHandler( void){}       
 void RCC_IRQHandler( void){}         
 
-void EXTI0_IRQHandler( void){
+void DEFAULT EXTI0_IRQHandler( void){
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 }
 
-void EXTI1_IRQHandler( void){
+void DEFAULT EXTI1_IRQHandler( void){
   HAL_GPIO_EXTI_IRQHandler(KEY_R_Pin);
 }
 

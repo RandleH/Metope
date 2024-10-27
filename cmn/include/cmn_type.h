@@ -30,6 +30,8 @@
   #define INLINE inline
 #endif
 
+#define DEFAULT __weak
+
 
 
 #ifdef __cplusplus

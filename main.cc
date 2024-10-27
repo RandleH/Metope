@@ -68,9 +68,14 @@ int main(int argc, char *argv[]){
 
 #include <iostream>
 #include "cmn_test.hh"
+#include "bsp_led.h"
 
 
-Test tb_infra(std::cout);
+
+
+
+
+LocalProjectTest tb_infra(std::cout);
 
 int main(int argc, char *argv[]){
   hw_init();

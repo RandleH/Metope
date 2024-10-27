@@ -42,6 +42,11 @@
 
 
 #define MAX_TEST_NAME_LENGTH       64
+#define CONSOLE_FMT_RED          "\033[31m"
+#define CONSOLE_FMT_YELLOW       "\033[33m"
+#define CONSOLE_FMT_BLUE         "\033[44m"
+#define CONSOLE_FMT_ITALIC       "\033[23m"
+#define CONSOLE_FMT_RESET        "\033[0m"
 
 
 /**
@@ -62,7 +67,8 @@ public:
   }
 
   const char* name(void){return _name;}
-  
+
+  virtual inline const char* info(void) const noexcept = 0;
   virtual bool run(void* q, void *a) = 0;
 
   virtual ~TestBone() = default;
@@ -98,6 +104,10 @@ public:
   TestUnitWrapper(const std::string test_name):TestBone(test_name),_result(false),_is_tested(false),_err_msg(""){}
   TestUnitWrapper(const TestUnitWrapper &x):TestBone(x._name),_result(false),_is_tested(false),_err_msg(""){}
   TestUnitWrapper(TestUnitWrapper&& x) noexcept{}
+  
+  inline const char* info(void) const noexcept{
+    return  ("\t"+_err_msg.str()).c_str();
+  }
 
   ~TestUnitWrapper(){
     _err_msg.str("");
@@ -196,6 +206,9 @@ public:
     return (*this);
   }
 
+  virtual void callback_if_passed( void){}
+  virtual void callback_if_failed( void){}
+
   void verdict(void){
     _cout<<"Number of tests in this batch: "<< _package.size()<<'\n'<<std::endl;
     uint32_t cnt = 0;
@@ -206,6 +219,7 @@ public:
       v_result &= result;
       if(result==false){
         _cout<<"FAILED"<<std::endl;
+        _cout<<CONSOLE_FMT_RED<<"Error Signature:\n"<<item.first->info()<<CONSOLE_FMT_RESET<<std::endl;
       }else{
         _cout<<"PASSED"<<std::endl;
       }
@@ -213,8 +227,15 @@ public:
     }
 
     _cout<<"\nTest completed. Verdict result: "<< ((v_result==false) ? "FAILED" : "PASSED")<<std::endl;
+
+    if(v_result==false){
+      callback_if_failed();
+    }else{
+      callback_if_passed();
+    }
   }
   
+
   /**
    * @todo
    *    Check if this is valid.
@@ -233,6 +254,41 @@ public:
 
 };
 
+
+
+
+/* ************************************************************************** */
+/*                   Project Dependent Test Infrastructure                    */
+/* ************************************************************************** */
+#include "bsp_led.h"
+class LocalProjectTest : public Test{
+public:
+  using Test::Test;
+  void callback_if_passed(void) override{bsp_led__switch(ON);}
+  void callback_if_failed(void) override{bsp_led__switch(OFF);}
+};
+
+
+
+/* ************************************************************************** */
+/*                      Integration Test Infrastructure                       */
+/* ************************************************************************** */
+class IntegrationTest : public Test{
+public:
+  using Test::Test;
+  void callback_if_passed(void) override{
+    /**
+     * @todo
+     *  Generate a system interrupt with a ERRNO status
+     */
+  }
+  void callback_if_failed(void) override{
+    /**
+     * @todo
+     *  Generate a system interrupt with a EINTR status
+     */
+  }
+};
 
 
 #endif
