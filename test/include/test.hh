@@ -29,6 +29,7 @@
 #include <map>
 #include <sys/stat.h>
 #include <memory>
+#include <queue>
 
 
 /* ************************************************************************** */
@@ -50,8 +51,7 @@ public:
   
   virtual bool run(void* q, void *a) = 0;
 
-  ~TestBone(){
-  }
+  virtual ~TestBone() = default;
 
   friend std::ostream& operator<<(std::ostream& out, const TestBone& testunit_client);
 
@@ -80,7 +80,9 @@ protected:
 public:
   TestUnitWrapper() = delete;
   TestUnitWrapper(const std::string test_name):TestBone(test_name),_err_msg(""),_result(false),_is_tested(false){}
-  TestUnitWrapper(const TestUnitWrapper &x) = default;
+  TestUnitWrapper(const TestUnitWrapper &x):TestBone(x._name),_err_msg(""),_result(false),_is_tested(false){}
+  TestUnitWrapper(TestUnitWrapper&& x) noexcept{}
+
   ~TestUnitWrapper(){
     _err_msg.str("");
   }
@@ -105,20 +107,24 @@ public:
 /**
  * @brief General Test Bench Portal
  * @note  This structure will ONLY iterate your whole test set and run it.
- *        Type <T> will be formed from type <Q> and type <A>. I recommand
- *        it to be the child of class `TestUnit`.
- * @note  The `verdict()` is an implemented function. Do NOT touch it.
  * 
+ * @remark  Import Tests
+ * @note    Your test data will be taken as a reference and will not be stored.
+ *          Please make sure the entity `Test` and your tests data were in the 
+ *          same life time.
+ * @example
  * 
- * @tparam [Q] - The input data of your tests
- * @tparam [A] - The expected answer of your tests
- * @tparam [T] - The type of your client who will host this test
+ * @remark  Insert Tests
+ * @note    Memory will be allocated. Your test data will have a deep copy to 
+ *          the buffer.
+ * @example
  * 
  * @author Randle.Helmslay [Signed]
 */
 class Test{
 private:
   std::map<TestBone*, std::pair<void*,void*>> _package;
+  std::queue<TestBone*>                       _alloc;
   std::ostream&                               _cout;
 
 public:
@@ -126,6 +132,17 @@ public:
 
   Test& import( TestBone *client, void *Q_input, void *A_answer){
     _package.insert(std::make_pair( client, std::make_pair(Q_input, A_answer)));
+    return (*this);
+  }
+
+  template<class T, class Q, class A>
+  Test& insert( const T& client, const Q& input, const A& answer){
+    auto *pT = new T(std::move(client));
+    auto *pQ = new Q(std::move(input));
+    auto *pA = new A(std::move(answer));
+    _alloc.push(pT);
+    
+    _package.insert(std::make_pair( pT, std::make_pair(pQ, pA)));
     return (*this);
   }
 
@@ -143,6 +160,22 @@ public:
         _cout<<"PASSED"<<std::endl;
       }
       ++cnt;
+    }
+  }
+  
+  /**
+   * @todo
+   *    Check if this is valid.
+  */
+  ~Test(){
+    while( !_alloc.empty()){
+      auto *pT = _alloc.front();
+      auto *pQ = _package[pT].first;
+      auto *pA = _package[pT].second;
+      delete pT;
+      delete [] (char*)pQ;
+      delete [] (char*)pA;
+      _alloc.pop();
     }
   }
 

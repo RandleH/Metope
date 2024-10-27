@@ -39,10 +39,10 @@ void foo(void){
   tb_infra
     .import(&a, &input, &ref)
     .import(new TestInterruptPushPopTopBasic<typeof(input), typeof(ref)>(), new std::vector<tCmnInterruptUnit>(input), new std::vector<uint32_t>(ref))
-    .import(new TestInterruptPushPopTopCornerCase<char, char>()            , NULL                                     , NULL);
+    .import(new TestInterruptPushPopTopCornerCase<char, char>()            , NULL                                     , NULL)
+    ;
 
+  tb_infra.insert( TestInterruptPushPopTopBasic<typeof(input), typeof(ref)>(), input, ref);
 
-
-
-
+  tb_infra.verdict();
 }
