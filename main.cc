@@ -29,6 +29,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 }
 
 
+#ifndef TEST_ONLY
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 int main(int argc, char *argv[]){
   
@@ -53,3 +58,24 @@ int main(int argc, char *argv[]){
     
   }
 }
+
+#ifdef __cplusplus
+}
+#endif
+
+#else
+
+
+#include <iostream>
+
+int main(int argc, char *argv[]){
+  
+  hw_init();
+  extern void foo(void);
+  foo();
+  while(1){
+
+  }
+}
+
+#endif

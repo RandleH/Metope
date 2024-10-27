@@ -39,6 +39,8 @@ void hw_init(void){
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
 
+  MX_USART2_Init();
+
   MX_USB_OTG_FS_USB_Init();
 
 }

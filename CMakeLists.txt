@@ -28,6 +28,7 @@ project( model1 C CXX ASM)
 set(CMAKE_C_STANDARD                    99)
 set(CMAKE_C_STANDARD_REQUIRED           ON)
 set(CMAKE_C_EXTENSIONS                  ON)
+set(CMAKE_CXX_STANDARD                  17)
 set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Cross-compiling" FORCE)
 
 
@@ -46,7 +47,7 @@ set( TARGET_LIST                    "")
 #########################################################################################################
 
 list(APPEND INC_DIR_LIST            "${PRJ_TOP}")
-list(APPEND SRC_LIST                "${PRJ_TOP}/main.c" 
+list(APPEND SRC_LIST                "${PRJ_TOP}/main.cc" 
                                     "${PRJ_TOP}/init.c")
 
 #########################################################################################################
@@ -70,8 +71,7 @@ set( LINK_FLAG                      "-specs=nosys.specs"
                                     "-lm"
                                     "-lnosys"
                                     "-Wl,-Map=${PROJECT_NAME}.map,--cref"
-                                    "-Wl,--gc-sections"
-                                    )
+                                    "-Wl,--gc-sections")
 
 
 
@@ -85,6 +85,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     message( STATUS "Target set to release.")
     include( ${PRJ_TOP}/cmake/release.cmake)
 endif()
+
 
 
 #########################################################################################################
@@ -103,6 +104,11 @@ endif()
 include( ${PRJ_TOP}/cmn/cmn.cmake)
 include( ${PRJ_TOP}/lib/lib.cmake)
 include( ${PRJ_TOP}/bsp/bsp.cmake)
+if( TEST_ONLY AND TEST_ONLY EQUAL 1)
+    list(APPEND DEF_LIST "-DTEST_ONLY=1")
+    include( ${PRJ_TOP}/test/test.cmake)
+endif()
+
 
 
 add_compile_options( ${CPU_FLAG})
