@@ -67,15 +67,20 @@ int main(int argc, char *argv[]){
 
 
 #include <iostream>
+#include "cmn_test.hh"
+
+
+Test tb_infra(std::cout);
 
 int main(int argc, char *argv[]){
-  
   hw_init();
-  extern void foo(void);
-  foo();
-  while(1){
-
-  }
+  
+  std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
+  
+  add_cmn_test();
+  tb_infra.verdict();
+  
+  while(1){}
 }
 
 #endif

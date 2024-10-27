@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    test.cc
  * @author  RandleH
- * @brief   Testing Program - Pre-Integration CI/Post-Integration CI
+ * @brief   Test Program - Pre-Integration CI/Post-Integration CI
  ******************************************************************************
  * @attention
  *
@@ -30,6 +30,8 @@
 #include <sys/stat.h>
 #include <memory>
 #include <queue>
+#include <cstring>
+#include <iomanip>
 
 
 /* ************************************************************************** */
@@ -39,15 +41,27 @@
 #define TEST_HH
 
 
+#define MAX_TEST_NAME_LENGTH       64
 
+
+/**
+ * @brief Test Bench Bone Structure (Do NOT modify/inherit)
+ * @note  Please develop the test on class `TestUnitWrapper`
+*/
 class TestBone{
 protected:
-  const std::string _name;
+  char _name[MAX_TEST_NAME_LENGTH];
 
 public:
   TestBone() = delete;
-  TestBone(const TestBone &x):_name(x._name){}
-  TestBone(const std::string test_name):_name(test_name){}
+  TestBone(const TestBone &x):_name{0}{
+    stpncpy(_name, x._name, MAX_TEST_NAME_LENGTH-1);
+  }
+  TestBone(const std::string test_name):_name{0}{
+    stpncpy(_name, test_name.c_str(), MAX_TEST_NAME_LENGTH-1);
+  }
+
+  const char* name(void){return _name;}
   
   virtual bool run(void* q, void *a) = 0;
 
@@ -72,15 +86,17 @@ std::ostream& operator<<(std::ostream& out, const TestBone& testunit_client);
 */
 template<class Q, class A>
 class TestUnitWrapper : public TestBone{
-protected:
-  std::stringstream _err_msg;
+private:
   bool              _result;
   bool              _is_tested;
 
+protected:
+  std::stringstream _err_msg;
+
 public:
   TestUnitWrapper() = delete;
-  TestUnitWrapper(const std::string test_name):TestBone(test_name),_err_msg(""),_result(false),_is_tested(false){}
-  TestUnitWrapper(const TestUnitWrapper &x):TestBone(x._name),_err_msg(""),_result(false),_is_tested(false){}
+  TestUnitWrapper(const std::string test_name):TestBone(test_name),_result(false),_is_tested(false),_err_msg(""){}
+  TestUnitWrapper(const TestUnitWrapper &x):TestBone(x._name),_result(false),_is_tested(false),_err_msg(""){}
   TestUnitWrapper(TestUnitWrapper&& x) noexcept{}
 
   ~TestUnitWrapper(){
@@ -92,7 +108,9 @@ public:
    *  Wrapped templated function
   */
   bool run(void *q, void *a) override{
-    return run( (*( static_cast<Q*>(q) )), (*( static_cast<A*>(a) )));
+    _is_tested = true;
+    _result    = run( (*( static_cast<Q*>(q) )), (*( static_cast<A*>(a) )));
+    return _result;
   }
   
   /**
@@ -112,12 +130,44 @@ public:
  * @note    Your test data will be taken as a reference and will not be stored.
  *          Please make sure the entity `Test` and your tests data were in the 
  *          same life time.
- * @example
  * 
  * @remark  Insert Tests
  * @note    Memory will be allocated. Your test data will have a deep copy to 
  *          the buffer.
- * @example
+ * 
+ * @example 
+ *          
+ *          template<class Q, class A>
+ *          class YourTestClass : public TestUnitWrapper<Q,A>{
+ *          public:
+ *            YourTestClass() : TestUnitWrapper<Q,A>("Your Test Description"){}
+ *            
+ *            bool run( Q& input, A& ref) override{
+ *              // Your Test Body //
+ *            }
+ *          };
+ *          
+ *          // Prepare the test material
+ *          TypeTestInput  input[]  = {x,x,x,x,x,x,x};
+ *          TypeTestResult result[] = {y,y,y,y,y,y,y};
+ * 
+ *          // Method 1 - Run Immediately
+ *          YourTestClass< typeof(input), typeof(result) >() client; // Instantiate the test client
+ *          client.run( input, result );                             // Run the test
+ * 
+ *          // Method 2 - Use Test Manager (Recommanded for CI)
+ *          Test tb_infra(std::cout);                                // Set `std::cout` as the output stream
+ *          
+ *            // Method 2.1 - User takes care of the test data memory
+ *            YourTestClass< typeof(input), typeof(result) >() client; // Instantiate the test client
+ *            tb_infra.import( client, input, result);
+ * 
+ *            // Method 2.1 - TB takes care of the test data memory
+ *            tb_infra.insert(YourTestClass< typeof(input), typeof(result) >(), input, result);
+ *            input[...]  = ...                                        // Change some input set
+ *            result[...] = ...                                        // Change some result set
+ *            tb_infra.insert(YourTestClass< typeof(input), typeof(result) >(), input, result);
+ *          
  * 
  * @author Randle.Helmslay [Signed]
 */
@@ -147,20 +197,22 @@ public:
   }
 
   void verdict(void){
-    _cout<<"Number of tests in this batch: "<< _package.size()<<std::endl;
+    _cout<<"Number of tests in this batch: "<< _package.size()<<'\n'<<std::endl;
     uint32_t cnt = 0;
+    bool     v_result = true;
     for( const auto &item : _package){
-      _cout<<"Running test ["<<cnt<<'/'<<_package.size()<<']'<<"...";
+      _cout<<"Running test ["<<cnt+1<<'/'<<_package.size()<<']'<<' '<< std::setfill('.') << std::left << std::setw(MAX_TEST_NAME_LENGTH) << item.first->name()<<' ';
       bool result = item.first->run(item.second.first, item.second.second);
-
+      v_result &= result;
       if(result==false){
-        _cout<<"FAILED\n"<<std::endl;
-        // _cout<<(*pClient)<<std::endl;
+        _cout<<"FAILED"<<std::endl;
       }else{
         _cout<<"PASSED"<<std::endl;
       }
       ++cnt;
     }
+
+    _cout<<"\nTest completed. Verdict result: "<< ((v_result==false) ? "FAILED" : "PASSED")<<std::endl;
   }
   
   /**
