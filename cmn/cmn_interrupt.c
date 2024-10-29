@@ -49,7 +49,8 @@ extern "C"{
 /*                      Interrupt Management Variable                         */
 /* ************************************************************************** */
 tCmnInterruptProc gInterruptProcess = {0};
-
+extern DMA_HandleTypeDef hdma_spi2_tx;
+extern SPI_HandleTypeDef hspi2;
 
 
 
@@ -238,7 +239,11 @@ void I2C1_ER_IRQHandler(void){}
 void I2C2_EV_IRQHandler(void){}           
 void I2C2_ER_IRQHandler(void){}           
 void SPI1_IRQHandler(void){}              
-void SPI2_IRQHandler(void){}
+
+void SPI2_IRQHandler(void){
+  HAL_SPI_IRQHandler(&hspi2);
+}
+
 void USART1_IRQHandler(void){}            
 
 void DEFAULT EXTI15_10_IRQHandler( void){
@@ -253,7 +258,6 @@ void SPI3_IRQHandler( void){}
 void DMA2_Stream0_IRQHandler( void){}
 void DMA2_Stream1_IRQHandler( void){}
 void DMA2_Stream4_IRQHandler( void){}
-void DMA1_Stream5_IRQHandler( void){}
 void WWDG_IRQHandler( void){}
 void PVD_IRQHandler( void){}
 void TAMP_STAMP_IRQHandler( void){}
@@ -277,6 +281,12 @@ void DMA1_Stream0_IRQHandler( void){}
 void DMA1_Stream1_IRQHandler( void){}
 void DMA1_Stream2_IRQHandler( void){}
 void DMA1_Stream3_IRQHandler( void){}
+
+void DEFAULT DMA1_Stream4_IRQHandler(void){
+  HAL_DMA_IRQHandler(&hdma_spi2_tx);
+}
+
+void DMA1_Stream5_IRQHandler( void){}
 void OTG_FS_IRQHandler( void){}
 void DMA2_Stream5_IRQHandler( void){}
 void DMA2_Stream6_IRQHandler( void){}

@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    cmn_utility.h
+ * @file    bsp_type.h
  * @author  RandleH
- * @brief   Common Program - Utility Macros
+ * @brief   Board Support Package Delivery - Type Declaration
  ******************************************************************************
  * @attention
  *
@@ -17,19 +17,25 @@
  ******************************************************************************
 */
 
+#include <stdint.h>
+#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+  
+#endif
+
+#ifndef BSP_TYPE_H
+#define BSP_TYPE_H
 
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+typedef uint16_t  bspScreenBrightness_t;
 
 
-#ifndef CMN_UTILITY_H
-#define CMN_UTILITY_H
-
-
-
-#define CMN_SWAP( a, b)   do{ (a)^=(b); (b)^=(a); (a)^=(b); }while(0)
-
-#define CMN_MIN( a, b)    ((a)>(b) ? (b) : (a))
-#define CMN_MAX( a, b)    ((a)<(b) ? (b) : (a))
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

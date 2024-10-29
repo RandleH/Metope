@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    cmn_utility.h
+ * @file    bsp_screen.h
  * @author  RandleH
- * @brief   Common Program - Utility Macros
+ * @brief   Board Support Package Delivery - Screen
  ******************************************************************************
  * @attention
  *
@@ -21,15 +21,29 @@
 
 
 
-#ifndef CMN_UTILITY_H
-#define CMN_UTILITY_H
+#include "cmn_type.h"
+#include "cmn_device.h"
+
+
+#ifndef BSP_SCREEN_H
+#define BSP_SCREEN_H
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 
 
-#define CMN_SWAP( a, b)   do{ (a)^=(b); (b)^=(a); (a)^=(b); }while(0)
+cmnBoolean_t bsp_screen_init( void);
 
-#define CMN_MIN( a, b)    ((a)>(b) ? (b) : (a))
-#define CMN_MAX( a, b)    ((a)<(b) ? (b) : (a))
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif
+
+
+
+

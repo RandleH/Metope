@@ -12,7 +12,7 @@ extern "C"{
 #endif
 
 void hw_init(void);
-
+void bsp_init(void);
 
 
 #ifdef __cplusplus

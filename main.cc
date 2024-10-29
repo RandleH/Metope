@@ -50,6 +50,7 @@ int main(int argc, char *argv[]){
    * 
   */
   hw_init();
+  bsp_init();
   
   bsp_led__switch(ON);
   
@@ -67,15 +68,16 @@ int main(int argc, char *argv[]){
 
 
 #include <iostream>
+#include "test.hh"
 #include "cmn_test.hh"
-#include "bsp_led.h"
+#include "bsp_test.hh"
+#include "global.h"
 
 
 
+LocalProjectTest     tb_infra_local(std::cout);
+HumanInteractionTest tb_infra_hmi(std::cout);
 
-
-
-LocalProjectTest tb_infra(std::cout);
 
 int main(int argc, char *argv[]){
   hw_init();
@@ -83,8 +85,14 @@ int main(int argc, char *argv[]){
   std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
   
   add_cmn_test();
-  tb_infra.verdict();
-  
+  add_bsp_test();
+
+  std::cout<<"Local Project Test:"<<std::endl;
+  tb_infra_local.verdict();
+
+  std::cout<<"Human Interaction Test:"<<std::endl;
+  tb_infra_hmi.verdict();
+
   while(1){}
 }
 

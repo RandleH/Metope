@@ -1,12 +1,14 @@
 
-#ifndef CMN_TEST_HH
-#define CMN_TEST_HH
+
+
+#ifndef BSP_TEST_HH
+#define BSP_TEST_HH
 
 
 /* ************************************************************************** */
 /*                         Bindings - TestInterrupt                           */
 /* ************************************************************************** */
-void add_cmn_test(void);
+void add_bsp_test(void);
 
 
 #endif

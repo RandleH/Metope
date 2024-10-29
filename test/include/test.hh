@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    test.cc
+ * @file    test.hh
  * @author  RandleH
- * @brief   Test Program - Pre-Integration CI/Post-Integration CI
+ * @brief   General Test Program Model
  ******************************************************************************
  * @attention
  *
@@ -41,14 +41,23 @@
 #define TEST_HH
 
 
+/* ************************************************************************** */
+/*                                  Macros                                    */
+/* ************************************************************************** */
 #define MAX_TEST_NAME_LENGTH       64
-#define CONSOLE_FMT_RED          "\033[31m"
-#define CONSOLE_FMT_YELLOW       "\033[33m"
-#define CONSOLE_FMT_BLUE         "\033[44m"
-#define CONSOLE_FMT_ITALIC       "\033[23m"
-#define CONSOLE_FMT_RESET        "\033[0m"
+#define CONSOLE_FMT_RED           "\033[31m"
+#define CONSOLE_FMT_YELLOW        "\033[33m"
+#define CONSOLE_FMT_BLUE          "\033[44m"
+#define CONSOLE_FMT_ITALIC        "\033[23m"
+#define CONSOLE_FMT_BOLD          "\033[1m"
+#define CONSOLE_FMT_RESET         "\033[0m"
+#define CONSOLE_FMT_USER_CUSTOM_1 "\033[38;5;51m"
+#define CONSOLE_FMT_USER_CUSTOM_2 "\033[48;5;51m"
 
 
+/* ************************************************************************** */
+/*                            Test Bone Component                             */
+/* ************************************************************************** */
 /**
  * @brief Test Bench Bone Structure (Do NOT modify/inherit)
  * @note  Please develop the test on class `TestUnitWrapper`
@@ -69,16 +78,17 @@ public:
   const char* name(void){return _name;}
 
   virtual inline const char* info(void) const noexcept = 0;
-  virtual bool run(void* q, void *a) = 0;
-
-  virtual ~TestBone() = default;
-
+  virtual              bool  run(void* q, void *a)     = 0;
+  virtual                    ~TestBone()               = default;
   friend std::ostream& operator<<(std::ostream& out, const TestBone& testunit_client);
-
 };
 std::ostream& operator<<(std::ostream& out, const TestBone& testunit_client);
 
 
+
+/* ************************************************************************** */
+/*                       Test Bone Wrapper Component                          */
+/* ************************************************************************** */
 /**
  * @brief General Test Bench Unit
  * @note  User needs to implement the `run()` function. This is an abstract class
@@ -131,7 +141,63 @@ public:
 };
 
 
+/**
+ * @brief General Test Bench Unit with Input(`istream`)
+ * 
+ * @author Randle.Helmslay [Signed]
+*/
+template<class Q, class A>
+class TestUnitWrapper_withInput : public TestUnitWrapper<Q,A>{
+protected:
+  std::istream& _cin;
+public:
+  TestUnitWrapper_withInput() = delete;
+  TestUnitWrapper_withInput(const std::string test_name, std::istream& cin):TestUnitWrapper<Q,A>(test_name),_cin(cin){}
+  TestUnitWrapper_withInput(const TestUnitWrapper_withInput &x):TestUnitWrapper<Q,A>(x),_cin(x._cin){}
 
+  ~TestUnitWrapper_withInput(){}
+};
+
+
+/**
+ * @brief General Test Bench Unit with Output(`ostream`)
+ * 
+ * @author Randle.Helmslay [Signed]
+*/
+template<class Q, class A>
+class TestUnitWrapper_withOutput : public TestUnitWrapper<Q,A>{
+protected:
+  std::ostream& _cout;
+public:
+  TestUnitWrapper_withOutput() = delete;
+  TestUnitWrapper_withOutput(const std::string test_name, std::ostream& cout):TestUnitWrapper<Q,A>(test_name),_cout(cout){}
+  TestUnitWrapper_withOutput(const TestUnitWrapper_withOutput &x):TestUnitWrapper<Q,A>(x),_cout(x._cout){}
+
+  ~TestUnitWrapper_withOutput(){}
+};
+
+
+/**
+ * @brief General Test Bench Unit with Input and Output(`iostream`)
+ * 
+ * @author Randle.Helmslay [Signed]
+*/
+template<class Q, class A>
+class TestUnitWrapper_withInputOutput : public TestUnitWrapper<Q,A>{
+protected:
+  std::istream& _cin;
+  std::ostream& _cout;
+public:
+  TestUnitWrapper_withInputOutput() = delete;
+  TestUnitWrapper_withInputOutput(const std::string test_name, std::istream& cin, std::ostream& cout):TestUnitWrapper<Q,A>(test_name),_cin(cin),_cout(cout){}
+  TestUnitWrapper_withInputOutput(const TestUnitWrapper_withInputOutput &x):TestUnitWrapper<Q,A>(x),_cin(x._cin),_cout(x._cout){}
+  ~TestUnitWrapper_withInputOutput(){}
+};
+
+
+/* ************************************************************************** */
+/*                            Test Infrastructure                             */
+/* ************************************************************************** */
 /**
  * @brief General Test Bench Portal
  * @note  This structure will ONLY iterate your whole test set and run it.
@@ -226,7 +292,7 @@ public:
       ++cnt;
     }
 
-    _cout<<"\nTest completed. Verdict result: "<< ((v_result==false) ? "FAILED" : "PASSED")<<std::endl;
+    _cout<<"\nTest completed. Verdict result: "<< ((v_result==false) ? "FAILED" : "PASSED")<<"\n"<<std::endl;
 
     if(v_result==false){
       callback_if_failed();
@@ -258,9 +324,13 @@ public:
 
 
 /* ************************************************************************** */
-/*                   Project Dependent Test Infrastructure                    */
+/*                       Customized Test Infrastructure                       */
 /* ************************************************************************** */
-#include "bsp_led.h"
+#include "bsp_led.h"    // Required by class `LocalProjectTest`
+/**
+ * @brief Local Test Infrastructure
+ * @note  Test for local debugging
+ */
 class LocalProjectTest : public Test{
 public:
   using Test::Test;
@@ -269,10 +339,22 @@ public:
 };
 
 
+/**
+ * @brief Interactional Test Infrastructure
+ * @note  Test process may need mannual intervention
+ */
+class HumanInteractionTest : public Test{
+protected:
+  
+public:
+  using Test::Test;
+};
 
-/* ************************************************************************** */
-/*                      Integration Test Infrastructure                       */
-/* ************************************************************************** */
+
+/**
+ * @brief CI Test Infrastructure
+ * @note  Test for continueous integration
+ */
 class IntegrationTest : public Test{
 public:
   using Test::Test;

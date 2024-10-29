@@ -1,4 +1,21 @@
-
+/**
+ ******************************************************************************
+ * @file    cmn_type.h
+ * @author  RandleH
+ * @brief   Common Program - Type Declaration
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 RandleH.
+ * All rights reserved.
+ *
+ * This software component is licensed by RandleH under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+*/
 
 
 #include <stdint.h>
@@ -39,6 +56,20 @@ extern "C"{
 #endif
 
 typedef uint8_t cmnBoolean_t;
+typedef uint8_t  u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
+typedef int8_t  i8;
+typedef int16_t i16;
+typedef int32_t i32;
+typedef int64_t i64;
+
+typedef volatile u8  vu8;
+typedef volatile u16 vu16;
+typedef volatile u32 vu32;
+typedef volatile u64 vu64;
 
 #if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
 typedef IRQn_Type cmnIRQn_t;

@@ -12,7 +12,7 @@
             "type": "cortex-debug",
             "device": "STM32F411CE",
             "runToEntryPoint": "main",
-            "svdFile": "${workspaceFolder}/cfg/stm32f411.svd",
+            "svdFile": "${workspaceFolder}/lib/cmsis-svd-stm32/stm32f4/STM32F411.svd",
             "interface": "swd",
             "servertype": "jlink",
             "swoConfig": {

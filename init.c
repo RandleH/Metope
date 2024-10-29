@@ -18,6 +18,8 @@
 #endif
 
 
+#include "bsp_screen.h"
+
 
 /**
  * @brief
@@ -39,10 +41,23 @@ void hw_init(void){
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
 
-  MX_USART2_Init();
+  MX_USART2_UART_Init();
+
+  MX_SPI2_Init();
+
+  MX_TIM3_Init();
+
+  MX_DMA_Init();
 
   MX_USB_OTG_FS_USB_Init();
 
+}
+
+
+
+
+void bsp_init(void){
+  bsp_screen_init();
 }
 
 

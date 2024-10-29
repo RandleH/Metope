@@ -13,12 +13,27 @@
 
 
 #include <bitset>
-
-
+#include "test.hh"
+#include "global.h"
 
 #include "cmn_test.hh"
 #include "cmn_type.h"
 #include "cmn_math.h"
+#include "cmn_interrupt.h"
+
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+extern cmnBoolean_t cmn_interrupt_push( const tCmnInterruptUnit *unit);
+extern void cmn_interrupt_pop( void);
+extern uint32_t cmn_interrupt_top( void);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 
 class TestCmnInterruptPushPopTopBasic : public TestUnitWrapper<std::vector<tCmnInterruptUnit>,std::vector<uint32_t>>{
@@ -137,7 +152,7 @@ public:
 };
 
 void add_cmn_test(void){
-  tb_infra
+  tb_infra_local
     .insert( 
       TestCmnDummy(), 
       0, 
