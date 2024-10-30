@@ -70,6 +70,7 @@
         "random": "cpp",
         "system_error": "cpp",
         "type_traits": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "stdlib.h": "c"
     }
 }

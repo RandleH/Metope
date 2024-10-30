@@ -23,6 +23,7 @@
 
 #include "cmn_type.h"
 #include "cmn_device.h"
+#include "bsp_type.h"
 
 
 #ifndef BSP_SCREEN_H
@@ -35,6 +36,7 @@ extern "C"{
 
 
 cmnBoolean_t bsp_screen_init( void);
+void bsp_screen_set_bright( bspScreenBrightness_t value);
 
 
 #ifdef __cplusplus

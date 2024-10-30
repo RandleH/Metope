@@ -81,6 +81,7 @@ HumanInteractionTest tb_infra_hmi(std::cout);
 
 int main(int argc, char *argv[]){
   hw_init();
+  bsp_init();
   
   std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
   

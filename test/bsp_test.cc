@@ -7,7 +7,7 @@
 #include "cmn_test.hh"
 #include "cmn_type.h"
 #include "cmn_math.h"
-
+#include "cmn_utility.h"
 
 
 
@@ -17,10 +17,9 @@ extern HumanInteractionTest tb_infra_hmi;
 
 class TestBspUsartEcho : public TestUnitWrapper_withInputOutput<std::array<char,6>,char>{
 public:
-  // TestBspUsartEcho():TestUnitWrapper("test_bsp_usart_echo"){}
   TestBspUsartEcho():TestUnitWrapper_withInputOutput("test_bsp_usart_echo", std::cin, std::cout){}
 
-  bool run( std::array<char,6>& input, char& ref ){
+  bool run( std::array<char,6>& input, char& ref ) override{
     for( const auto& ref_ch : input){
       char       dut_ch = '\0';
       
@@ -39,6 +38,47 @@ public:
   }
 };
 
+#include "bsp_screen.h"
+class TestBspScreen : public TestUnitWrapper_withInputOutput<char,char>{
+public:
+  TestBspScreen():TestUnitWrapper_withInputOutput("test_bsp_screen_brightness", std::cin, std::cout){}
+  bool run( char& input, char& ref ) override{
+    std::string s;
+    bool result = true;
+
+    this->_cout<<"\nScreen Brightness Test - Please enter a percentage value:"<<std::endl;
+    this->_cout<<"Press [Q] to quit; Press [E] to reject;"<<std::endl;
+    while (std::cin >> s) {
+      cmnBoolean_t isValid  = false;
+      float      brightness = cmn_utility_str2float(s.c_str(), &isValid);
+      if(isValid){
+        if(brightness<100.0 && brightness>=0.0){
+          bsp_screen_set_bright( lround(brightness*2048)/100 );
+        }else{
+          this->_cout<<"Please enter a value between 0~100:"<<std::endl;
+        }
+      }else{
+        if(s.length()==1){
+          if(s[0]=='Q' || s[0]=='q'){
+            result = true;
+            break;
+          }else if (s[0]=='E' || s[0]=='e'){
+            result = false;
+            this->_err_msg<<"User objection."<<std::endl;
+            break;
+          }
+        }
+        this->_cout<<"Press [Q] to quit; Press [E] to reject;"<<std::endl;
+        this->_cout<<"Please enter a valid number:"<<std::endl;
+      }
+    }
+
+    return result;
+  }
+};
+
+
+
 
 /**
  * @addtogroup TestBench
@@ -49,6 +89,11 @@ void add_bsp_test(void){
       TestBspUsartEcho(),
       std::array<char,6>{{'R','a','n','d','l','e'}},
       '\0'
+    )
+    .insert(
+      TestBspScreen(),
+      (char)'\0',
+      (char)'\0'
     )
   ;
 

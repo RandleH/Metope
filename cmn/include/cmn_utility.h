@@ -19,6 +19,7 @@
 
 
 
+#include "cmn_type.h"
 
 
 #ifndef CMN_UTILITY_H
@@ -31,5 +32,16 @@
 #define CMN_MIN( a, b)    ((a)>(b) ? (b) : (a))
 #define CMN_MAX( a, b)    ((a)<(b) ? (b) : (a))
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+int32_t cmn_utility_str2dec(const char *str, cmnBoolean_t *isValid);
+int32_t cmn_utility_str2hex(const char *str, cmnBoolean_t *isValid);
+float cmn_utility_str2float(const char *str, cmnBoolean_t *isValid);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
