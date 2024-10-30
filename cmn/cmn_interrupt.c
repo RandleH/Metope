@@ -217,8 +217,11 @@ void PendSV_Handler( void){
 }
 
 
-void SysTick_Handler( void){
-
+/**
+ * @note  1ms System Interrupt
+ */
+void DEFAULT SysTick_Handler( void){
+  HAL_IncTick();
 }
 
 void ADC_IRQHandler( void){}

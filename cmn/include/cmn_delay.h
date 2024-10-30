@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    bsp_screen.h
+ * @file    cmn_delay.h
  * @author  RandleH
- * @brief   Board Support Package Delivery - Screen
+ * @brief   Common Program - Delay Program
  ******************************************************************************
  * @attention
  *
@@ -19,37 +19,17 @@
 
 
 
-
-
 #include "cmn_type.h"
-#include "cmn_device.h"
-#include "bsp_type.h"
 
 
-#ifndef BSP_SCREEN_H
-#define BSP_SCREEN_H
-
-#ifdef __cplusplus
-extern "C"{
-#endif
+#ifndef CMN_DELAY_H
+#define CMN_DELAY_H
 
 
 
-cmnBoolean_t bsp_screen_init( void);
-void bsp_screen_on(void);
-void bsp_screen_off(void);
-void bsp_screen_smooth_on(void);
-void bsp_screen_smooth_off(void);
-void bsp_screen_set_bright( bspScreenBrightness_t value);
+void cmn_timer_delay(u32 ms);
 
 
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif
-
-
-
-

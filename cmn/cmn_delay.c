@@ -1,8 +1,13 @@
+
+
+
+
+
 /**
  ******************************************************************************
- * @file    bsp_screen.h
+ * @file    cmn_delay.c
  * @author  RandleH
- * @brief   Board Support Package Delivery - Screen
+ * @brief   Common Program - Delay Program
  ******************************************************************************
  * @attention
  *
@@ -20,36 +25,30 @@
 
 
 
+#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#include "stm32f4xx_hal.h"
+#endif
 
-#include "cmn_type.h"
-#include "cmn_device.h"
-#include "bsp_type.h"
+#include "cmn_delay.h"
 
-
-#ifndef BSP_SCREEN_H
-#define BSP_SCREEN_H
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
+/**
+ * @brief
+ * @addtogroup MachineDependent
+ */
+void cmn_timer_delay(u32 ms){
+  HAL_Delay(ms);
+}
 
 
-cmnBoolean_t bsp_screen_init( void);
-void bsp_screen_on(void);
-void bsp_screen_off(void);
-void bsp_screen_smooth_on(void);
-void bsp_screen_smooth_off(void);
-void bsp_screen_set_bright( bspScreenBrightness_t value);
+
+
 
 
 #ifdef __cplusplus
 }
 #endif
-
-
-#endif
-
-
-
-

@@ -39,15 +39,16 @@ public:
 };
 
 #include "bsp_screen.h"
-class TestBspScreen : public TestUnitWrapper_withInputOutput<char,char>{
+class TestBspScreenBrightness : public TestUnitWrapper_withInputOutput<char,char>{
 public:
-  TestBspScreen():TestUnitWrapper_withInputOutput("test_bsp_screen_brightness", std::cin, std::cout){}
+  TestBspScreenBrightness():TestUnitWrapper_withInputOutput("test_bsp_screen_brightness", std::cin, std::cout){}
   bool run( char& input, char& ref ) override{
     std::string s;
     bool result = true;
 
     this->_cout<<"\nScreen Brightness Test - Please enter a percentage value:"<<std::endl;
     this->_cout<<"Press [Q] to quit; Press [E] to reject;"<<std::endl;
+    bsp_screen_on();
     while (std::cin >> s) {
       cmnBoolean_t isValid  = false;
       float      brightness = cmn_utility_str2float(s.c_str(), &isValid);
@@ -72,13 +73,48 @@ public:
         this->_cout<<"Please enter a valid number:"<<std::endl;
       }
     }
-
+    bsp_screen_off();
     return result;
   }
 };
 
 
+class TestBspScreenSmoothness : public TestUnitWrapper_withInputOutput<char,char>{
+public:
+  TestBspScreenSmoothness():TestUnitWrapper_withInputOutput("test_bsp_screen_smoothness", std::cin, std::cout){}
 
+  bool run( char& input, char& ref ) override{
+    std::string s;
+    bool result = true;
+    bool flag = false;
+    this->_cout<<"\nScreen Smoothness Test - Press any other keys to continue."<<std::endl;
+    this->_cout<<"Press [Q] to quit; Press [E] to reject;"<<std::endl;
+
+    bsp_screen_off();
+    
+    while (std::cin >> s) {
+      if(s.length()==1){
+        if(s[0]=='Q' || s[0]=='q'){
+          result = true;
+          break;
+        }else if (s[0]=='E' || s[0]=='e'){
+          result = false;
+          this->_err_msg<<"User objection."<<std::endl;
+          break;
+        }
+      }
+      if(!flag){
+        bsp_screen_smooth_on();
+      }else{
+        bsp_screen_smooth_off();
+      }
+      flag = !flag;
+    }
+
+    bsp_screen_off();
+    return result;
+  }
+};
 
 /**
  * @addtogroup TestBench
@@ -91,7 +127,12 @@ void add_bsp_test(void){
       '\0'
     )
     .insert(
-      TestBspScreen(),
+      TestBspScreenBrightness(),
+      (char)'\0',
+      (char)'\0'
+    )
+    .insert(
+      TestBspScreenSmoothness(),
       (char)'\0',
       (char)'\0'
     )

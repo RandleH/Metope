@@ -27,7 +27,7 @@
   #include "stm32f4xx_hal_tim.h"
 #endif
 #include "bsp_screen.h"
-
+#include "cmn_delay.h"
 
 #define CMD    0
 #define DAT    1
@@ -104,6 +104,41 @@ void bsp_screen_set_bright( bspScreenBrightness_t value){
    * 
   */
   __HAL_TIM_SET_COMPARE( &htim3, TIM_CHANNEL_1, value);
+}
+
+/**
+ * @brief
+ * @addtogroup MachineDependent
+ */
+void inline bsp_screen_on(void){
+  HAL_TIM_PWM_Start( &htim3, TIM_CHANNEL_1);
+}
+
+/**
+ * @brief
+ * @addtogroup MachineDependent
+ */
+void inline bsp_screen_off(void){
+  // HAL_TIM_PWM_Stop( &htim3, TIM_CHANNEL_1);
+  bsp_screen_set_bright(0);
+}
+
+const u16 tmp[] = {0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377};
+
+void bsp_screen_smooth_on(void){
+  u32 cnt = 0;
+  while(cnt < sizeof(tmp)/sizeof(*tmp)){
+    bsp_screen_set_bright(tmp[cnt++]);
+    cmn_timer_delay(50);
+  }
+}
+
+void bsp_screen_smooth_off(void){
+  u32 cnt = sizeof(tmp)/sizeof(*tmp);
+  while(cnt--){
+    bsp_screen_set_bright(tmp[cnt]);
+    cmn_timer_delay(50);
+  }
 }
 
 

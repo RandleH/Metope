@@ -71,6 +71,7 @@
         "system_error": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "stm32f4xx_hal.h": "c"
     }
 }
