@@ -41,6 +41,7 @@ void bsp_screen_off(void);
 void bsp_screen_smooth_on(void);
 void bsp_screen_smooth_off(void);
 void bsp_screen_set_bright( bspScreenBrightness_t value);
+u32 bsp_screen_fill( const u16 color, u16 xs, u16 ys, u16 xe, u16 ye);
 
 
 #ifdef __cplusplus

@@ -39,6 +39,8 @@
 #define DBG_RX_GPIO_Port GPIOA
 #define SCREEN_DC_Pin GPIO_PIN_2
 #define SCREEN_DC_GPIO_Port GPIOB
+#define SCREEN_CS_Pin GPIO_PIN_12
+#define SCREEN_CS_GPIO_Port GPIOB
 #define SCREEN_CLK_Pin GPIO_PIN_13
 #define SCREEN_CLK_GPIO_Port GPIOB
 #define SCREEN_MISO_Pin GPIO_PIN_14
@@ -51,7 +53,6 @@
 #define KEY_L_Pin GPIO_PIN_15
 #define KEY_L_GPIO_Port GPIOA
 #define KEY_L_EXTI_IRQn EXTI15_10_IRQn
-
 
 #endif
 

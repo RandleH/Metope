@@ -23,13 +23,22 @@
 #include "bsp_led.h"
 #include "cmn_device.h"
 
+#define PIN_LED(x)\
+  do{\
+    if((x)==0){\
+      ((LED_GPIO_Port)->BSRR) |= (u32)((LED_Pin)<<16);\
+    }else{\
+      ((LED_GPIO_Port)->BSRR) |= (LED_Pin);\
+    }\
+  }while(0)
+
 
 /**
  * @todo
  * @addtogroup MachineDependent
  */
 void inline bsp_led__on( void){
-  
+  PIN_LED(0);
 }
 
 
@@ -38,7 +47,7 @@ void inline bsp_led__on( void){
  * @addtogroup MachineDependent
  */
 void inline bsp_led__off( void){
-
+  PIN_LED(1);
 }
 
 /**
@@ -53,9 +62,9 @@ void inline bsp_led__toggle( void){
  */
 void inline bsp_led__switch( cmnBoolean_t status){
   if(ON==status){
-    LED_GPIO_Port->BSRR = (uint32_t)(LED_Pin << 16U);
+    LED_GPIO_Port->BSRR |= (uint32_t)(LED_Pin << 16U);
   }
   else{
-    LED_GPIO_Port->BSRR = LED_Pin;
+    LED_GPIO_Port->BSRR |= LED_Pin;
   }
 }

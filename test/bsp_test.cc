@@ -15,6 +15,9 @@ extern HumanInteractionTest tb_infra_hmi;
 
 
 
+
+
+
 class TestBspUsartEcho : public TestUnitWrapper_withInputOutput<std::array<char,6>,char>{
 public:
   TestBspUsartEcho():TestUnitWrapper_withInputOutput("test_bsp_usart_echo", std::cin, std::cout){}
@@ -116,6 +119,52 @@ public:
   }
 };
 
+
+
+class TestBspScreenFill : public TestUnitWrapper_withInputOutput<char,char>{
+public:
+  TestBspScreenFill():TestUnitWrapper_withInputOutput("test_bsp_screen_filling", std::cin, std::cout){}
+
+  bool run( char& input, char& ref ) override{
+    std::string s;
+    bool result = true;
+    
+    bsp_screen_on();
+    bsp_screen_set_bright(BSP_SCREEN_DEFAULT_BRIGHTNESS);
+
+    this->_cout<<"\nScreen Fill Test - Please enter the hex color:"<<std::endl;
+    this->_cout<<"Example: 0x00FF0000 (Red) | 0x0000FF00 (Green)"<<std::endl;
+    this->_cout<<"\nPress [Q] to quit; Press [E] to reject;"<<std::endl;
+    while (std::cin >> s) {
+      cmnBoolean_t isValid  = false;
+      int32_t color = cmn_utility_str2hex(s.c_str(), &isValid);
+      
+      if(s[0]=='Q' || s[0]=='q'){
+        result = true;
+        break;
+      }else if (s[0]=='E' || s[0]=='e'){
+        result = false;
+        this->_err_msg<<"User objection."<<std::endl;
+        break;
+      }else if(isValid){
+        if( color>0x00FFFFFF){
+          this->_cout<<"Hex Color is [0:0xFFFFFF] with `0x00RRGGBB` format. Please enter a valid value:"<<std::endl;
+        }else{
+          u16 r = ((((color&0xFF0000)<<5>>8)>>16)<<11);
+          u16 g = ((((color&0x00FF00)<<6>>8)>>8)<<5);
+          u16 b = ((((color&0x0000FF)<<5>>8)>>0)<<0);
+
+          bsp_screen_fill( (r|g|b), 0, 0, BSP_SCREEN_WIDTH-1, BSP_SCREEN_HEIGHT-1);
+        }
+      }else{
+        this->_cout<<"Hex Color is [0:0xFFFFFF] with `0x00RRGGBB` format. Please enter a valid value:"<<std::endl;
+      }
+    }
+    return result;
+  }
+};
+
+
 /**
  * @addtogroup TestBench
  */
@@ -133,6 +182,11 @@ void add_bsp_test(void){
     )
     .insert(
       TestBspScreenSmoothness(),
+      (char)'\0',
+      (char)'\0'
+    )
+    .insert(
+      TestBspScreenFill(),
       (char)'\0',
       (char)'\0'
     )

@@ -31,15 +31,27 @@
 
 #define CMD    0
 #define DAT    1
-#define PIN_DC(x)\
-    do{\
-        if((x)==0){\
-          ((SCREEN_DC_GPIO_Port)->BSRR) |= (u32)((SCREEN_DC_Pin)<<16);\
-        }else{\
-          ((SCREEN_DC_GPIO_Port)->BSRR) |= (SCREEN_DC_Pin);\
-        }\
-    }while(0)
 
+#define PIN_DC(x)\
+  do{\
+    if((x)==0){\
+      ((SCREEN_DC_GPIO_Port)->BSRR) |= (u32)((SCREEN_DC_Pin)<<16);\
+    }else{\
+      ((SCREEN_DC_GPIO_Port)->BSRR) |= (SCREEN_DC_Pin);\
+    }\
+  }while(0)
+
+#define PIN_CS(x)
+#if 0
+#define PIN_CS(x)\
+  do{\
+    if((x)==0){\
+      ((SCREEN_CS_GPIO_Port)->BSRR) |= (u32)((SCREEN_CS_Pin)<<16);\
+    }else{\
+      ((SCREEN_CS_GPIO_Port)->BSRR) |= (SCREEN_CS_Pin);\
+    }\
+  }while(0)
+#endif
 
 #ifdef __cplusplus
 extern "C"{
@@ -59,19 +71,21 @@ cmnBoolean_t bsp_screen_block_send( const uint8_t *buf, size_t nItems, size_t nT
     return 1;
   }
   
-  CLEAR_BIT( SPI2->CR1, SPI_CR1_DFF);
-  SET_BIT( SPI2->CR1, SPI_CR1_BIDIOE);
-  if( !READ_BIT( SPI2->CR1, SPI_CR1_SPE) ){
-    SET_BIT( SPI2->CR1, SPI_CR1_SPE);
-  }
+  // CLEAR_BIT( SPI2->CR1, SPI_CR1_DFF);
+  // SET_BIT( SPI2->CR1, SPI_CR1_BIDIOE);
+  // if( !READ_BIT( SPI2->CR1, SPI_CR1_SPE) ){
+  //   SET_BIT( SPI2->CR1, SPI_CR1_SPE);
+  // }
   
   while(nTimes--){
-    const uint8_t *ptr = buf;
-    size_t len = nItems;
-    while( len--){
-      SPI2->DR = *ptr++;
-      while( 0==READ_BIT( SPI2->SR, SPI_SR_TXE));  // Blocking function
-    }
+    // const uint8_t *ptr = buf;
+    // size_t len = nItems;
+    // while( len--){
+    //   SPI2->DR = *ptr++;
+    //   while( 0==READ_BIT( SPI2->SR, SPI_SR_TXE));  // Blocking function
+    // }
+    HAL_SPI_Transmit( &hspi2, buf, nItems, HAL_MAX_DELAY);
+    while( hspi2.State == HAL_SPI_STATE_BUSY );
 
     // if( interval_delay_ms!=0){
       // rh_cmn_delay_ms__escape( interval_delay_ms);
@@ -166,7 +180,63 @@ static void bsp_screen_parse_code( const uint8_t *code, size_t len){
 }
 
 
+
+
+/**
+ * @brief       Internal function. Select screen area. DMA bypass.
+ * @param       x0  Start X
+ * @param       y0  Start Y
+ * @param       x1  End X
+ * @param       y1  End Y
+ * @return      (none)
+*/
+static void bsp_screen_area( u8 x0, u8 y0, u8 x1, u8 y1){
+    const u8 code[] = {
+        /* Set the X coordinates */
+        CMD, 1, 0x2A,\
+        DAT, 4, 0x00,  x0,0x00,  x1,\
+        
+        /* Set the Y coordinates */
+        CMD, 1, 0x2B,\
+        DAT, 4, 0x00,  y0,0x00,  y1,\
+
+        CMD, 1, 0x2C
+    };
+    bsp_screen_parse_code( code, sizeof(code)/sizeof(*code));
+}
+
+/**
+ * @brief       Change scan direction. DMA bypass.
+ * @param       mode    @ref 0: L->R; U->D;
+ *                      @ref 1: R->L; D->U;
+ * @return      (none)
+*/
+static void bsp_screen_scan_mode( u8 mode){
+  u8 code[] = {
+    CMD, 1, 0x36,\
+    DAT, 1, 0x08
+  };
+
+  switch(mode){
+    case 0: // L->R; U->D;
+      code[5] = 0x08;
+      break;
+    case 1: // R->L; D->U;
+      code[5] = 0xC8;
+      break;
+    default:
+      break;
+  }
+
+  bsp_screen_parse_code( code, sizeof(code)/sizeof(*code));
+}
+
+
+/**
+ * @brief 
+ */
 cmnBoolean_t bsp_screen_init( void){
+  PIN_CS(0);
   const uint8_t init_code[] = {
         CMD,  1, 0x36,\
         DAT,  1, 0xc8,\
@@ -258,14 +328,49 @@ cmnBoolean_t bsp_screen_init( void){
         DAT,  2, 0x3e,0x07,\
         CMD,  3, 0x35,0x21,0x11
     };
-  
   bsp_screen_parse_code( init_code, sizeof(init_code)/sizeof(uint8_t));
-  
-  return 0;
+
+  cmn_timer_delay(120);
+
+  const u8 on_code[] = {
+      CMD, 1, 0x29,\
+  };
+  bsp_screen_parse_code( on_code, sizeof(on_code)/sizeof(uint8_t));
+
+  cmn_timer_delay(20);
+  bsp_screen_scan_mode(0);
+  PIN_CS(1);
+  return true;
 }
 
 
+/**
+ * @brief       Fill screen with single color
+ *              Length of the buffer must be valid great or equal than (xe-xs+1)*(ye-ys+1)
+ * @return      Return 0, if success
+ *              Return 1, if area params are wrong
+*/
+u32 bsp_screen_fill( const u16 color, u16 xs, u16 ys, u16 xe, u16 ye){
+    if( xs>xe || ys>ye ){
+        return 1;
+    }
+    
+    u8 buf[2] = {(u8)(color>>8),(u8)(color&0xff)};
+    u8 done = false;
+    PIN_CS(0);
+    bsp_screen_area( xs, ys, xe, ye);
+    
+    PIN_DC(1);
+    bsp_screen_block_send( buf, sizeof(color), (xe-xs+1)*(ye-ys+1), 0, &done);
+    
+    if(!done){
+        // #warning "Note: Do something"
+    }
+    
+    PIN_CS(1);
 
+    return 0;
+}
 
 
 

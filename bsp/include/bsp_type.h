@@ -26,9 +26,20 @@
 #define BSP_TYPE_H
 
 
+#define BSP_SCREEN_WIDTH          (240)
+#define BSP_SCREEN_HEIGHT         (240)
+
+#define BSP_SCREEN_MIN_BRIGHTNESS     (0U)
+#define BSP_SCREEN_MAX_BRIGHTNESS     (2048U-1)
+#define BSP_SCREEN_DEFAULT_BRIGHTNESS (1024U)
+
+
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+
+
 
 typedef uint16_t  bspScreenBrightness_t;
 
