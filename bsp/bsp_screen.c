@@ -70,22 +70,25 @@ cmnBoolean_t bsp_screen_block_send( const uint8_t *buf, size_t nItems, size_t nT
   if( buf==NULL || nItems==0){
     return 1;
   }
-  
-  // CLEAR_BIT( SPI2->CR1, SPI_CR1_DFF);
-  // SET_BIT( SPI2->CR1, SPI_CR1_BIDIOE);
-  // if( !READ_BIT( SPI2->CR1, SPI_CR1_SPE) ){
-  //   SET_BIT( SPI2->CR1, SPI_CR1_SPE);
-  // }
-  
+
   while(nTimes--){
-    // const uint8_t *ptr = buf;
-    // size_t len = nItems;
-    // while( len--){
-    //   SPI2->DR = *ptr++;
-    //   while( 0==READ_BIT( SPI2->SR, SPI_SR_TXE));  // Blocking function
-    // }
+
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+    CLEAR_BIT( SPI2->CR1, SPI_CR1_DFF);
+    SET_BIT( SPI2->CR1, SPI_CR1_BIDIOE);
+    if( !READ_BIT( SPI2->CR1, SPI_CR1_SPE) ){
+      SET_BIT( SPI2->CR1, SPI_CR1_SPE);
+    }
+    const uint8_t *ptr = buf;
+    size_t len = nItems;
+    while( len--){
+      SPI2->DR = *ptr++;
+      while( 0==READ_BIT( SPI2->SR, SPI_SR_TXE));  // Blocking function
+    }
+#else
     HAL_SPI_Transmit( &hspi2, buf, nItems, HAL_MAX_DELAY);
     while( hspi2.State == HAL_SPI_STATE_BUSY );
+#endif
 
     // if( interval_delay_ms!=0){
       // rh_cmn_delay_ms__escape( interval_delay_ms);

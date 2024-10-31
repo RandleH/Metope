@@ -109,6 +109,10 @@ if( TEST_ONLY AND TEST_ONLY EQUAL 1)
     include( ${PRJ_TOP}/test/test.cmake)
 endif()
 
+if( USE_REGISTER AND USE_REGISTER EQUAL 1)
+    list(APPEND DEF_LIST "-DUSE_REGISTER=1")
+endif()
+
 
 
 add_compile_options( ${CPU_FLAG})
