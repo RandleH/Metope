@@ -107,7 +107,7 @@ cmnBoolean_t bsp_screen_block_send( const uint8_t *buf, size_t nItems, size_t nT
  * @param [in]  value - 0~2047
  * @addtogroup MachineDependent
  */
-void bsp_screen_set_bright( bspScreenBrightness_t value){
+void inline bsp_screen_set_bright( bspScreenBrightness_t value){
   /**
    * @note
    *                    (f_apb MHz) * 1000000
@@ -120,7 +120,11 @@ void bsp_screen_set_bright( bspScreenBrightness_t value){
    * By default, we make timer input clk source divided to 2.048 MHz which is easier for later use
    * 
   */
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+  TIM3->CCR1 = value;
+#else
   __HAL_TIM_SET_COMPARE( &htim3, TIM_CHANNEL_1, value);
+#endif
 }
 
 /**
@@ -128,7 +132,14 @@ void bsp_screen_set_bright( bspScreenBrightness_t value){
  * @addtogroup MachineDependent
  */
 void inline bsp_screen_on(void){
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+  htim3.ChannelState[TIM_CHANNEL_1] = HAL_TIM_CHANNEL_STATE_BUSY;
+  TIM3->CCER &= ~(TIM_CCER_CC1E << (TIM_CHANNEL_1 & 0x1FU));
+  TIM3->CCER |= 1<<(TIM_CHANNEL_1& 0x1FU);
+  TIM3->CR1  |= TIM_CR1_CEN;
+#else
   HAL_TIM_PWM_Start( &htim3, TIM_CHANNEL_1);
+#endif
 }
 
 /**
@@ -136,7 +147,6 @@ void inline bsp_screen_on(void){
  * @addtogroup MachineDependent
  */
 void inline bsp_screen_off(void){
-  // HAL_TIM_PWM_Stop( &htim3, TIM_CHANNEL_1);
   bsp_screen_set_bright(0);
 }
 
@@ -146,7 +156,7 @@ void bsp_screen_smooth_on(void){
   u32 cnt = 0;
   while(cnt < sizeof(tmp)/sizeof(*tmp)){
     bsp_screen_set_bright(tmp[cnt++]);
-    cmn_timer_delay(50);
+    cmn_timer_delay(20);
   }
 }
 
@@ -154,7 +164,7 @@ void bsp_screen_smooth_off(void){
   u32 cnt = sizeof(tmp)/sizeof(*tmp);
   while(cnt--){
     bsp_screen_set_bright(tmp[cnt]);
-    cmn_timer_delay(50);
+    cmn_timer_delay(20);
   }
 }
 
