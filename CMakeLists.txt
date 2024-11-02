@@ -154,6 +154,5 @@ add_custom_command(     TARGET  ${PROJECT_NAME}.elf POST_BUILD
                         COMMAND ${CMAKE_OBJCOPY} -Oihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
                         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
                         COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}"
-                        COMMAND "nm" "--print-size" "--size-sort" ${PROJECT_NAME}.elf ">" "${PRJ_TOP}/build/${PROJECT_NAME}.nm")
-
-
+                        COMMAND "nm" "--print-size" "--size-sort" "${PROJECT_NAME}.elf" ">" "${PRJ_TOP}/build/${PROJECT_NAME}.nm"
+                        COMMAND "objdump" "-d" "${PROJECT_NAME}.elf"  ">" "${PRJ_TOP}/build/${PROJECT_NAME}.dis" )

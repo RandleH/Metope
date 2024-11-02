@@ -27,6 +27,29 @@ extern "C"{
 
 const lv_font_t dummy_font;
 
+/**
+ * @brief
+ * @note DummyFunction
+ */
+int lv_snprintf(char * buffer, size_t count, const char * format, ...){
+  if(buffer){
+    buffer[0] = '\0';
+  }
+  return 0;
+}
+
+/**
+ * @brief
+ * @note DummyFunction
+ */
+int lv_vsnprintf(char * buffer, size_t count, const char * format, va_list va){
+  if(buffer){
+    buffer[0] = '\0';
+  }
+  return 0;
+}
+
+
 void app_lvgl_init(void){
   lv_init();
 }
