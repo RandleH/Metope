@@ -13,7 +13,7 @@ extern "C"{
 
 void hw_init(void);
 void bsp_init(void);
-
+void app_init(void);
 
 #ifdef __cplusplus
 }

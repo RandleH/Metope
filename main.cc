@@ -21,7 +21,7 @@
 #include "init.h"
 #include "cmn_type.h"
 #include "bsp_led.h"
-
+#include "global.h"
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
@@ -51,9 +51,10 @@ int main(int argc, char *argv[]){
   */
   hw_init();
   bsp_init();
+  app_init();
   
   bsp_led__switch(ON);
-  
+  metope.app.dummy = 0;
   while(1){
 
     
@@ -71,18 +72,14 @@ int main(int argc, char *argv[]){
 #include "test.hh"
 #include "cmn_test.hh"
 #include "bsp_test.hh"
-#include "global.h"
 
-
-
-LocalProjectTest     tb_infra_local(std::cout);
-HumanInteractionTest tb_infra_hmi(std::cout);
 
 
 int main(int argc, char *argv[]){
   hw_init();
   bsp_init();
-  
+  app_init();
+  // printf( "Device Serial Number: %02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d\r\n", uid.raw[0],uid.raw[1],uid.raw[2],uid.raw[3],uid.raw[4],uid.raw[5],uid.raw[6],uid.raw[7],uid.raw[8],uid.raw[9],uid.raw[10],uid.raw[11]);
   std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
   
   add_cmn_test();
@@ -93,7 +90,7 @@ int main(int argc, char *argv[]){
 
   std::cout<<"Human Interaction Test:"<<std::endl;
   tb_infra_hmi.verdict();
-
+  metope.app.dummy = 0;
   while(1){}
 }
 

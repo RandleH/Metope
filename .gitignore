@@ -37,6 +37,7 @@ STM32CubeMX/STM32F405RGT6/*
 
 lib/*
 !lib/lib.cmake
+!lv_conf.h
 
 
 

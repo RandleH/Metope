@@ -48,7 +48,8 @@ set( TARGET_LIST                    "")
 
 list(APPEND INC_DIR_LIST            "${PRJ_TOP}")
 list(APPEND SRC_LIST                "${PRJ_TOP}/main.cc" 
-                                    "${PRJ_TOP}/init.c")
+                                    "${PRJ_TOP}/init.c"
+                                    "${PRJ_TOP}/global.cc")
 
 #########################################################################################################
 # Target Compile Option Flag
@@ -56,7 +57,8 @@ list(APPEND SRC_LIST                "${PRJ_TOP}/main.cc"
 set( CXX_FLAG                       "-fdata-sections"
                                     "-ffunction-sections"
                                     "-Wall"
-                                    "-Wno-pedantic")
+                                    "-Wno-pedantic"
+                                    "-fstack-usage")
 
 set( CPU_FLAG                       "-mthumb"
                                     "-mfloat-abi=hard"
@@ -71,8 +73,14 @@ set( LINK_FLAG                      "-specs=nosys.specs"
                                     "-lm"
                                     "-lnosys"
                                     "-Wl,-Map=${PROJECT_NAME}.map,--cref"
-                                    "-Wl,--gc-sections")
+                                    "-Wl,--gc-sections,--print-memory-usage,--print-output-format")
 
+if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6") OR (CHIP STREQUAL "STM32F405RGT6"))
+    list(APPEND CPU_FLAG  "-mcpu=cortex-m4")
+endif()
+
+add_compile_options( ${CPU_FLAG})
+add_link_options( ${CPU_FLAG})
 
 
 #########################################################################################################
@@ -104,6 +112,7 @@ endif()
 include( ${PRJ_TOP}/cmn/cmn.cmake)
 include( ${PRJ_TOP}/lib/lib.cmake)
 include( ${PRJ_TOP}/bsp/bsp.cmake)
+include( ${PRJ_TOP}/app/app.cmake)
 if( TEST_ONLY AND TEST_ONLY EQUAL 1)
     list(APPEND DEF_LIST "-DTEST_ONLY=1")
     include( ${PRJ_TOP}/test/test.cmake)
@@ -115,8 +124,7 @@ endif()
 
 
 
-add_compile_options( ${CPU_FLAG})
-add_link_options( ${CPU_FLAG})
+
 
 #########################################################################################################
 # Final Execution 
@@ -130,7 +138,6 @@ add_executable( ${PROJECT_NAME}.elf  ${SRC_LIST})
 target_compile_options ( ${PROJECT_NAME}.elf  PUBLIC      ${CMAKE_CXX_FLAGS} ${CPU_FLAG} ${CXX_FLAG})
 target_link_options    ( ${PROJECT_NAME}.elf  PUBLIC      ${LINK_FLAG} ${CPU_FLAG} )
 target_link_libraries( ${PROJECT_NAME}.elf PUBLIC  ${TARGET_LIST})
-
 
 message("================================================================================")
 message( "Executable target property: ${PROJECT_NAME}.elf")
@@ -146,7 +153,7 @@ set(BIN_FILE ${CMAKE_SOURCE_DIR}/build/${PROJECT_NAME}.bin)
 add_custom_command(     TARGET  ${PROJECT_NAME}.elf POST_BUILD
                         COMMAND ${CMAKE_OBJCOPY} -Oihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
                         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-                        COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}")
-
+                        COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}"
+                        COMMAND "nm" "--print-size" "--size-sort" ${PROJECT_NAME}.elf ">" "${PRJ_TOP}/build/${PROJECT_NAME}.nm")
 
 

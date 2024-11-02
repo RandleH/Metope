@@ -21,6 +21,7 @@
 #if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
   
 #endif
+#include "cmn_type.h"
 
 #ifndef BSP_TYPE_H
 #define BSP_TYPE_H
@@ -28,6 +29,12 @@
 
 #define BSP_SCREEN_WIDTH          (240)
 #define BSP_SCREEN_HEIGHT         (240)
+
+#if (BSP_SCREEN_WIDTH<=UINT8_MAX) && (BSP_SCREEN_HEIGHT<=UINT8_MAX)
+typedef u8 bspScreenCood_t;
+#else
+typedef u16 bspScreenCood_t;
+#endif
 
 #define BSP_SCREEN_MIN_BRIGHTNESS     (0U)
 #define BSP_SCREEN_MAX_BRIGHTNESS     (2048U-1)
@@ -41,8 +48,18 @@ extern "C"{
 
 
 
-typedef uint16_t  bspScreenBrightness_t;
+typedef uint16_t bspScreenBrightness_t;
 
+typedef union{
+  struct{
+    u16 r : 5;
+    u16 g : 6;
+    u16 b : 5;
+  };
+  u16 word;
+}bspScreenPixelUnion_t;
+
+typedef u16 bspScreenPixel_t;
 
 #ifdef __cplusplus
 }

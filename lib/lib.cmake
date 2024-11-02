@@ -16,7 +16,6 @@
 set( INC_STM32 "")
 set( SRC_STM32 "")
 set( DEF_STM32 "")
-set( CPU_FLAG_STM32 "")
 set( LINK_FLAG_STM32 "")
 
 if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
@@ -37,8 +36,6 @@ if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
     
     list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F411CEUX_FLASH.ld")
 
-    list(APPEND CPU_FLAG_STM32  "-mcpu=cortex-m4")
-
 elseif((CHIP STREQUAL "STM32F405RGT6"))
     list(APPEND DEF_STM32       "-DSTM32F405xx"
                                 "-DUSE_HAL_DRIVER" )
@@ -57,8 +54,6 @@ elseif((CHIP STREQUAL "STM32F405RGT6"))
     list(APPEND INC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/Core/Inc/")
     
     list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F405RGTx_FLASH.ld")
-    
-    list(APPEND CPU_FLAG_STM32  "-mcpu=cortex-m4")
 else()
     message(FATAL_ERROR "Unknown system target")
 endif()
@@ -76,4 +71,46 @@ list( REMOVE_ITEM   SRC_LIST    "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HA
 
 list( APPEND        INC_DIR_LIST ${INC_STM32})
 list( APPEND        LINK_FLAG    ${LINK_FLAG_STM32})
-list( APPEND        CPU_FLAG     ${CPU_FLAG_STM32})
+
+
+
+
+
+
+message( STATUS "Check library integrity @ ${PRJ_TOP}/lib/lvgl ..." )
+# SET( LIB_DIR__LVGL  ${PRJ_TOP}/lib/lvgl)
+# CHECK_LIB_INTEGRITY( ${LIB_DIR__LVGL} result)
+# if( ${result} STREQUAL FALSE)
+#     FetchContent_Declare(   lib_lvgl
+#                             GIT_REPOSITORY https://github.com/lvgl/lvgl.git
+#                             GIT_TAG "release/v8.3"
+#                             SOURCE_DIR ${LIB_DIR__LVGL})
+#     FetchContent_MakeAvailable(lib_lvgl)                        
+# endif()
+
+
+set( LV_CONF_BUILD_DISABLE_EXAMPLES  TRUE)
+set( DLV_CONF_BUILD_DISABLE_DEMOS    TRUE)
+set( LVGL_MISC_DEFINE       "-DLV_CONF_BUILD_DISABLE_EXAMPLES=1"
+                            "-DLV_CONF_BUILD_DISABLE_DEMOS=1"
+                            "-DLV_CONF_PATH=${PRJ_TOP}/lib/lv_conf.h"
+                            )
+
+add_definitions( ${LVGL_MISC_DEFINE})
+add_subdirectory( ${PRJ_TOP}/lib/lvgl ${PRJ_TOP}/build/lvgl/build )
+
+# include(${PRJ_TOP}/lib/lvgl/env_support/cmake/custom.cmake)
+
+# target_include_directories(lvgl INTERFACE ${PRJ_TOP}/cfg ${PRJ_TOP}/lib/FreeRTOS-Kernel/include)
+target_compile_options(lvgl  INTERFACE   ${CMAKE_CXX_FLAGS} ${CPU_FLAG} ${CXX_FLAG} )
+target_link_options(lvgl INTERFACE ${LINK_FLAG} ${CPU_FLAG})
+
+# lvgl_demos
+# lvgl_example
+
+
+list( APPEND INC_DIR_LIST   ${PRJ_TOP}/lib/lvgl)
+list( APPEND TARGET_LIST    lvgl)
+
+message( STATUS "LVGL library loaded")
+

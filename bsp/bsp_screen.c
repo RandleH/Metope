@@ -363,14 +363,15 @@ cmnBoolean_t bsp_screen_init( void){
  * @return      Return 0, if success
  *              Return 1, if area params are wrong
 */
-u32 bsp_screen_fill( const u16 color, u16 xs, u16 ys, u16 xe, u16 ye){
+void bsp_screen_fill( const bspScreenPixel_t color, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye){
     if( xs>xe || ys>ye ){
-        return 1;
+        return;
     }
     
     u8 buf[2] = {(u8)(color>>8),(u8)(color&0xff)};
     u8 done = false;
     PIN_CS(0);
+
     bsp_screen_area( xs, ys, xe, ye);
     
     PIN_DC(1);
@@ -381,11 +382,14 @@ u32 bsp_screen_fill( const u16 color, u16 xs, u16 ys, u16 xe, u16 ye){
     }
     
     PIN_CS(1);
-
-    return 0;
 }
 
 
+
+
+void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye){
+  
+}
 
 #ifdef __cplusplus
 }
