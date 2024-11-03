@@ -74,6 +74,7 @@
         "stdlib.h": "c",
         "stm32f4xx_hal.h": "c",
         "charconv": "c",
-        "chrono": "c"
+        "chrono": "c",
+        "iomanip": "cpp"
     }
 }

@@ -72,14 +72,23 @@ int main(int argc, char *argv[]){
 #include "test.hh"
 #include "cmn_test.hh"
 #include "bsp_test.hh"
-
+#include "bsp_cpu.h"
 
 
 int main(int argc, char *argv[]){
   hw_init();
   bsp_init();
   app_init();
-  // printf( "Device Serial Number: %02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d-%02d\r\n", uid.raw[0],uid.raw[1],uid.raw[2],uid.raw[3],uid.raw[4],uid.raw[5],uid.raw[6],uid.raw[7],uid.raw[8],uid.raw[9],uid.raw[10],uid.raw[11]);
+
+  {
+    size_t len = 0;
+    auto  *uuid = bsp_cpu_chip_uuid(&len);
+    for(size_t i=0; i<len; ++i){
+      std::cout << std::setfill('0')<<std::setw(2)<<(int)uuid[i];
+    }
+    std::cout << std::endl;
+  }
+
   std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
   
   add_cmn_test();

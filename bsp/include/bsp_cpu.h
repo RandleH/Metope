@@ -5,7 +5,7 @@
 
 
 
-
+#include "cmn_type.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -13,7 +13,7 @@ extern "C"{
 
 
 void bsp_cpu_clock_init( void);
-
+const u8* bsp_cpu_chip_uuid( size_t *len);
 
 #ifdef __cplusplus
 }
