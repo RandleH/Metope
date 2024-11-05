@@ -18,6 +18,8 @@
 */
 
 
+#include <stdarg.h>
+#include "cmn_type.h"
 
 #ifndef APP_LVGL_H
 #define APP_LVGL_H
@@ -26,7 +28,13 @@
 extern "C"{
 #endif
 
+u32 app_lvgl_get_tick(void);
+
 void app_lvgl_init(void);
+void app_lvgl_flush_all( void);
+
+int app_lvgl_snprintf(char * buffer, size_t count, const char * format, ...);
+int app_lvgl_vsnprintf(char * buffer, size_t count, const char * format, va_list va);
 
 #ifdef __cplusplus
 }

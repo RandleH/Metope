@@ -76,7 +76,7 @@ typedef IRQn_Type cmnIRQn_t;
 #endif
 
 
-typedef struct cmnDateTime_t{
+typedef union cmnDateTime_t{
   struct{
     uint32_t  year   : 6;    /*!< Distance from 2024 +- 32 */
     uint32_t  month  : 4;

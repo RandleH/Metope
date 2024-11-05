@@ -24,7 +24,18 @@ tMainSystemStatus  metope = {
     .pHtim3  = &htim3
   },
   .app = {
-    0
+    .lvgl = {
+#if LVGL_VERSION==836
+      .disp_drv      = {0},
+      .disp          = NULL,
+      .disp_draw_buf = {0},
+      .gram          = {0},
+      .isFlushDone   = true
+#elif LVGL_VERSION==922
+      .pDisplayHandle = NULL,
+      .pLvglTheme     = NULL
+#endif
+    }
   }
 };
 

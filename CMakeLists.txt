@@ -109,10 +109,6 @@ elseif (CHIP STREQUAL "STM32F405RGT6")
 else()
     message(FATAL_ERROR "Unknown system target")
 endif()
-include( ${PRJ_TOP}/cmn/cmn.cmake)
-include( ${PRJ_TOP}/lib/lib.cmake)
-include( ${PRJ_TOP}/bsp/bsp.cmake)
-include( ${PRJ_TOP}/app/app.cmake)
 if( TEST_ONLY AND TEST_ONLY EQUAL 1)
     list(APPEND DEF_LIST "-DTEST_ONLY=1")
     include( ${PRJ_TOP}/test/test.cmake)
@@ -122,6 +118,10 @@ if( USE_REGISTER AND USE_REGISTER EQUAL 1)
     list(APPEND DEF_LIST "-DUSE_REGISTER=1")
 endif()
 
+include( ${PRJ_TOP}/cmn/cmn.cmake)
+include( ${PRJ_TOP}/app/app.cmake)
+include( ${PRJ_TOP}/bsp/bsp.cmake)
+include( ${PRJ_TOP}/lib/lib.cmake)
 
 
 

@@ -42,16 +42,6 @@
   }while(0)
 
 #define PIN_CS(x)
-#if 0
-#define PIN_CS(x)\
-  do{\
-    if((x)==0){\
-      ((SCREEN_CS_GPIO_Port)->BSRR) |= (u32)((SCREEN_CS_Pin)<<16);\
-    }else{\
-      ((SCREEN_CS_GPIO_Port)->BSRR) |= (SCREEN_CS_Pin);\
-    }\
-  }while(0)
-#endif
 
 #ifdef __cplusplus
 extern "C"{
@@ -370,7 +360,7 @@ void bsp_screen_fill( const bspScreenPixel_t color, bspScreenCood_t xs, bspScree
     
     u8 buf[2] = {(u8)(color>>8),(u8)(color&0xff)};
     u8 done = false;
-    PIN_CS(0);
+    // PIN_CS(0);
 
     bsp_screen_area( xs, ys, xe, ye);
     
@@ -378,17 +368,24 @@ void bsp_screen_fill( const bspScreenPixel_t color, bspScreenCood_t xs, bspScree
     bsp_screen_block_send( buf, sizeof(color), (xe-xs+1)*(ye-ys+1), 0, &done);
     
     if(!done){
-        // #warning "Note: Do something"
+      // #warning "Note: Do something"
     }
     
-    PIN_CS(1);
+    // PIN_CS(1);
 }
 
 
 
 
 void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye){
-  
+  u8 done = false;
+  bsp_screen_area( xs, ys, xe, ye);
+  PIN_DC(1);
+  bsp_screen_block_send( (const u8*)buf, (xe-xs+1)*(ye-ys+1)*sizeof(bspScreenPixel_t), 1, 0, &done);
+
+  if(!done){
+    // #warning "Note: Do something"
+  }
 }
 
 #ifdef __cplusplus

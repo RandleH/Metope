@@ -1,6 +1,7 @@
 
 
 
+#include <stdlib.h>
 #include <bitset>
 #include "test.hh"
 
@@ -8,7 +9,6 @@
 #include "cmn_type.h"
 #include "cmn_math.h"
 #include "cmn_utility.h"
-
 
 
 extern HumanInteractionTest tb_infra_hmi;
@@ -132,10 +132,10 @@ public:
     bsp_screen_on();
     bsp_screen_set_bright(BSP_SCREEN_DEFAULT_BRIGHTNESS);
 
-    this->_cout<<"\nScreen Fill Test - Please enter the hex color:"<<std::endl;
+    this->_cout<<"\nScreen Fill Test - "<<"Please enter the hex color:"<<std::endl;
     this->_cout<<"Example: 0x00FF0000 (Red) | 0x0000FF00 (Green)"<<std::endl;
     this->_cout<<"\nPress [Q] to quit; Press [E] to reject;"<<std::endl;
-    while (std::cin >> s) {
+    while (this->_cin >> s) {
       cmnBoolean_t isValid  = false;
       int32_t color = cmn_utility_str2hex(s.c_str(), &isValid);
       
@@ -165,29 +165,152 @@ public:
 };
 
 
+class TestBspScreenDrawArea : public TestUnitWrapper_withInputOutput<char,char>{
+public:
+  TestBspScreenDrawArea():TestUnitWrapper_withInputOutput("test_bsp_screen_draw_area", std::cin, std::cout){}
+  bool run( char& input, char& ref ) override{
+    std::string s;
+    bool result = true;
+    
+    bsp_screen_on();
+    bsp_screen_set_bright(BSP_SCREEN_DEFAULT_BRIGHTNESS);
+
+    this->_cout<<"\nScreen Draw Area Test - Please enter the area:"<<std::endl;
+    this->_cout<<"\nPress [Q] to quit; Press [E] to reject;"<<std::endl;
+
+    u32 cood[4] = {0};
+    const char* msg[] = {"[xs]","[ys]","[xe]","[ye]"};
+    cmnBoolean_t isValid = false;
+    
+    for( u8 i=0; i<4; ++i){
+      this->_cout<<"Please enter the coodinate "<<msg[i]<<std::endl;
+      while (this->_cin >> s){
+        cood[i] = cmn_utility_str2dec(s.c_str(), &isValid);
+        if(!isValid){
+          this->_cout<<"Please enter a number!"<<std::endl;
+        }else if(cood[i]<0 || cood[i]>= ((i%2==0)?BSP_SCREEN_WIDTH:BSP_SCREEN_HEIGHT) ){
+          this->_cout<<"Out of region!"<<std::endl;
+        }else if(i>=3 && (cood[3]<cood[1] || cood[2]<cood[0])){
+          this->_cout<<msg[2]<<" and "<<msg[3]<<" must be greater than the start coods!"<<std::endl;
+        }else{
+          break;
+        }
+      }
+    }
+    
+    this->_cout<<"\nPlease enter the hex color:"<<std::endl;
+    this->_cout<<"Example: 0x00FF0000 (Red) | 0x0000FF00 (Green)"<<std::endl;
+    while (this->_cin >> s) {
+      int32_t color = cmn_utility_str2hex(s.c_str(), &isValid);
+      
+      if(s[0]=='Q' || s[0]=='q'){
+        result = true;
+        break;
+      }else if (s[0]=='E' || s[0]=='e'){
+        result = false;
+        this->_err_msg<<"User objection."<<std::endl;
+        break;
+      }else if(isValid){
+        if( color>0x00FFFFFF){
+          this->_cout<<"Hex Color is [0:0xFFFFFF] with `0x00RRGGBB` format. Please enter a valid value:"<<std::endl;
+        }else{
+          u16 r = ((((color&0xFF0000)<<5>>8)>>16)<<11);
+          u16 g = ((((color&0x00FF00)<<6>>8)>>8)<<5);
+          u16 b = ((((color&0x0000FF)<<5>>8)>>0)<<0);
+
+          bsp_screen_fill( (r|g|b), cood[0], cood[1], cood[2], cood[3]);
+        }
+      }else{
+        this->_cout<<"Hex Color is [0:0xFFFFFF] with `0x00RRGGBB` format. Please enter a valid value:"<<std::endl;
+      }
+    }
+    return result;
+  }
+};
+
+
+
+/**
+ * @brief
+ * @note  `std::array<bspScreenCood_t,4>` is the area coodinates set.
+ * @note  Total num rounds: 3
+ */
+class TestBspScreenDrawAreaStatic : public TestUnitWrapper_withInputOutput<std::array<std::array<bspScreenCood_t,4>,3>,char>{
+public:
+  TestBspScreenDrawAreaStatic():TestUnitWrapper_withInputOutput("test_bsp_screen_draw_area_static", std::cin, std::cout){}
+  bool run( std::array<std::array<bspScreenCood_t,4>,3>& input, char& ref ) override{
+    bool result = false;
+    std::string s;
+
+    bsp_screen_fill( 0x688, 0,0, BSP_SCREEN_WIDTH-1, BSP_SCREEN_HEIGHT-1);
+    for( const auto &item : input){
+      size_t len = (1+item[2]-item[0])*(1+item[3]-item[1])*sizeof(bspScreenPixel_t);
+      bspScreenPixel_t *buf = (bspScreenPixel_t*)malloc(len);
+      if(buf==NULL){
+        this->_err_msg<<"Can NOT allocate enough memory"<<std::endl;
+        result = false;
+      }else{
+        memset( buf, 0xFF, len);
+        bsp_screen_refresh( buf, item[0], item[1], item[2], item[3]);
+        free(buf);
+      }
+    }
+
+    this->_cout<<"\nPress [Q] to quit; Press [E] to reject;"<<std::endl;
+
+    while (this->_cin >> s) {
+      if(s[0]=='Q' || s[0]=='q'){
+        result = true;
+        break;
+      }else if (s[0]=='E' || s[0]=='e'){
+        result = false;
+        this->_err_msg<<"User objection."<<std::endl;
+        break;
+      }else{
+        this->_cout<<"\nPress [Q] to quit; Press [E] to reject;"<<std::endl;
+      }
+    }
+    return result;
+  }
+};
+
 /**
  * @addtogroup TestBench
  */
 void add_bsp_test(void){
   tb_infra_hmi
-    .insert(
-      TestBspUsartEcho(),
-      std::array<char,6>{{'R','a','n','d','l','e'}},
-      '\0'
-    )
-    .insert(
-      TestBspScreenBrightness(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenSmoothness(),
-      (char)'\0',
-      (char)'\0'
-    )
+    // .insert(
+    //   TestBspUsartEcho(),
+    //   std::array<char,6>{{'R','a','n','d','l','e'}},
+    //   '\0'
+    // )
+    // .insert(
+    //   TestBspScreenBrightness(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenSmoothness(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
     .insert(
       TestBspScreenFill(),
       (char)'\0',
+      (char)'\0'
+    )
+    // .insert(
+    //   TestBspScreenDrawArea(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    .insert(
+      TestBspScreenDrawAreaStatic(),
+      std::array<std::array<bspScreenCood_t,4>,3>{{
+        {66,66,77,77},
+        {120,120,140,150},
+        {190,100, 195,130}
+      }},
       (char)'\0'
     )
   ;

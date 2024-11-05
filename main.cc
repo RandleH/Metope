@@ -54,7 +54,7 @@ int main(int argc, char *argv[]){
   app_init();
   
   bsp_led__switch(ON);
-  metope.app.dummy = 0;
+  
   while(1){
 
     
@@ -72,6 +72,7 @@ int main(int argc, char *argv[]){
 #include "test.hh"
 #include "cmn_test.hh"
 #include "bsp_test.hh"
+#include "app_test.hh"
 #include "bsp_cpu.h"
 
 
@@ -79,27 +80,28 @@ int main(int argc, char *argv[]){
   hw_init();
   bsp_init();
   app_init();
-
-  {
-    size_t len = 0;
-    auto  *uuid = bsp_cpu_chip_uuid(&len);
-    for(size_t i=0; i<len; ++i){
-      std::cout << std::setfill('0')<<std::setw(2)<<(int)uuid[i];
-    }
-    std::cout << std::endl;
-  }
-
-  std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
   
-  add_cmn_test();
-  add_bsp_test();
+  // {
+  //   size_t len = 0;
+  //   auto  *uuid = bsp_cpu_chip_uuid(&len);
+  //   std::cout << "Device Unique Serial ID: ";
+  //   for(size_t i=0; i<len; ++i){
+  //     std::cout << std::setfill('0')<<std::setw(2)<<(int)uuid[i]<< ((i==len-1)?'\n':'-');
+  //   }
+  // }
+
+  // std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
+  
+  // add_cmn_test();
+  // add_bsp_test();
+  add_app_test();
 
   std::cout<<"Local Project Test:"<<std::endl;
   tb_infra_local.verdict();
 
   std::cout<<"Human Interaction Test:"<<std::endl;
   tb_infra_hmi.verdict();
-  metope.app.dummy = 0;
+  
   while(1){}
 }
 

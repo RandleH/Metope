@@ -8,6 +8,7 @@
 #if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
 #include "stm32f4xx_hal.h"
 #endif
+#include "lvgl.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -33,9 +34,19 @@ typedef struct{
     TIM_HandleTypeDef  * const pHtim3;
     //...//
   }dev;
-
   struct{
-    u8 dummy;
+    struct{
+#if LVGL_VERSION==836
+      lv_disp_drv_t      disp_drv;
+      lv_disp_t         *disp;
+      lv_disp_draw_buf_t disp_draw_buf;
+      lv_color_t         gram[2][BSP_SCREEN_WIDTH*4];
+      cmnBoolean_t       isFlushDone;
+#elif LVGL_VERSION==922
+      lv_display_t *pDisplayHandle;
+      lv_theme_t   *pLvglTheme;
+#endif
+    }lvgl;
   }app;
 
 } tMainSystemStatus;

@@ -95,13 +95,18 @@ set( LVGL_MISC_DEFINE       "-DLV_CONF_BUILD_DISABLE_EXAMPLES=1"
                             "-DLV_CONF_BUILD_DISABLE_DEMOS=1"
                             "-DLV_CONF_PATH=${PRJ_TOP}/lib/lv_conf.h"
                             )
+if( LVGL_VERSION_9_2_2 )
+    list(APPEND LVGL_MISC_DEFINE "-DLVGL_VERSION=922")
+else()
+    list(APPEND LVGL_MISC_DEFINE "-DLVGL_VERSION=836")
+endif()
 
 add_definitions( ${LVGL_MISC_DEFINE})
 add_subdirectory( ${PRJ_TOP}/lib/lvgl ${PRJ_TOP}/build/lvgl/build )
 
 # include(${PRJ_TOP}/lib/lvgl/env_support/cmake/custom.cmake)
 
-# target_include_directories(lvgl INTERFACE ${PRJ_TOP}/cfg ${PRJ_TOP}/lib/FreeRTOS-Kernel/include)
+target_include_directories(lvgl PUBLIC ${INC_DIR_LIST})
 target_compile_options(lvgl  INTERFACE   ${CMAKE_CXX_FLAGS} ${CPU_FLAG} ${CXX_FLAG} )
 target_link_options(lvgl INTERFACE ${LINK_FLAG} ${CPU_FLAG})
 
