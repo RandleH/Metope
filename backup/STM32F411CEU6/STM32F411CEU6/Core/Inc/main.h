@@ -68,6 +68,12 @@ void Error_Handler(void);
 #define DBG_TX_GPIO_Port GPIOA
 #define DBG_RX_Pin GPIO_PIN_3
 #define DBG_RX_GPIO_Port GPIOA
+#define FLASH_CS_Pin GPIO_PIN_4
+#define FLASH_CS_GPIO_Port GPIOA
+#define FLASH_CLK_Pin GPIO_PIN_5
+#define FLASH_CLK_GPIO_Port GPIOA
+#define FLASH_MOSI_Pin GPIO_PIN_7
+#define FLASH_MOSI_GPIO_Port GPIOA
 #define SCREEN_DC_Pin GPIO_PIN_2
 #define SCREEN_DC_GPIO_Port GPIOB
 #define SCREEN_CLK_Pin GPIO_PIN_13
@@ -82,6 +88,8 @@ void Error_Handler(void);
 #define KEY_L_Pin GPIO_PIN_15
 #define KEY_L_GPIO_Port GPIOA
 #define KEY_L_EXTI_IRQn EXTI15_10_IRQn
+#define FLASH_MISO_Pin GPIO_PIN_4
+#define FLASH_MISO_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -81,19 +81,19 @@ int main(int argc, char *argv[]){
   bsp_init();
   app_init();
   
-  // {
-  //   size_t len = 0;
-  //   auto  *uuid = bsp_cpu_chip_uuid(&len);
-  //   std::cout << "Device Unique Serial ID: ";
-  //   for(size_t i=0; i<len; ++i){
-  //     std::cout << std::setfill('0')<<std::setw(2)<<(int)uuid[i]<< ((i==len-1)?'\n':'-');
-  //   }
-  // }
+  {
+    size_t len = 0;
+    auto  *uuid = bsp_cpu_chip_uuid(&len);
+    std::cout << "Device Unique Serial ID: ";
+    for(size_t i=0; i<len; ++i){
+      std::cout << std::setfill('0')<<std::setw(2)<<(int)uuid[i]<< ((i==len-1)?'\n':'-');
+    }
+  }
 
-  // std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
+  std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
   
-  // add_cmn_test();
-  // add_bsp_test();
+  add_cmn_test();
+  add_bsp_test();
   add_app_test();
 
   std::cout<<"Local Project Test:"<<std::endl;
