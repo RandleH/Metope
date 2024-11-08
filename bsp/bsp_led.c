@@ -36,7 +36,6 @@
 
 
 /**
- * @todo
  * @addtogroup MachineDependent
  */
 void inline bsp_led__on( void){
@@ -45,7 +44,6 @@ void inline bsp_led__on( void){
 
 
 /**
- * @todo
  * @addtogroup MachineDependent
  */
 void inline bsp_led__off( void){

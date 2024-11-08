@@ -46,7 +46,7 @@ tMainSystemStatus  metope = {
 
 #if (defined TEST_ONLY) && (TEST_ONLY==1) && (defined __cplusplus)
 
-LocalProjectTest     tb_infra_local(std::cout);
-HumanInteractionTest tb_infra_hmi(std::cout);
+LocalProjectTest     tb_infra_local;
+HumanInteractionTest tb_infra_hmi;
 
 #endif

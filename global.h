@@ -67,6 +67,8 @@ extern UART_HandleTypeDef  huart2;
 #if (defined TEST_ONLY) && (TEST_ONLY==1) && (defined __cplusplus)
 
 #include "test.hh"
+#include <stdlib.h>
+#include "cmn_utility.h"
 
 extern LocalProjectTest     tb_infra_local;
 extern HumanInteractionTest tb_infra_hmi;

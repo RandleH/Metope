@@ -152,8 +152,7 @@ void cmn_interrupt_enable_irq_after( const cmnIRQn_t irq, const uint32_t ms){
 }
 
 /**
- * @todo
- *  Add timer cnt
+ * @todo: Add timer cnt
 */
 void cmn_interrupt_execute( void){
   if(cmn_interrupt_top()){

@@ -31,6 +31,113 @@
 
 
 
+#define STATIC_SWAP( a, b)   do{ (a)^=(b); (b)^=(a); (a)^=(b); }while(0)
+
+
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+int _read(int fd, char* ptr, int len);
+int _write(int fd, const char* ptr, int len);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/* ************************************************************************** */
+/*                           Customized I/O stream                            */
+/* ************************************************************************** */
+#if USE_LOCAL_IOSTREAM
+namespace local{
+
+local::istream cin  = {};
+local::ostream cout = {};
+const char* endl = "\n";
+
+
+bool istream::operator>>(std::string& str){
+  std::stringstream s;
+  char x = '\0';
+
+  do{
+    if(1==_read(STDIN_FILENO, &x, 1)){
+      s << x;
+    }else{
+      return false;
+    }
+  }while(x!='\r');
+  str = s.str();
+  return true;
+}
+
+bool istream::operator>>(char& c){
+  if(1==_read(STDIN_FILENO, &c, 1)){
+    return true;
+  }
+  return false;
+}
+
+
+ostream& ostream::operator<<(uint32_t x){
+  char    buf[11] = {0};
+  uint8_t cnt     = 0;
+  ldiv_t a;
+  do{
+    a = ldiv(x,10);
+    buf[cnt++] = a.rem+'0';
+    x = a.quot;
+  }while(x);
+
+  size_t nel = 0;
+  --cnt;
+  while(cnt>nel){
+    /* Reuse `x` variable for swapping */
+    x = buf[cnt];
+    buf[cnt] = buf[nel];
+    buf[nel] = x;
+    --cnt; ++nel;
+  }
+  _write( STDOUT_FILENO, buf, cnt);
+  return (*this);
+}
+
+ostream& ostream::operator<<(unsigned int x){
+  return (*this)<<((uint32_t)x);
+}
+
+/**
+ * @todo: Add support for signed values.
+ */
+ostream& ostream::operator<<( int32_t x){
+  return (*this)<<((uint32_t)x);
+}
+
+/**
+ * @todo: Add support for signed values.
+ */
+ostream& ostream::operator<<( int x){
+  return (*this)<<((uint32_t)x);
+}
+
+
+ostream& ostream::operator<<(char c){
+  _write( STDOUT_FILENO, &c, 1);
+  return (*this);
+}
+
+ostream& ostream::operator<<(const char *str){
+  _write( STDOUT_FILENO, str, strlen(str));
+  return (*this);
+}
+
+}
+#endif
+
+
+
 /* ************************************************************************** */
 /*                       Standard I/O Stream Retargeting                      */
 /* ************************************************************************** */
@@ -57,7 +164,7 @@ int _isatty(int fd);
 /**
  * @addtogroup MachineDependent
  */
-int _write(int fd, char* ptr, int len){
+int _write(int fd, const char* ptr, int len){
   HAL_StatusTypeDef hstatus;
 
   if (fd == STDOUT_FILENO || fd == STDERR_FILENO) {

@@ -10,22 +10,27 @@
 #include "lvgl.h"
 
 
+/* ************************************************************************** */
+/*                             Default Namespace                              */
+/* ************************************************************************** */
+
+
 class TestAppGuiMainDisplayClock1 : public TestUnitWrapper_withInputOutput<std::array<cmnDateTime_t,4>,u8>{
 private:
   bool get_user_input(bool &verdict_result, cmnDateTime_t &date){
     std::string s;
-    this->_cout<<"Please enter a date time: YYYYMMDDHHMMSS"<<std::endl;
-    this->_cout<<"\nPress [Q] to quit; Press [E] to reject;"<<std::endl;
+    this->_cout<<"Please enter a date time: YYYYMMDDHHMMSS"<<endl;
+    this->_cout<<"\nPress [Q] to quit; Press [E] to reject;"<<endl;
     while (this->_cin >> s) {
       if(s[0]=='Q' || s[0]=='q'){
         verdict_result = true;
         return true;
       }else if (s[0]=='E' || s[0]=='e'){
         verdict_result = false;
-        this->_err_msg<<"User objection."<<std::endl;
+        this->_err_msg<<"User objection."<<endl;
         return true;
       }else if( (4+2+2+2+2+2)!=s.length()){
-        this->_cout<<"Please enter a valid format: YYYYMMDDHHMMSS"<<std::endl;
+        this->_cout<<"Please enter a valid format: YYYYMMDDHHMMSS"<<endl;
       }else{
         date.year   = 2024-(1000*(s[0]-'0') + 100*(s[1]-'0') + 10*(s[2]-'0') + (s[3]-'0'));
         date.month  = 10*(s[4]-'0')+(s[5]-'0');
@@ -40,9 +45,7 @@ private:
   }
 
 public:
-  TestAppGuiMainDisplayClock1():TestUnitWrapper_withInputOutput("test_app_main_disp_clock1", std::cin, std::cout){}
-  
-  
+  TestAppGuiMainDisplayClock1():TestUnitWrapper_withInputOutput("test_app_main_disp_clock1"){}
 
   bool run( std::array<cmnDateTime_t,4>& input, u8& ref) override{
     tGuiClock1 client = {

@@ -75,6 +75,8 @@
         "stm32f4xx_hal.h": "c",
         "charconv": "c",
         "chrono": "c",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "deque": "cpp",
+        "queue": "cpp"
     }
 }

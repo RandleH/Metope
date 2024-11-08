@@ -40,6 +40,12 @@ int32_t cmn_utility_str2dec(const char *str, cmnBoolean_t *isValid);
 int32_t cmn_utility_str2hex(const char *str, cmnBoolean_t *isValid);
 float cmn_utility_str2float(const char *str, cmnBoolean_t *isValid);
 
+
+
+char *cmn_utility_strrev(char *str);
+char *cmn_utility_strnrev(char *str, size_t len);
+
+
 #ifdef __cplusplus
 }
 #endif

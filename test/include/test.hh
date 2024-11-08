@@ -23,10 +23,6 @@
 /*                                  Includes                                  */
 /* ************************************************************************** */
 #include <cstdbool>
-#include <vector>
-#include <iostream>
-#include <sstream>
-#include <map>
 #include <sys/stat.h>
 #include <memory>
 #include <queue>
@@ -56,12 +52,65 @@
 
 
 /* ************************************************************************** */
+/*                           Configurable Macros                              */
+/* ************************************************************************** */
+#define USE_LOCAL_IOSTREAM    0
+
+
+
+/* ************************************************************************** */
+/*                           Customized I/O stream                            */
+/* ************************************************************************** */
+#if USE_LOCAL_IOSTREAM
+namespace local{
+
+class istream{
+public:
+  istream(){}
+  bool operator>>(std::string& str);
+  bool operator>>(char& str);
+  ~istream(){}
+};
+
+class ostream{
+public:
+  ostream(){}
+  ostream& operator<<(int32_t x);
+  ostream& operator<<(uint32_t x);
+  ostream& operator<<(char c);
+  ostream& operator<<(int x);
+  ostream& operator<<(unsigned int x);
+  ostream& operator<<(const char *str);
+  ~ostream(){}
+};
+
+extern istream     cin;
+extern ostream     cout;
+extern const char *endl;
+
+}
+#endif
+
+/* ************************************************************************** */
+/*                             Default Namespace                              */
+/* ************************************************************************** */
+#if USE_LOCAL_IOSTREAM
+using namespace local;
+#else
+#include <iostream>
+using namespace std;
+#endif
+
+
+
+/* ************************************************************************** */
 /*                            Test Bone Component                             */
 /* ************************************************************************** */
 /**
  * @brief Test Bench Bone Structure (Do NOT modify/inherit)
  * @note  Please develop the test on class `TestUnitWrapper`
 */
+
 class TestBone{
 protected:
   char _name[MAX_TEST_NAME_LENGTH];
@@ -80,9 +129,7 @@ public:
   virtual inline const char* info(void) const noexcept = 0;
   virtual              bool  run(void* q, void *a)     = 0;
   virtual                    ~TestBone()               = default;
-  friend std::ostream& operator<<(std::ostream& out, const TestBone& testunit_client);
 };
-std::ostream& operator<<(std::ostream& out, const TestBone& testunit_client);
 
 
 
@@ -107,21 +154,22 @@ private:
   bool              _is_tested;
 
 protected:
-  std::stringstream _err_msg;
+  ostream& _err_msg;
 
 public:
   TestUnitWrapper() = delete;
-  TestUnitWrapper(const std::string test_name):TestBone(test_name),_result(false),_is_tested(false),_err_msg(""){}
-  TestUnitWrapper(const TestUnitWrapper &x):TestBone(x._name),_result(false),_is_tested(false),_err_msg(""){}
+  TestUnitWrapper(const std::string test_name):TestBone(test_name),_result(false),_is_tested(false),_err_msg(cout){}
+  TestUnitWrapper(const TestUnitWrapper &x):TestBone(x._name),_result(false),_is_tested(false),_err_msg(cout){}
   TestUnitWrapper(TestUnitWrapper&& x) noexcept{}
   
+  /**
+   * @todo: Consider making the TestUnit printable.
+   */
   inline const char* info(void) const noexcept{
-    return  ("\t"+_err_msg.str()).c_str();
+    return "\n";
   }
 
-  ~TestUnitWrapper(){
-    _err_msg.str("");
-  }
+  ~TestUnitWrapper(){}
 
   /**
    * @note
@@ -149,10 +197,10 @@ public:
 template<class Q, class A>
 class TestUnitWrapper_withInput : public TestUnitWrapper<Q,A>{
 protected:
-  std::istream& _cin;
+  istream& _cin;
 public:
   TestUnitWrapper_withInput() = delete;
-  TestUnitWrapper_withInput(const std::string test_name, std::istream& cin):TestUnitWrapper<Q,A>(test_name),_cin(cin){}
+  TestUnitWrapper_withInput(const std::string test_name):TestUnitWrapper<Q,A>(test_name),_cin(cin){}
   TestUnitWrapper_withInput(const TestUnitWrapper_withInput &x):TestUnitWrapper<Q,A>(x),_cin(x._cin){}
 
   ~TestUnitWrapper_withInput(){}
@@ -167,12 +215,11 @@ public:
 template<class Q, class A>
 class TestUnitWrapper_withOutput : public TestUnitWrapper<Q,A>{
 protected:
-  std::ostream& _cout;
+  ostream& _cout;
 public:
   TestUnitWrapper_withOutput() = delete;
-  TestUnitWrapper_withOutput(const std::string test_name, std::ostream& cout):TestUnitWrapper<Q,A>(test_name),_cout(cout){}
+  TestUnitWrapper_withOutput(const std::string test_name):TestUnitWrapper<Q,A>(test_name),_cout(cout){}
   TestUnitWrapper_withOutput(const TestUnitWrapper_withOutput &x):TestUnitWrapper<Q,A>(x),_cout(x._cout){}
-
   ~TestUnitWrapper_withOutput(){}
 };
 
@@ -185,11 +232,11 @@ public:
 template<class Q, class A>
 class TestUnitWrapper_withInputOutput : public TestUnitWrapper<Q,A>{
 protected:
-  std::istream& _cin;
-  std::ostream& _cout;
+  istream& _cin;
+  ostream& _cout;
 public:
   TestUnitWrapper_withInputOutput() = delete;
-  TestUnitWrapper_withInputOutput(const std::string test_name, std::istream& cin, std::ostream& cout):TestUnitWrapper<Q,A>(test_name),_cin(cin),_cout(cout){}
+  TestUnitWrapper_withInputOutput(const std::string test_name):TestUnitWrapper<Q,A>(test_name),_cin(cin),_cout(cout){}
   TestUnitWrapper_withInputOutput(const TestUnitWrapper_withInputOutput &x):TestUnitWrapper<Q,A>(x),_cin(x._cin),_cout(x._cout){}
   ~TestUnitWrapper_withInputOutput(){}
 };
@@ -232,7 +279,7 @@ public:
  *          client.run( input, result );                             // Run the test
  * 
  *          // Method 2 - Use Test Manager (Recommanded for CI)
- *          Test tb_infra(std::cout);                                // Set `std::cout` as the output stream
+ *          Test tb_infra;
  *          
  *            // Method 2.1 - User takes care of the test data memory
  *            YourTestClass< typeof(input), typeof(result) >() client; // Instantiate the test client
@@ -247,17 +294,17 @@ public:
  * 
  * @author Randle.Helmslay [Signed]
 */
+
 class Test{
 private:
-  std::map<TestBone*, std::pair<void*,void*>> _package;
-  std::queue<TestBone*>                       _alloc;
-  std::ostream&                               _cout;
+  std::queue< std::tuple<TestBone*,void*,void*> > _package;
+  ostream&                                        _cout;
 
 public:
-  Test(std::ostream& ostream):_cout(ostream){}
+  Test():_cout(cout){}
 
   Test& import( TestBone *client, void *Q_input, void *A_answer){
-    _package.insert(std::make_pair( client, std::make_pair(Q_input, A_answer)));
+    _package.push(std::make_tuple(client,Q_input,A_answer));
     return (*this);
   }
 
@@ -266,9 +313,8 @@ public:
     auto *pT = new T(std::move(client));
     auto *pQ = new Q(std::move(input));
     auto *pA = new A(std::move(answer));
-    _alloc.push(pT);
     
-    _package.insert(std::make_pair( pT, std::make_pair(pQ, pA)));
+    _package.push(std::make_tuple(pT,pQ,pA));
     return (*this);
   }
 
@@ -276,23 +322,33 @@ public:
   virtual void callback_if_failed( void){}
 
   void verdict(void){
-    _cout<<"Number of tests in this batch: "<< _package.size()<<'\n'<<std::endl;
+    _cout<<"Number of tests in this batch: "<< _package.size()<<'\n'<<endl;
     uint32_t cnt = 0;
     bool     v_result = true;
-    for( const auto &item : _package){
-      _cout<<"Running test ["<<cnt+1<<'/'<<_package.size()<<']'<<' '<< std::setfill('.') << std::left << std::setw(MAX_TEST_NAME_LENGTH) << item.first->name()<<' ';
-      bool result = item.first->run(item.second.first, item.second.second);
-      v_result &= result;
+    
+    while( !_package.empty()){
+      auto item = _package.front();
+      
+      /**
+       * @todo: Local iostream doesn't support this.
+       */
+#if USE_LOCAL_IOSTREAM
+      _cout<<"Running test ["<<cnt+1<<'/'<<_package.size()<<']'<<' '<< "......."                                                         << std::get<0>(item)->name()<<' ';
+#else
+      _cout<<"Running test ["<<cnt+1<<'/'<<_package.size()<<']'<<' '<< std::setfill('.') << std::left << std::setw(MAX_TEST_NAME_LENGTH) << std::get<0>(item)->name()<<' ';
+#endif
+      bool result = std::get<0>(item)->run( std::get<1>(item), std::get<2>(item));
       if(result==false){
-        _cout<<"FAILED"<<std::endl;
-        _cout<<CONSOLE_FMT_RED<<"Error Signature:\n"<<item.first->info()<<CONSOLE_FMT_RESET<<std::endl;
+        _cout<<"FAILED"<<endl;
+        _cout<<CONSOLE_FMT_RED<<"Error Signature:\n"<<std::get<0>(item)->info()<<CONSOLE_FMT_RESET<<endl;
       }else{
-        _cout<<"PASSED"<<std::endl;
+        _cout<<"PASSED"<<endl;
       }
       ++cnt;
+      _package.pop();
     }
 
-    _cout<<"\nTest completed. Verdict result: "<< ((v_result==false) ? "FAILED" : "PASSED")<<"\n"<<std::endl;
+    _cout<<"\nTest completed. Verdict result: "<< ((v_result==false) ? "FAILED" : "PASSED")<<"\n"<<endl;
 
     if(v_result==false){
       callback_if_failed();
@@ -303,18 +359,15 @@ public:
   
 
   /**
-   * @todo
-   *    Check if this is valid.
+   * @todo: Check if this deconstuctor is valid or not.
   */
   ~Test(){
-    while( !_alloc.empty()){
-      auto *pT = _alloc.front();
-      auto *pQ = _package[pT].first;
-      auto *pA = _package[pT].second;
-      delete pT;
-      delete [] (char*)pQ;
-      delete [] (char*)pA;
-      _alloc.pop();
+    while( !_package.empty()){
+      auto item = _package.front();
+      delete std::get<0>(item);
+      delete [] (char*)std::get<1>(item);
+      delete [] (char*)std::get<2>(item);
+      _package.pop();
     }
   }
 
@@ -360,14 +413,12 @@ public:
   using Test::Test;
   void callback_if_passed(void) override{
     /**
-     * @todo
-     *  Generate a system interrupt with a ERRNO status
+     * @todo: Generate a system interrupt with a ERRNO status.
      */
   }
   void callback_if_failed(void) override{
     /**
-     * @todo
-     *  Generate a system interrupt with a EINTR status
+     * @todo: Generate a system interrupt with a EINTR status.
      */
   }
 };

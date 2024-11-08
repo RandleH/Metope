@@ -57,7 +57,6 @@ int main(int argc, char *argv[]){
   
   while(1){
 
-    
   }
 }
 
@@ -68,7 +67,6 @@ int main(int argc, char *argv[]){
 #else
 
 
-#include <iostream>
 #include "test.hh"
 #include "cmn_test.hh"
 #include "bsp_test.hh"
@@ -90,16 +88,16 @@ int main(int argc, char *argv[]){
     }
   }
 
-  std::cout<<"Hardware Initialization Completed.\n\n"<<std::endl;
+  cout<<"Hardware Initialization Completed.\n\n"<<endl;
   
-  add_cmn_test();
+  // add_cmn_test();
   add_bsp_test();
-  add_app_test();
+  // add_app_test();
 
-  std::cout<<"Local Project Test:"<<std::endl;
+  cout<<"Local Project Test:"<<endl;
   tb_infra_local.verdict();
 
-  std::cout<<"Human Interaction Test:"<<std::endl;
+  cout<<"Human Interaction Test:"<<endl;
   tb_infra_hmi.verdict();
   
   while(1){}

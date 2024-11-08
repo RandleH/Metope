@@ -22,6 +22,11 @@
 #include "cmn_interrupt.h"
 
 
+/* ************************************************************************** */
+/*                             Default Namespace                              */
+/* ************************************************************************** */
+
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -44,14 +49,14 @@ public:
     size_t cnt = 0;
     for(auto &item : input){
       if(false==cmn_interrupt_push(&item)){
-        this->_err_msg << "Failed to insert item "<<cnt<<": target_cnt="<<item.target_cnt<<" irqn="<<item.irqn<<" operation="<<item.operation<<std::endl;
+        this->_err_msg << "Failed to insert item "<<cnt<<": target_cnt="<<item.target_cnt<<" irqn="<<item.irqn<<" operation="<<item.operation<<endl;
         return false;
       }
       ++cnt;
     }
 
     if(gInterruptProcess.record_cnt!=input.size()){
-      this->_err_msg << "Record length mismatched!! dut="<<gInterruptProcess.record_cnt << " ref="<<input.size()<<std::endl;
+      this->_err_msg << "Record length mismatched!! dut="<<gInterruptProcess.record_cnt << " ref="<<input.size()<<endl;
       return false;
     }
 
@@ -61,13 +66,13 @@ public:
 
       uint32_t top = cmn_interrupt_top();
       if( ref[cnt]!=top){
-        this->_err_msg << "Incorrect top value in the PQ. Processing cnt="<<cnt<<" dut="<<top<<" ref="<<ref[cnt]<<std::endl;
+        this->_err_msg << "Incorrect top value in the PQ. Processing cnt="<<cnt<<" dut="<<top<<" ref="<<ref[cnt]<<endl;
         return false;
       }
 
       cmn_interrupt_pop();
       if(gInterruptProcess.record_cnt != tmp-1){
-        this->_err_msg << "Count wasn't decreased by 1. Processing cnt="<<cnt<<" dut="<<gInterruptProcess.record_cnt<<" ref="<<(tmp-1)<<std::endl;
+        this->_err_msg << "Count wasn't decreased by 1. Processing cnt="<<cnt<<" dut="<<gInterruptProcess.record_cnt<<" ref="<<(tmp-1)<<endl;
         return false;
       }
     }
@@ -90,7 +95,7 @@ public:
     
     uint32_t ret = cmn_interrupt_top();
     if(ret!=UINT32_MAX){
-      this->_err_msg << "Empty interrupt queue should return the maximum clock count."<<" dut: top="<<ret<<" ref: top="<<UINT32_MAX<<std::endl;
+      this->_err_msg << "Empty interrupt queue should return the maximum clock count."<<" dut: top="<<ret<<" ref: top="<<UINT32_MAX<<endl;
       return false;
     }
 
@@ -117,7 +122,7 @@ public:
     for( int i=0; i<10; ++i){
       int32_t dut = cmn_math_gcd(input[i][0],input[i][1]);
       if( ref[i]!=dut){
-        this->_err_msg<<"Result mismatched. Input=["<<input[i][0]<<','<<input[i][1]<<']'<<" dut="<<dut<<" ref="<<ref[i]<<std::endl;
+        this->_err_msg<<"Result mismatched. Input=["<<input[i][0]<<','<<input[i][1]<<']'<<" dut="<<dut<<" ref="<<ref[i]<<endl;
         return false;
       }
     }
@@ -133,19 +138,18 @@ public:
     uint32_t  x8 =input[0], r8;
     r8 = CMN_CLZ_U32(x8);
     if( r8!=ref[0] ){
-      this->_err_msg<<"Mismatch in CMN_CLZ_U32()."<<" input="<<"0b"<<std::bitset<32>{input[0]}<<" dut="<<r8<<" ref="<<ref[0]<<std::endl;
+      
+#if USE_LOCAL_IOSTREAM
+      /**
+       * @todo: Local iostream doesn't support bitset output.
+       */
+      this->_err_msg<<"Mismatch in CMN_CLZ_U32()."<<" input="<<input[0]<<" dut="<<r8<<" ref="<<ref[0]<<endl;
+#else
+      this->_err_msg<<"Mismatch in CMN_CLZ_U32()."<<" input="<<"0b"<<std::bitset<32>{input[0]}<<" dut="<<r8<<" ref="<<ref[0]<<endl;
+#endif
+
       return false;
     }
-
-    // uint16_t x16=input[0];
-    // uint32_t x32=input[0];
-    // r8 = CMN_BIT_EXT_U8( x8, 2,3);
-    // CMN_BIT_EXT_U16( x16, 2,3);
-    // CMN_BIT_EXT_U32( x32, 2,3);
-    // if( x8!= ((input[0]&(((1<<3)-1)<<2))>>2) ){
-      // this->_err_msg<<"Mismatch in CMN_BIT_EXT()."<<" dut="<<"0b"<< std::bitset<8>{x8}<<" ref="<<"0b"<<std::bitset<8>{(uint8_t)input[0]}<<endl;
-      // return false;
-    // }
     
     return true;
   }
