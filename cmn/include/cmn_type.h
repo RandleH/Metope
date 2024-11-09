@@ -29,15 +29,26 @@
 
 
 
-#define ENABLE    (1U)
 #define DISABLE   (0U)
-#define ON        (1U)
+#define ENABLE    (1U)
+
 #define OFF       (0U)
-#define YES       (1U)
+#define ON        (1U)
+
+#define IDLE      (0U)
+#define BUSY      (1U)
+
 #define NO        (0U)
+#define YES       (1U)
+
 #define NULLABLE
+
 #define FAILED    (0U)
 #define PASSED    (1U)
+
+#define SUCCESS   (0U)
+#define ERROR     (1U)
+
 
 #ifdef TEST_ONLY
   #define STATIC
@@ -47,7 +58,7 @@
   #define INLINE inline
 #endif
 
-#define DEFAULT __weak
+#define DEFAULT __attribute__((weak))
 
 
 

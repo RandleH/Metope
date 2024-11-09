@@ -32,6 +32,16 @@ typedef struct{
     SPI_HandleTypeDef  * const pHspi2;
     UART_HandleTypeDef * const pHuart2;
     TIM_HandleTypeDef  * const pHtim3;
+
+    union{
+      struct{
+        u16 spi2  : 1;
+        u16 uart2 : 1;
+        u16 tim3  : 1;
+        u16 reserved : 13;
+      };
+      u16 word;
+    }status;
     //...//
   }dev;
   struct{
@@ -69,6 +79,7 @@ extern UART_HandleTypeDef  huart2;
 #include "test.hh"
 #include <stdlib.h>
 #include "cmn_utility.h"
+
 
 extern LocalProjectTest     tb_infra_local;
 extern HumanInteractionTest tb_infra_hmi;

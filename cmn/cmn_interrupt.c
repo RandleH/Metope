@@ -22,6 +22,7 @@
 #include "cmn_device.h"
 #include "cmn_interrupt.h"
 #include "cmn_utility.h"
+#include "cmn_callback.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -285,7 +286,35 @@ void DMA1_Stream2_IRQHandler( void){}
 void DMA1_Stream3_IRQHandler( void){}
 
 void DEFAULT DMA1_Stream4_IRQHandler(void){
+
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+  u32 tmp = DMA1->HISR;
+#ifdef DEBUG_VERSION
+  if( 0!=(tmp & (DMA_FLAG_TEIF0_4|DMA_FLAG_FEIF0_4|DMA_FLAG_DMEIF0_4)) ){
+    /**
+     * @todo: Change to the ASSERTION
+     */
+    while(1); // Transmission error
+  }
+#endif
+  if(0!=(tmp & (DMA_FLAG_HTIF0_4))){
+    DMA1->HIFCR = DMA_FLAG_HTIF0_4 << (4-4);
+    DMA1_Stream4->CR &= ~(DMA_IT_HT);
+    /**
+     * @todo: Do something?
+     */
+  }else if(0!=(tmp & (DMA_FLAG_TCIF0_4))){
+    DMA1->HIFCR = DMA_FLAG_TCIF0_4 << (4-4);
+    DMA1_Stream4->CR &= ~(DMA_IT_TC);
+    /**
+     * @note: Full Transmission Complete Callback
+     */
+    cmn_callback_screen_spi_completed(&hspi2);
+  }
+#else
   HAL_DMA_IRQHandler(&hdma_spi2_tx);
+  cmn_callback_screen_spi_completed(&hspi2);
+#endif
 }
 
 void DMA1_Stream5_IRQHandler( void){}

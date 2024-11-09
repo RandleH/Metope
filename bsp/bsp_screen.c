@@ -41,7 +41,18 @@
     }\
   }while(0)
 
-#define PIN_CS(x)
+#if BSP_SCREEN_USE_HARDWARE_NSS
+  #define PIN_CS(x)
+#else
+  #define PIN_CS(x)\
+    do{\
+      if((x)==0){\
+        ((SCREEN_CS_GPIO_Port)->BSRR) |= (u32)((SCREEN_CS_Pin)<<16);\
+      }else{\
+        ((SCREEN_CS_GPIO_Port)->BSRR) |= (SCREEN_CS_Pin);\
+      }\
+    }while(0)
+#endif
 
 #ifdef __cplusplus
 extern "C"{
@@ -52,11 +63,7 @@ extern "C"{
  * @brief
  * @addtogroup MachineDependent
  */
-cmnBoolean_t bsp_screen_block_send( const uint8_t *buf, size_t nItems, size_t nTimes, uint32_t interval_delay_ms, uint8_t* pDone){
-  if( pDone!=NULL){
-    *pDone = false;
-  }
-
+STATIC cmnBoolean_t bsp_screen_spi_polling_send( const uint8_t *buf, size_t nItems, size_t nTimes){
   if( buf==NULL || nItems==0){
     return 1;
   }
@@ -79,18 +86,97 @@ cmnBoolean_t bsp_screen_block_send( const uint8_t *buf, size_t nItems, size_t nT
     HAL_SPI_Transmit( &hspi2, buf, nItems, HAL_MAX_DELAY);
     while( hspi2.State == HAL_SPI_STATE_BUSY );
 #endif
-
-    // if( interval_delay_ms!=0){
-      // rh_cmn_delay_ms__escape( interval_delay_ms);
-    // }
-  }
-  
-  if( pDone!=NULL){
-    *pDone = true;
   }
   
   return 0;
 }
+
+
+/**
+ * @brief
+ *    BSP Screen Non-Block SPI transmission function using DMA
+ * 
+ * @param [in] buf    - Data Buffer
+ * @param [in] nItems - Data Length
+ * @param [in] nTimes - How many times do you want to transmit?
+ * @addtogroup MachineDependent
+ */
+STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, size_t nTimes){
+  if( buf==NULL || nItems==0){
+    return 1;
+  }
+  
+  cmnBoolean_t ret = SUCCESS;
+
+  while(nTimes--){
+    metope.dev.status.spi2 = BUSY;
+
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+    metope.dev.pHspi2->State       = HAL_SPI_STATE_BUSY_TX;
+    metope.dev.pHspi2->ErrorCode   = HAL_SPI_ERROR_NONE;
+    /* Clear DBM bit */
+    DMA1_Stream4->CR &= (uint32_t)(~DMA_SxCR_DBM);
+
+  /* Configure DMA Stream data length */
+    DMA1_Stream4->NDTR = nItems;
+
+    /* Configure DMA Stream destination address */
+    DMA1_Stream4->PAR = ((u32)(&(SPI2->DR)));
+
+    /* Configure DMA Stream source address */
+    DMA1_Stream4->M0AR = (u32)buf;
+
+    DMA1->HIFCR = (0x3FU << (4-4)) ;
+
+    /* Enable Common interrupts*/
+    DMA1_Stream4->CR |= DMA_IT_TC | DMA_IT_TE | DMA_IT_DME;
+
+    /* Enable Half Complete Interrupt */
+    DMA1_Stream4->CR |= DMA_IT_HT;
+    
+    /* Enable the Peripheral */
+    DMA1_Stream4->CR |= DMA_SxCR_EN;
+
+    /* Check if the SPI is already enabled */
+    if ((SPI2->CR1 & SPI_CR1_SPE) != SPI_CR1_SPE){
+      /* Enable SPI peripheral */
+      SET_BIT( SPI2->CR1, SPI_CR1_SPE);
+    }
+
+#ifdef DEBUG_VERSION
+    /* Enable Error Interrupt */
+    SET_BIT(SPI2->CR2, SPI_IT_ERR);
+#endif
+
+    SET_BIT(SPI2->CR2, SPI_CR2_TXDMAEN);
+#else
+    if(HAL_OK!=HAL_SPI_Transmit_DMA( metope.dev.pHspi2, (u8*)buf, nItems)){
+      ret = ERROR;
+      break;
+    }
+#endif
+    
+    /**
+     * @todo: Change to the system escape function. Will return here after `DMA1_Stream4_IRQHandler()` was called.
+     * 
+     * @note
+     *  Phase 1: DMA Request to send bytes
+     *  Phase 2: DMA Interrupt will be triggered. Entering the `DMA1_Stream4_IRQHandler()`
+     *  Phase 3: `HAL_DMA_IRQHandler()` will be called.
+     *  Phase 4: `SPI_DMATransmitCplt()` function will be called. This callback was configed during DMA requesting to send.
+     *  Phase 5: `HAL_SPI_TxCpltCallback()` will be called if no error. This is a weak function.
+     *  Phase 6: The escape function shall be notified to come back.
+     */
+    while(IDLE!=metope.dev.status.spi2);
+  }
+  return ret;
+}
+
+
+
+
+
+
 
 /**
  * @brief
@@ -146,6 +232,10 @@ void bsp_screen_smooth_on(void){
   u32 cnt = 0;
   while(cnt < sizeof(tmp)/sizeof(*tmp)){
     bsp_screen_set_bright(tmp[cnt++]);
+
+    /**
+     * @todo: Use non-block delay!!!
+     */
     cmn_timer_delay(20);
   }
 }
@@ -154,6 +244,10 @@ void bsp_screen_smooth_off(void){
   u32 cnt = sizeof(tmp)/sizeof(*tmp);
   while(cnt--){
     bsp_screen_set_bright(tmp[cnt]);
+
+    /**
+     * @todo: Use non-block delay!!!
+     */
     cmn_timer_delay(20);
   }
 }
@@ -165,18 +259,14 @@ void bsp_screen_smooth_off(void){
  * @param [in]  len   - Buffer length
  * @return      (none)
 */
-static void bsp_screen_parse_code( const uint8_t *code, size_t len){
+STATIC void bsp_screen_parse_code( const uint8_t *code, size_t len){
   while( len!=0 ){
     PIN_DC( *code++);       /* Determine command or data */
     --len;
     uint8_t nItem = *code++;     /* Parse num of items */
     --len;
 
-    cmnBoolean_t done = false;
-    bsp_screen_block_send( code, nItem, 1, 0, &done);
-    while(!done){
-        //...//
-    }
+    bsp_screen_spi_polling_send( code, nItem, 1);
     code += nItem;
     len  -= nItem;
   }
@@ -193,7 +283,7 @@ static void bsp_screen_parse_code( const uint8_t *code, size_t len){
  * @param       y1  End Y
  * @return      (none)
 */
-static void bsp_screen_area( u8 x0, u8 y0, u8 x1, u8 y1){
+STATIC void bsp_screen_area( u8 x0, u8 y0, u8 x1, u8 y1){
     const u8 code[] = {
         /* Set the X coordinates */
         CMD, 1, 0x2A,\
@@ -214,7 +304,7 @@ static void bsp_screen_area( u8 x0, u8 y0, u8 x1, u8 y1){
  *                      @ref 1: R->L; D->U;
  * @return      (none)
 */
-static void bsp_screen_scan_mode( u8 mode){
+STATIC void bsp_screen_scan_mode( u8 mode){
   u8 code[] = {
     CMD, 1, 0x36,\
     DAT, 1, 0x08
@@ -354,38 +444,29 @@ cmnBoolean_t bsp_screen_init( void){
  *              Return 1, if area params are wrong
 */
 void bsp_screen_fill( const bspScreenPixel_t color, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye){
-    if( xs>xe || ys>ye ){
-        return;
-    }
-    
-    u8 buf[2] = {(u8)(color>>8),(u8)(color&0xff)};
-    u8 done = false;
-    // PIN_CS(0);
-
-    bsp_screen_area( xs, ys, xe, ye);
-    
-    PIN_DC(1);
-    bsp_screen_block_send( buf, sizeof(color), (xe-xs+1)*(ye-ys+1), 0, &done);
-    
-    if(!done){
-      // #warning "Note: Do something"
-    }
-    
-    // PIN_CS(1);
+  if( xs>xe || ys>ye ){
+      return;
+  }
+  
+  u8 buf[2] = {(u8)(color>>8),(u8)(color&0xff)};
+  
+  PIN_CS(0);
+  bsp_screen_area( xs, ys, xe, ye);
+  
+  PIN_DC(1);
+  bsp_screen_spi_polling_send( buf, sizeof(color), (xe-xs+1)*(ye-ys+1));
+  PIN_CS(1);
 }
 
 
 
 
 void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye){
-  u8 done = false;
+  PIN_CS(0);
   bsp_screen_area( xs, ys, xe, ye);
   PIN_DC(1);
-  bsp_screen_block_send( (const u8*)buf, (xe-xs+1)*(ye-ys+1)*sizeof(bspScreenPixel_t), 1, 0, &done);
-
-  if(!done){
-    // #warning "Note: Do something"
-  }
+  bsp_screen_spi_dma_send( (const u8*)buf, (xe-xs+1)*(ye-ys+1)*sizeof(bspScreenPixel_t), 1);
+  PIN_CS(1);
 }
 
 #ifdef __cplusplus

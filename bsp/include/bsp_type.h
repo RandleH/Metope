@@ -40,6 +40,7 @@ typedef u16 bspScreenCood_t;
 #define BSP_SCREEN_MAX_BRIGHTNESS     (2048U-1)
 #define BSP_SCREEN_DEFAULT_BRIGHTNESS (1024U)
 
+#define BSP_SCREEN_USE_HARDWARE_NSS   1
 
 #ifdef __cplusplus
 extern "C"{

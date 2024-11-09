@@ -123,7 +123,11 @@ include( ${PRJ_TOP}/app/app.cmake)
 include( ${PRJ_TOP}/bsp/bsp.cmake)
 include( ${PRJ_TOP}/lib/lib.cmake)
 
-
+if( CMAKE_BUILD_TYPE STREQUAL "Debug")
+    include(${PRJ_TOP}/cmake/debug.cmake)
+else()
+    include(${PRJ_TOP}/cmake/released.cmake)
+endif()
 
 
 #########################################################################################################
