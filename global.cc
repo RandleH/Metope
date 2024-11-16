@@ -35,6 +35,31 @@ tMainSystemStatus  metope = {
       .pDisplayHandle = NULL,
       .pLvglTheme     = NULL
 #endif
+    },
+    .rtos = {0},
+    .clock = {0}
+  },
+  .info = {
+    .system_initial_time = {
+      /**
+       * @name    Time Stamp  __TIME_STAMP__
+       * @example Thu Oct 19 22:41:50 2023
+       * @note    [0:2]   Weekday
+       *          [4:6]   Month
+       *          [8:9]   Date
+       *          [11:12] Hour
+       *          [14:15] Minute
+       *          [17:18] Second
+       *          [20:23] Year
+      */
+      { 
+        .year   = (__TIMESTAMP__[20]-'0')*1000 + (__TIMESTAMP__[21]-'0')*100 + (__TIMESTAMP__[22]-'0')*10 + (__TIMESTAMP__[23]-'0') - 2024,
+        .month  = 11, // @todo: Fix the correct month
+        .day    = (__TIMESTAMP__[8]-'0')*10 + (__TIMESTAMP__[9]-'0'),
+        .hour   = (__TIMESTAMP__[11]-'0')*10 + (__TIMESTAMP__[12]-'0'),
+        .minute = (__TIMESTAMP__[14]-'0')*10 + (__TIMESTAMP__[15]-'0'),
+        .second = (__TIMESTAMP__[17]-'0')*10 + (__TIMESTAMP__[18]-'0'),
+      }
     }
   }
 };
@@ -46,7 +71,16 @@ tMainSystemStatus  metope = {
 
 #if (defined TEST_ONLY) && (TEST_ONLY==1) && (defined __cplusplus)
 
+#if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
 LocalProjectTest     tb_infra_local;
+#endif
+
+#if (defined INCLUDE_TB_HMI) && (INCLUDE_TB_HMI==1)
 HumanInteractionTest tb_infra_hmi;
+#endif
+
+#if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
+Test                 tb_infra_os;
+#endif
 
 #endif

@@ -109,14 +109,35 @@ elseif (CHIP STREQUAL "STM32F405RGT6")
 else()
     message(FATAL_ERROR "Unknown system target")
 endif()
+
+#########################################################################################################
+# Customized Project Macros
+# @param TEST_ONLY      - Test Bench Program was enabled. Escape the main program.
+#   @param INCLUDE_TB_HMI - Enable Human Interaction Test Bench (ie. Tests that need manual intervine)
+#   @param INCLUDE_TB_CMN - Enable Common Test Bench (ie. Basic utility functional tests)
+#   @param INCLUDE_TB_OS  - Enable OS Test Bench (ie. RTOS related Test Bench)
+#
+# @param USE_REGISTER   - Bypass the HAL library support. Use bare register instruction. (Partially Supported)
+
+#########################################################################################################
 if( TEST_ONLY AND TEST_ONLY EQUAL 1)
     list(APPEND DEF_LIST "-DTEST_ONLY=1")
+    if(INCLUDE_TB_HMI AND INCLUDE_TB_HMI EQUAL 1)
+        list(APPEND DEF_LIST "-DINCLUDE_TB_HMI=1")
+    endif()
+    if(INCLUDE_TB_CMN AND INCLUDE_TB_CMN EQUAL 1)
+        list(APPEND DEF_LIST "-DINCLUDE_TB_CMN=1")
+    endif()
+    if(INCLUDE_TB_OS AND INCLUDE_TB_OS EQUAL 1)
+        list(APPEND DEF_LIST "-DINCLUDE_TB_OS=1")
+    endif()
     include( ${PRJ_TOP}/test/test.cmake)
 endif()
 
 if( USE_REGISTER AND USE_REGISTER EQUAL 1)
     list(APPEND DEF_LIST "-DUSE_REGISTER=1")
 endif()
+
 
 include( ${PRJ_TOP}/cmn/cmn.cmake)
 include( ${PRJ_TOP}/app/app.cmake)

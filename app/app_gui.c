@@ -17,16 +17,16 @@
  ******************************************************************************
 */
 
-
+#include "global.h"
 #include "app_gui.h"
-
+#include "cmn_utility.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 
-void ui_Clock1_screen_init(tGuiClock1 *pClient)
+void ui_clock1_init(tAppGuiClockParam *pClient)
 {
   pClient->pScreen = lv_scr_act();
   lv_obj_clear_flag( pClient->pScreen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
@@ -129,27 +129,71 @@ void ui_Clock1_screen_init(tGuiClock1 *pClient)
   lv_obj_set_style_border_color(ui_Knotch, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
   lv_obj_set_style_border_opa(ui_Knotch, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-  ui_Clock1_set_time( pClient, pClient->time);
+  // ui_clock1_set_time( pClient, pClient->time);
 }
 
 
-void ui_Clock1_set_time(tGuiClock1 *pClient, cmnDateTime_t time){
-  pClient->time = time;
+void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
+  cmn_utility_angleset( &pClient->_degree_hour, &pClient->_degree_minute, NULL, &time);
+  lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_angle(pClient->pPinMinute, pClient->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
+}
+
+/**
+ * @todo: Add assertion for microseconds range
+ */
+void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
+  uint16_t hour_inc, minute_inc;
+  cmn_utility_angleinc(&hour_inc, &minute_inc, NULL, ms);
+
+  pClient->_degree_hour += hour_inc;
+  pClient->_degree_minute += minute_inc;
   
-#if (defined OPTIMIZATION_LEVEL_0)
-  lv_coord_t angle_hour = ((time.hour*3600+time.minute*60+time.second) * 3600) / (12*3600);
-  lv_coord_t angle_min  = ((time.minute*60+time.second) * 3600) / (3600);
-#else
-  lv_coord_t angle_hour = time.hour*300 + time.minute*5 + time.second/12;
-  lv_coord_t angle_min  = time.minute*60 + time.second;
-#endif
-  lv_obj_set_style_transform_angle(pClient->pPinHour, angle_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
-  lv_obj_set_style_transform_angle(pClient->pPinMinute, angle_min, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_angle(pClient->pPinMinute, pClient->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
 }
 
 
+void ui_clock1_deinit(tAppGuiClockParam *pClient){
+  lv_obj_del(pClient->pScreen);
+  pClient->pPinHour   = NULL;
+  pClient->pPinMinute = NULL;
+  pClient->p_anything = NULL;
+}
 
+void app_gui_switch( AppGuiClockEnum_t x){
+  /**
+   * @warning
+   *  Assume the `deinit()` is NULL when clock ui is deactivated, vice versa.
+   */
+  if(NULL!=metope.app.clock.gui.deinit){
+    metope.app.clock.gui.deinit( &metope.app.clock.gui.param );
+  }
+  switch(x){
+    case kAppGuiClock_None:{
+      metope.app.clock.gui.init     = NULL;
+      metope.app.clock.gui.set_time = NULL;
+      metope.app.clock.gui.inc_time = NULL;
+      metope.app.clock.gui.deinit   = NULL;
+      break;
+    }
+    case kAppGuiClock_Clock1:{
+      metope.app.clock.gui.init     = ui_clock1_init;
+      metope.app.clock.gui.set_time = ui_clock1_set_time;
+      metope.app.clock.gui.inc_time = ui_clock1_inc_time;
+      metope.app.clock.gui.deinit   = ui_clock1_deinit;
+      break;
+    }
+    default:{
+      /**
+       * @todo: Add assertion
+       */
+      break;
+    }
+  }
 
+  metope.app.clock.gui.init( &metope.app.clock.gui.param );
+}
 
 #ifdef __cplusplus
 }

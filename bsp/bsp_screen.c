@@ -423,14 +423,33 @@ cmnBoolean_t bsp_screen_init( void){
     };
   bsp_screen_parse_code( init_code, sizeof(init_code)/sizeof(uint8_t));
 
+  /**
+   * @todo: Fix cmn delay
+   */
+#if 0
   cmn_timer_delay(120);
+#endif
+  {
+    volatile uint32_t cnt=120000;
+    while(--cnt);
+  }
 
   const u8 on_code[] = {
       CMD, 1, 0x29,\
   };
   bsp_screen_parse_code( on_code, sizeof(on_code)/sizeof(uint8_t));
 
+  /**
+   * @todo: Fix cmn delay
+   */
+#if 0
   cmn_timer_delay(20);
+#endif
+  {
+    volatile uint32_t cnt=20000;
+    while(--cnt);
+  }
+  
   bsp_screen_scan_mode(0);
   PIN_CS(1);
   return true;

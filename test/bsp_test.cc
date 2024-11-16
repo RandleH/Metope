@@ -277,32 +277,33 @@ public:
  * @addtogroup TestBench
  */
 void add_bsp_test(void){
+#if (defined INCLUDE_TB_HMI) && (INCLUDE_TB_HMI==1)
   tb_infra_hmi
-    // .insert(
-    //   TestBspUsartEcho(),
-    //   std::array<char,6>{{'R','a','n','d','l','e'}},
-    //   '\0'
-    // )
-    // .insert(
-    //   TestBspScreenBrightness(),
-    //   (char)'\0',
-    //   (char)'\0'
-    // )
-    // .insert(
-    //   TestBspScreenSmoothness(),
-    //   (char)'\0',
-    //   (char)'\0'
-    // )
+    .insert(
+      TestBspUsartEcho(),
+      std::array<char,6>{{'R','a','n','d','l','e'}},
+      '\0'
+    )
+    .insert(
+      TestBspScreenBrightness(),
+      (char)'\0',
+      (char)'\0'
+    )
+    .insert(
+      TestBspScreenSmoothness(),
+      (char)'\0',
+      (char)'\0'
+    )
     .insert(
       TestBspScreenFill(),
       (char)'\0',
       (char)'\0'
     )
-    // .insert(
-    //   TestBspScreenDrawArea(),
-    //   (char)'\0',
-    //   (char)'\0'
-    // )
+    .insert(
+      TestBspScreenDrawArea(),
+      (char)'\0',
+      (char)'\0'
+    )
     .insert(
       TestBspScreenDrawAreaStatic(),
       std::array<std::array<bspScreenCood_t,4>,3>{{
@@ -313,5 +314,6 @@ void add_bsp_test(void){
       (char)'\0'
     )
   ;
+#endif
 
 }

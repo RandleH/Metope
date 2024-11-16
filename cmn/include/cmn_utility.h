@@ -41,10 +41,12 @@ int32_t cmn_utility_str2hex(const char *str, cmnBoolean_t *isValid);
 float cmn_utility_str2float(const char *str, cmnBoolean_t *isValid);
 
 
-
 char *cmn_utility_strrev(char *str);
 char *cmn_utility_strnrev(char *str, size_t len);
 
+void cmn_utility_angleinc( uint16_t *hour_inc, uint16_t *minute_inc, uint16_t NULLABLE *second_inc, uint32_t ms);
+void cmn_utility_angleset( uint16_t *hour_deg, uint16_t *minute_deg, uint16_t NULLABLE *second_deg, const cmnDateTime_t *pTime);
+void cmn_utility_timeinc( cmnDateTime_t *pTime, uint32_t ms);
 
 #ifdef __cplusplus
 }

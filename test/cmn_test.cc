@@ -156,6 +156,8 @@ public:
 };
 
 void add_cmn_test(void){
+
+#if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
   tb_infra_local
     .insert( 
       TestCmnDummy(), 
@@ -219,5 +221,6 @@ void add_cmn_test(void){
       }
     )
   ;
+#endif
 
 }

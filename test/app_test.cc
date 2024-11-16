@@ -48,27 +48,22 @@ public:
   TestAppGuiMainDisplayClock1():TestUnitWrapper_withInputOutput("test_app_main_disp_clock1"){}
 
   bool run( std::array<cmnDateTime_t,4>& input, u8& ref) override{
-    tGuiClock1 client = {
+    tAppGuiClockParam client = {
       .pScreen    = NULL,
       .pPinHour   = NULL,
       .pPinMinute = NULL,
-      .time       = {0}
     };
-    client.time.year     = 0;
-    client.time.month    = 4;
-    client.time.day      = 1;
-    client.time.hour     = 13;
-    client.time.minute   = 42;
-    client.time.second   = 32;
     
-    ui_Clock1_screen_init( &client);
+    app_gui_switch(kAppGuiClock_Clock1);
 
     bool          result   = false;
     cmnDateTime_t datetime = {0};
 
     while(1){
       if(!get_user_input(result, datetime)){
-        ui_Clock1_set_time( &client, datetime);
+
+        metope.app.clock.gui.set_time( &metope.app.clock.gui.param, datetime);
+
         lv_disp_load_scr( client.pScreen);
         app_lvgl_flush_all();
       }else{
@@ -81,8 +76,114 @@ public:
 };
 
 
+namespace paramsTestAppTaskFreeRTOS{
+
+/**
+ * @note: 3 Task functions with their customized stack depth
+ */
+typedef std::array<std::pair<TaskFunction_t,u16>,3> Input;
+
+/**
+ * @note: No output
+ */
+typedef u8 Output;
+
+}
+
+
+class TestAppTaskFreeRTOS : public TestUnitWrapper_withInputOutput< paramsTestAppTaskFreeRTOS::Input ,paramsTestAppTaskFreeRTOS::Output>{
+private:
+
+  TaskHandle_t _handle[3];
+
+public:
+  static void task0(void*param){
+      const TickType_t xFrequency    = 10; // 10 ms
+      TickType_t       xLastWakeTime = xTaskGetTickCount();
+    while(1){
+      vTaskDelayUntil( &xLastWakeTime, xFrequency );
+      lv_tick_inc(xFrequency);
+      lv_timer_handler();
+    }
+  }
+  static void task1(void*param){
+    portTICK_TYPE_ENTER_CRITICAL();
+    app_gui_switch(kAppGuiClock_Clock1);
+    portTICK_TYPE_EXIT_CRITICAL();
+
+    metope.app.clock.time = metope.info.system_initial_time;
+    metope.app.clock.gui.set_time( &metope.app.clock.gui.param, metope.app.clock.time);
+    
+    TickType_t old_tick = xTaskGetTickCount();
+    while(1){
+      /**
+       * @note
+       *  Control Part:
+       *    1) Perpare the updated time.
+       *    2) Calculate the increased ms.
+       */
+      TickType_t tmp = xTaskGetTickCount();
+      TickType_t ms_delta = tmp - old_tick;
+      old_tick = tmp;
+      cmn_utility_timeinc( &metope.app.clock.time, ms_delta);
+      
+      /**
+       * @note
+       *  View Part:
+       *    1) Update the increased ms.
+       */
+      portTICK_TYPE_ENTER_CRITICAL();
+      metope.app.clock.gui.inc_time( &metope.app.clock.gui.param, ms_delta);
+      portTICK_TYPE_EXIT_CRITICAL();
+
+      vTaskDelay(64);
+    }
+  }
+  static void task2(void*param){
+    while(1){
+      vTaskDelay(10000);
+    }
+  }
+  TestAppTaskFreeRTOS():TestUnitWrapper_withInputOutput("test_app_task_freertos"){}
+
+  bool run( paramsTestAppTaskFreeRTOS::Input& input, paramsTestAppTaskFreeRTOS::Output& ref) override{
+    cmnBoolean_t result;
+    cmnBoolean_t ret;
+
+    for(int i=0; i<3; ++i){
+      ret = xTaskCreate(\
+        input[i].first,\
+        "0",\
+        input[i].second,\
+        NULL,\
+        kAppPriority_IMPORTANT,\
+        &_handle[i]
+      );
+
+      // if(ret!=pdPASS){
+      //   this->_err_msg<<"Failed to create Task 0"<<endl;
+      //   result = false;
+      //   break;
+      // }
+    }
+    
+    vTaskStartScheduler();
+    // if(result==false){
+    //   return result;
+    // }else{
+    // }
+
+    while(1);
+
+    return result;
+  }
+};
+
 
 void add_app_test( void){
+
+
+#if (defined INCLUDE_TB_HMI) && (INCLUDE_TB_HMI==1)
   tb_infra_hmi.insert(
     TestAppGuiMainDisplayClock1(),
     std::array<cmnDateTime_t,4>{{
@@ -92,4 +193,19 @@ void add_app_test( void){
     }},
     '\0'
   );
+#endif
+
+#if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
+  tb_infra_os.insert(
+    TestAppTaskFreeRTOS(),
+    std::array<std::pair<TaskFunction_t,u16>,3>{{
+      {TestAppTaskFreeRTOS::task0, 512},
+      {TestAppTaskFreeRTOS::task1, 512},
+      {TestAppTaskFreeRTOS::task2, 128},
+    }},
+    '\0'
+  );
+#endif
+
+
 }

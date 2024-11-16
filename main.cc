@@ -52,8 +52,11 @@ int main(int argc, char *argv[]){
   hw_init();
   bsp_init();
   app_init();
+  os_init();
   
   bsp_led__switch(ON);
+
+  vTaskStartScheduler();
   
   while(1){
 
@@ -78,6 +81,7 @@ int main(int argc, char *argv[]){
   hw_init();
   bsp_init();
   app_init();
+  // os_init();
   
   {
     size_t len = 0;
@@ -86,19 +90,32 @@ int main(int argc, char *argv[]){
     for(size_t i=0; i<len; ++i){
       std::cout << std::setfill('0')<<std::setw(2)<<(int)uuid[i]<< ((i==len-1)?'\n':'-');
     }
+
+    std::cout<<"System time set to: "<< metope.info.system_initial_time.hour << ":" << metope.info.system_initial_time.minute << ":" << metope.info.system_initial_time.second << std::endl;
+
+    std::cout<<"TIMESTAMP: "<<__TIMESTAMP__<<std::endl;
   }
 
   cout<<"Hardware Initialization Completed.\n\n"<<endl;
   
-  // add_cmn_test();
+  add_cmn_test();
   add_bsp_test();
-  // add_app_test();
+  add_app_test();
 
+#if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
   cout<<"Local Project Test:"<<endl;
   tb_infra_local.verdict();
+#endif
 
+#if (defined INCLUDE_TB_HMI) && (INCLUDE_TB_HMI==1)
   cout<<"Human Interaction Test:"<<endl;
   tb_infra_hmi.verdict();
+#endif
+  
+#if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
+  cout<<"RTOS Test:"<<endl;
+  tb_infra_os.verdict();
+#endif
   
   while(1){}
 }

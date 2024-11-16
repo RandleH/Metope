@@ -23,7 +23,7 @@
 #include "cmn_interrupt.h"
 #include "cmn_utility.h"
 #include "cmn_callback.h"
-
+#include "global.h"
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -213,7 +213,13 @@ void DebugMon_Handler( void){
 }
 
 void PendSV_Handler( void){
+  extern void FreeRTOS_FreeRTOS_PendSV_Handler(void);
+  FreeRTOS_FreeRTOS_PendSV_Handler();
+}
 
+void SVC_Handler( void){
+  extern void FreeRTOS_SVC_Handler(void);
+  FreeRTOS_SVC_Handler();
 }
 
 
@@ -221,7 +227,9 @@ void PendSV_Handler( void){
  * @note  1ms System Interrupt
  */
 void DEFAULT SysTick_Handler( void){
-  HAL_IncTick();
+  extern void FreeRTOS_SysTick_Handler( void);
+  FreeRTOS_SysTick_Handler();
+  // HAL_IncTick();
 }
 
 void ADC_IRQHandler( void){}

@@ -60,6 +60,8 @@
 
 #define DEFAULT __attribute__((weak))
 
+#define likely(x)       __builtin_expect(!!(x), 1)
+#define unlikely(x)     __builtin_expect(!!(x), 0)
 
 
 #ifdef __cplusplus
@@ -85,6 +87,7 @@ typedef volatile u64 vu64;
 #if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
 typedef IRQn_Type cmnIRQn_t;
 #endif
+
 
 
 typedef union cmnDateTime_t{

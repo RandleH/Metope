@@ -5,16 +5,21 @@
 
 #include "bsp_type.h"
 #include "cmn_type.h"
+#include "app_type.h"
 #if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
 #include "stm32f4xx_hal.h"
 #endif
 #include "lvgl.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-
+/**
+ * @todo: Clean up unused terms
+ */
 typedef struct{
   struct{
     struct{
@@ -57,7 +62,34 @@ typedef struct{
       lv_theme_t   *pLvglTheme;
 #endif
     }lvgl;
+
+    struct{
+      struct{
+        struct{
+          TaskHandle_t handle;
+          StaticTask_t _tcb;
+          StackType_t  _stack[APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE];    
+        }screen_refresh;
+
+      }task;
+    }rtos;
+
+    struct{
+      struct{
+        tAppGuiClockParam param;
+        void (*init)(tAppGuiClockParam *);
+        void (*set_time)(tAppGuiClockParam *, cmnDateTime_t);
+        void (*inc_time)(tAppGuiClockParam *, uint32_t);
+        void (*deinit)(tAppGuiClockParam *);
+      }gui;
+      cmnDateTime_t time;
+      TaskHandle_t _handle;
+    }clock;
   }app;
+
+  struct {
+    const cmnDateTime_t system_initial_time;
+  }info;
 
 } tMainSystemStatus;
 
@@ -83,6 +115,7 @@ extern UART_HandleTypeDef  huart2;
 
 extern LocalProjectTest     tb_infra_local;
 extern HumanInteractionTest tb_infra_hmi;
+extern Test                 tb_infra_os;
 
 #endif
 #endif

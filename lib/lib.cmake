@@ -21,19 +21,20 @@ set( LINK_FLAG_STM32 "")
 if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
     list(APPEND DEF_STM32       "-DSTM32F411xE"
                                 "-DUSE_HAL_DRIVER" )
-    aux_source_directory( ${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src  SRC_STM32)
-    list(APPEND SRC_LIST        "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s"
-                                "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c" )
-    
+
+    aux_source_directory( "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src"  SRC_STM32)
+    list(APPEND SRC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c" 
+                                )
+
+
     list(APPEND INC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc" 
-                                "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/DSP/Include" )
+                                "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/DSP/Include" 
+                                "${PRJ_TOP}/STM32CubeMX/STM32F411CEU6/Core/Inc/"
+                                )
                                 
-    # set( INC_STM32CUBE "")
-    # GET_SUBDIR( INC_STM32CUBE   "${PRJ_TOP}/STM32CubeMX")
-    list(APPEND INC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F411CEU6/Core/Inc/")
-    
     list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F411CEUX_FLASH.ld")
 
 elseif((CHIP STREQUAL "STM32F405RGT6"))
@@ -48,9 +49,6 @@ elseif((CHIP STREQUAL "STM32F405RGT6"))
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc" 
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/DSP/Include" )
                                 
-
-    # set( INC_STM32CUBE "")
-    # GET_SUBDIR( INC_STM32CUBE   "${PRJ_TOP}/STM32CubeMX")
     list(APPEND INC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/Core/Inc/")
     
     list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F405RGTx_FLASH.ld")
@@ -59,17 +57,39 @@ else()
 endif()
 
 
+set( INC_FREERTOS "")
+set( SRC_FREERTOS "")
+set( DEF_FREERTOS "")
+
+aux_source_directory( "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" SRC_FREERTOS)
+
+list(APPEND SRC_FREERTOS        "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/croutine.c"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/list.c"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/queue.c"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/tasks.c"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/timers.c" )
 
 
+list(APPEND INC_FREERTOS        "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/include"
+                                "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F" )
 
-list( APPEND        DEF_LIST    ${DEF_STM32})
-list( APPEND        SRC_LIST    ${SRC_STM32})
+list(APPEND DEF_FREERTOS        "-DCMSIS_device_header=\"${PRJ_TOP}/device.h\"")
+
+
+list( APPEND        DEF_LIST    "${DEF_STM32}" "${DEF_FREERTOS}")
+list( APPEND        SRC_LIST    "${SRC_STM32}" "${SRC_FREERTOS}")
 list( REMOVE_ITEM   SRC_LIST    "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_timebase_tim_template.c"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_msp_template.c"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_timebase_rtc_alarm_template.c"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_timebase_rtc_wakeup_template.c" )
 
-list( APPEND        INC_DIR_LIST ${INC_STM32})
+list( APPEND        INC_DIR_LIST "${INC_STM32}" "${PRJ_TOP}/lib" "${INC_FREERTOS}")
+
 list( APPEND        LINK_FLAG    ${LINK_FLAG_STM32})
 
 
@@ -78,15 +98,6 @@ list( APPEND        LINK_FLAG    ${LINK_FLAG_STM32})
 
 
 message( STATUS "Check library integrity @ ${PRJ_TOP}/lib/lvgl ..." )
-# SET( LIB_DIR__LVGL  ${PRJ_TOP}/lib/lvgl)
-# CHECK_LIB_INTEGRITY( ${LIB_DIR__LVGL} result)
-# if( ${result} STREQUAL FALSE)
-#     FetchContent_Declare(   lib_lvgl
-#                             GIT_REPOSITORY https://github.com/lvgl/lvgl.git
-#                             GIT_TAG "release/v8.3"
-#                             SOURCE_DIR ${LIB_DIR__LVGL})
-#     FetchContent_MakeAvailable(lib_lvgl)                        
-# endif()
 
 
 set( LV_CONF_BUILD_DISABLE_EXAMPLES  TRUE)
@@ -104,7 +115,6 @@ endif()
 add_definitions( ${LVGL_MISC_DEFINE})
 add_subdirectory( ${PRJ_TOP}/lib/lvgl ${PRJ_TOP}/build/lvgl/build )
 
-# include(${PRJ_TOP}/lib/lvgl/env_support/cmake/custom.cmake)
 
 target_include_directories(lvgl PUBLIC ${INC_DIR_LIST})
 target_compile_options(lvgl  INTERFACE   ${CMAKE_CXX_FLAGS} ${CPU_FLAG} ${CXX_FLAG} )
