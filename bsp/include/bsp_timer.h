@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    cmn_delay.h
+ * @file    bsp_timer.h
  * @author  RandleH
- * @brief   Common Program - Delay Program
+ * @brief   Board Support Package Delivery - Timer
  ******************************************************************************
  * @attention
  *
@@ -18,25 +18,15 @@
 */
 
 
-
 #include "cmn_type.h"
-
-
-#ifndef CMN_DELAY_H
-#define CMN_DELAY_H
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-
-void cmn_timer_delay(u32 ms);
-
-cmnBoolean_t cmn_tim2_sleep(u16 ms);
-
+void bsp_timer_init( void);
+void bsp_tim2_delay(u16 ms);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

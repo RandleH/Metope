@@ -60,7 +60,7 @@
 #define configSUPPORT_STATIC_ALLOCATION   1
 #define configSUPPORT_DYNAMIC_ALLOCATION  1
 
-#define configTOTAL_HEAP_SIZE             ((size_t)(40 * 1024))
+#define configTOTAL_HEAP_SIZE             ((size_t)(10 * 1024))
 #if (defined SYS_TARGET_STM32F411CEU6) 
   #define configCPU_CLOCK_HZ                (96000000U)
 #elif defined (SYS_TARGET_STM32F405RGT6)
@@ -70,7 +70,7 @@
 #define configTICK_RATE_HZ                ((TickType_t)1000)
 #define configMINIMAL_STACK_SIZE          ((uint16_t)128)
 
-#define configMAX_TASK_NAME_LEN           (16)
+#define configMAX_TASK_NAME_LEN           (8)
 #define configUSE_TRACE_FACILITY          1
 #define configUSE_16_BIT_TICKS            0
 #define configIDLE_SHOULD_YIELD           1

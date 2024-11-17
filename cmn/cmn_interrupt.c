@@ -24,6 +24,8 @@
 #include "cmn_utility.h"
 #include "cmn_callback.h"
 #include "global.h"
+#include "FreeRTOS.h"
+#include "event_groups.h"
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -162,6 +164,50 @@ void cmn_interrupt_execute( void){
   }
 }
 
+
+
+#define CMN_NVIC_PRIORITY_CRITICAL   4,0
+#define CMN_NVIC_PRIORITY_IMPORTANT  8,0
+#define CMN_NVIC_PRIORITY_NORMAL     9,0
+#define CMN_NVIC_PRIORITY_CASUAL     10,0
+
+
+
+
+void cmn_interrupt_init_priority( void){
+#if 1
+  HAL_NVIC_SetPriority(EXTI0_IRQn, CMN_NVIC_PRIORITY_CRITICAL);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI1_IRQn, CMN_NVIC_PRIORITY_CRITICAL);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, CMN_NVIC_PRIORITY_CRITICAL);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, CMN_NVIC_PRIORITY_CRITICAL);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  /* DMA1_Stream4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, CMN_NVIC_PRIORITY_NORMAL);
+  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
+  
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, CMN_NVIC_PRIORITY_CASUAL);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+  
+  /* DMA2_Stream3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, CMN_NVIC_PRIORITY_CASUAL);
+  HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
+
+  HAL_NVIC_SetPriority(TIM2_IRQn, CMN_NVIC_PRIORITY_NORMAL);
+  HAL_NVIC_EnableIRQ(TIM2_IRQn);
+  
+  HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, CMN_NVIC_PRIORITY_NORMAL);
+  HAL_NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
+#endif
+}
+
 #endif
 
 
@@ -238,11 +284,44 @@ void EXTI9_5_IRQHandler(void){
   HAL_GPIO_EXTI_IRQHandler(TP_INT_Pin);
 }
 
-void TIM1_BRK_TIM9_IRQHandler(void){}     
+void TIM1_BRK_TIM9_IRQHandler(void){
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+  TIM9->SR = 0x00000000;
+  CLEAR_BIT( TIM9->CR1, TIM_CR1_CEN);  // Disable timer
+#else
+  HAL_TIM_IRQHandler(&htim9);
+#endif
+  if(metope.app.rtos.status==ON){
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+    xHigherPriorityTaskWoken = pdFALSE;
+    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_TIM9, &xHigherPriorityTaskWoken );
+    if( xResult != pdFAIL ){
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
+  }
+}
+
 void TIM1_UP_TIM10_IRQHandler(void){}     
 void TIM1_TRG_COM_TIM11_IRQHandler(void){}
 void TIM1_CC_IRQHandler(void){}           
-void TIM2_IRQHandler(void){}              
+void TIM2_IRQHandler(void){
+  // extern volatile u32 gDummy;
+  // gDummy = 0;
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+  TIM2->SR = 0x00000000;
+  CLEAR_BIT( TIM2->CR1, TIM_CR1_CEN);  // Disable timer
+#else
+  HAL_TIM_IRQHandler(&htim2);
+#endif
+  if(metope.app.rtos.status==ON){
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+    xHigherPriorityTaskWoken = pdFALSE;
+    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_TIM2, &xHigherPriorityTaskWoken );
+    if( xResult != pdFAIL ){
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
+  }
+}              
 void TIM3_IRQHandler(void){}              
 void TIM4_IRQHandler(void){}              
 void I2C1_EV_IRQHandler(void){}           

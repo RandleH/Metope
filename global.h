@@ -7,17 +7,22 @@
 #include "cmn_type.h"
 #include "app_type.h"
 #if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-#include "stm32f4xx_hal.h"
+  #include "stm32f4xx_hal.h"
 #endif
 #include "lvgl.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "event_groups.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 /**
+ * @note
+ *  Naming convention: 
+ *    - Add '_' if this parameter is ONLY supposed to be overwritten by the third party library.
+ *    - Use snake case for the variable names.
  * @todo: Clean up unused terms
  */
 typedef struct{
@@ -49,6 +54,7 @@ typedef struct{
     }status;
     //...//
   }dev;
+  
   struct{
     struct{
 #if LVGL_VERSION==836
@@ -72,6 +78,13 @@ typedef struct{
         }screen_refresh;
 
       }task;
+
+      struct{
+        StaticEventGroup_t _eg_buffer;  /*!< Event Group Buffer */
+        EventGroupHandle_t _handle;     /*!< Event Group Handle */
+      }event;
+
+      cmnBoolean_t status; /*!< `ON` | `OFF` */
     }rtos;
 
     struct{
@@ -98,6 +111,7 @@ extern tMainSystemStatus   metope;
 
 extern SPI_HandleTypeDef   hspi2;
 extern DMA_HandleTypeDef   hdma_spi2_tx;
+extern TIM_HandleTypeDef   htim2;
 extern TIM_HandleTypeDef   htim3;
 extern UART_HandleTypeDef  huart2;
 

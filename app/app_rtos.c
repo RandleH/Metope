@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    cmn_delay.h
+ * @file    app_rtos.c
  * @author  RandleH
- * @brief   Common Program - Delay Program
+ * @brief   Application - FreeRTOS Application Interface
  ******************************************************************************
  * @attention
  *
@@ -19,24 +19,28 @@
 
 
 
+
+#include "FreeRTOS.h"
+#include "global.h"
+#include "app_rtos.h"
 #include "cmn_type.h"
 
-
-#ifndef CMN_DELAY_H
-#define CMN_DELAY_H
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
+void app_rtos_start( void){
+  metope.app.rtos.status = ON;
+  vTaskStartScheduler();
+}
 
-void cmn_timer_delay(u32 ms);
-
-cmnBoolean_t cmn_tim2_sleep(u16 ms);
+void app_rtos_stop( void){
+  metope.app.rtos.status = OFF;
+  vTaskEndScheduler();
+}
 
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

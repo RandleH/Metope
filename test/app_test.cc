@@ -3,10 +3,12 @@
 
 #include "global.h"
 #include "app_test.hh"
+#include "app_rtos.h"
 #include "app_gui.h"
 #include "app_lvgl.h"
 #include "test.hh"
 #include "cmn_type.h"
+#include "cmn_delay.h"
 #include "lvgl.h"
 
 
@@ -141,7 +143,8 @@ public:
   }
   static void task2(void*param){
     while(1){
-      vTaskDelay(10000);
+      cmn_tim2_sleep(1000);
+      bsp_led__toggle();
     }
   }
   TestAppTaskFreeRTOS():TestUnitWrapper_withInputOutput("test_app_task_freertos"){}
@@ -167,7 +170,8 @@ public:
       // }
     }
     
-    vTaskStartScheduler();
+    app_rtos_start();
+    
     // if(result==false){
     //   return result;
     // }else{

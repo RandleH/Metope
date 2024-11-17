@@ -36,7 +36,7 @@ tMainSystemStatus  metope = {
       .pLvglTheme     = NULL
 #endif
     },
-    .rtos = {0},
+    .rtos = {.status = OFF},
     .clock = {0}
   },
   .info = {
@@ -52,17 +52,28 @@ tMainSystemStatus  metope = {
        *          [17:18] Second
        *          [20:23] Year
       */
-      { 
+      {
+#if 0 // No idea why this doesn't work
         .year   = (__TIMESTAMP__[20]-'0')*1000 + (__TIMESTAMP__[21]-'0')*100 + (__TIMESTAMP__[22]-'0')*10 + (__TIMESTAMP__[23]-'0') - 2024,
         .month  = 11, // @todo: Fix the correct month
         .day    = (__TIMESTAMP__[8]-'0')*10 + (__TIMESTAMP__[9]-'0'),
         .hour   = (__TIMESTAMP__[11]-'0')*10 + (__TIMESTAMP__[12]-'0'),
         .minute = (__TIMESTAMP__[14]-'0')*10 + (__TIMESTAMP__[15]-'0'),
-        .second = (__TIMESTAMP__[17]-'0')*10 + (__TIMESTAMP__[18]-'0'),
+        .second = (__TIMESTAMP__[17]-'0')*10 + (__TIMESTAMP__[18]-'0')
+#else
+        .year   = 0,
+        .month  = 11,
+        .day    = 17,
+        .hour   = 11,
+        .minute = 45,
+        .second = 17
+#endif
       }
     }
   }
 };
+
+volatile u32 gDummy = 0;
 
 #ifdef __cplusplus
 }

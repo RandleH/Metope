@@ -89,6 +89,11 @@ typedef IRQn_Type cmnIRQn_t;
 #endif
 
 
+#define CMN_EVENT_TIM2                (1<<0)
+#define CMN_EVENT_TIM9                (1<<1)
+#define CMN_EVENT_SCREEN_REFRESH_CPLT (1<<2)
+
+
 
 typedef union cmnDateTime_t{
   struct{

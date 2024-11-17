@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    cmn_delay.h
+ * @file    app_rtos.h
  * @author  RandleH
- * @brief   Common Program - Delay Program
+ * @brief   Application - FreeRTOS Application Interface
  ******************************************************************************
  * @attention
  *
@@ -18,22 +18,16 @@
 */
 
 
+#ifndef APP_RTOS_H
+#define APP_RTOS_H
 
-#include "cmn_type.h"
-
-
-#ifndef CMN_DELAY_H
-#define CMN_DELAY_H
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-
-void cmn_timer_delay(u32 ms);
-
-cmnBoolean_t cmn_tim2_sleep(u16 ms);
-
+void app_rtos_start( void);
+void app_rtos_stop( void);
 
 #ifdef __cplusplus
 }

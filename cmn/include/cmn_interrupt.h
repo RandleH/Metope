@@ -50,7 +50,7 @@ extern tCmnInterruptProc gInterruptProcess;
 
 void cmn_interrupt_disable_irq_after( const cmnIRQn_t irq, const uint32_t ms);
 void cmn_interrupt_enable_irq_after( const cmnIRQn_t irq, const uint32_t ms);
-
+void cmn_interrupt_init_priority( void);
 
 #ifdef __cplusplus
 }

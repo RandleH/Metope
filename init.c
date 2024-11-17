@@ -17,9 +17,11 @@
 
 #include "global.h"
 #include "cmn_device.h"
+#include "cmn_interrupt.h"
 
 #if (defined USE_REGISTER) && (USE_REGISTER==1)
   #include "bsp_cpu.h"
+  #include "bsp_timer.h"
 #endif
 
 #include "bsp_screen.h"
@@ -62,10 +64,17 @@ void hw_init(void){
 
   MX_SPI2_Init();
 
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+  bsp_timer_init();
+#else
+  MX_TIM2_Init();
+#endif
+
   MX_TIM3_Init();
 
   MX_USB_OTG_FS_USB_Init();
-
+  
+  cmn_interrupt_init_priority();
 }
 
 
@@ -84,6 +93,12 @@ void app_init(void){
 
 
 void os_init(void){
+
+  metope.app.rtos.event._handle = xEventGroupCreateStatic( &metope.app.rtos.event._eg_buffer);
+
+#if (defined TEST_ONLY) && (TEST_ONLY==1)
+  
+#else 
   extern TaskHandle_t xTaskCreateStatic(	TaskFunction_t pxTaskCode,
 									const char * const pcName,		/*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 									const uint32_t ulStackDepth,
@@ -102,7 +117,8 @@ void os_init(void){
     &metope.app.rtos.task.screen_refresh._stack[0],\
     &metope.app.rtos.task.screen_refresh._tcb\
   );
-  
+#endif
+
 }
 
 

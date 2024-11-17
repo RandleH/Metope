@@ -69,6 +69,7 @@ int main(int argc, char *argv[]){
 
 #else
 
+  #include "cmn_delay.h"
 
 #include "test.hh"
 #include "cmn_test.hh"
@@ -76,12 +77,11 @@ int main(int argc, char *argv[]){
 #include "app_test.hh"
 #include "bsp_cpu.h"
 
-
 int main(int argc, char *argv[]){
   hw_init();
   bsp_init();
   app_init();
-  // os_init();
+  os_init();
   
   {
     size_t len = 0;
@@ -97,6 +97,7 @@ int main(int argc, char *argv[]){
   }
 
   cout<<"Hardware Initialization Completed.\n\n"<<endl;
+  
   
   add_cmn_test();
   add_bsp_test();
