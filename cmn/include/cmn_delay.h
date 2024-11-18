@@ -29,11 +29,13 @@
 extern "C"{
 #endif
 
-
+/**
+ * @todo: Consider removing this function
+ */
 void cmn_timer_delay(u32 ms);
 
 cmnBoolean_t cmn_tim2_sleep(u16 ms);
-
+cmnBoolean_t cmn_tim9_sleep(u16 us);
 
 #ifdef __cplusplus
 }

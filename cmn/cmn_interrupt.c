@@ -176,16 +176,16 @@ void cmn_interrupt_execute( void){
 
 void cmn_interrupt_init_priority( void){
 #if 1
-  HAL_NVIC_SetPriority(EXTI0_IRQn, CMN_NVIC_PRIORITY_CRITICAL);
+  HAL_NVIC_SetPriority(EXTI0_IRQn, CMN_NVIC_PRIORITY_IMPORTANT);
   HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI1_IRQn, CMN_NVIC_PRIORITY_CRITICAL);
+  HAL_NVIC_SetPriority(EXTI1_IRQn, CMN_NVIC_PRIORITY_IMPORTANT);
   HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, CMN_NVIC_PRIORITY_CRITICAL);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, CMN_NVIC_PRIORITY_CRITICAL);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, CMN_NVIC_PRIORITY_IMPORTANT);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
   /* DMA1_Stream4_IRQn interrupt configuration */
@@ -356,7 +356,21 @@ void FLASH_IRQHandler( void){}
 void RCC_IRQHandler( void){}         
 
 void DEFAULT EXTI0_IRQHandler( void){
+#if (defined USE_REGISTER) && (USE_REGISTER==1)
+  if( READ_BIT(EXTI->PR, GPIO_PIN_0) ){
+    EXTI->PR = GPIO_PIN_0;
+  }
+#else
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+#endif
+  if(metope.app.rtos.status==ON){
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+    xHigherPriorityTaskWoken = pdFALSE;
+    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M, &xHigherPriorityTaskWoken );
+    if( xResult != pdFAIL ){
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
+  }
 }
 
 void DEFAULT EXTI1_IRQHandler( void){

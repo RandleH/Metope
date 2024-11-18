@@ -92,6 +92,8 @@ typedef IRQn_Type cmnIRQn_t;
 #define CMN_EVENT_TIM2                (1<<0)
 #define CMN_EVENT_TIM9                (1<<1)
 #define CMN_EVENT_SCREEN_REFRESH_CPLT (1<<2)
+#define CMN_EVENT_USER_KEY_M          (1<<3)  /*!< Use click the power button */
+#define CMN_EVENT_SCREEN_NEED_OFF     (1<<4)  /*!< Screen has been inactive for a while */
 
 
 

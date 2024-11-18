@@ -56,24 +56,52 @@ void cmn_timer_delay(u32 ms){
  */
 cmnBoolean_t cmn_tim2_sleep(u16 ms){
   /* Config Timer Register */
-
-  
-  // extern volatile u32 gDummy;
-  // gDummy = 1;
-
   bsp_tim2_delay(ms);
   
   /* Wait until event was called */
-  EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM2, pdTRUE, pdFALSE, portMAX_DELAY);
-
-  // while(gDummy){
-  //   __ASM volatile ("nop");
-  // }
+  if(metope.app.rtos.status==ON){
+    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM2, pdTRUE, pdFALSE, portMAX_DELAY);
+  }else{
+    u32 tmp;
+    do{
+      // Wait until an update was generated
+      tmp = TIM2->SR;
+    }while( 0==READ_BIT( tmp, TIM_SR_UIF ));
+    
+    TIM2->SR = ~(TIM_SR_UIF);
+  }
   
   return SUCCESS;
 }
 
 
+/**
+ * @brief TIM9 based Non-block sleep given the microsecond
+ * @note  The current process will pause until wake up
+ *        TIM9 was runnning on 1MHz. The maximum delay ms is `65535`
+ * @param [in]  us - Microseconds
+ * @return  Return `BUSY` when timer is currently unavailable
+ *          Return `SUCCESS` when finished.
+ */
+cmnBoolean_t cmn_tim9_sleep(u16 us){
+  /* Config Timer Register */
+  bsp_tim9_delay(us);
+  
+  /* Wait until event was called */
+  if(metope.app.rtos.status==ON){
+    xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM9, pdTRUE, pdFALSE, portMAX_DELAY);
+  }else{
+    u32 tmp;
+    do{
+      // Wait until an update was generated
+      tmp = TIM9->SR;
+    }while( 0==READ_BIT( tmp, TIM_SR_UIF ));
+    
+    TIM9->SR = ~(TIM_SR_UIF);
+  }
+  
+  return SUCCESS;
+}
 
 
 #ifdef __cplusplus

@@ -102,6 +102,13 @@ typedef struct{
 
   struct {
     const cmnDateTime_t system_initial_time;
+    union{
+      struct{
+        u8 display_off : 1;
+        u8 reserved    : 7;
+      };
+      u8 word;
+    }status;
   }info;
 
 } tMainSystemStatus;

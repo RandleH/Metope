@@ -26,6 +26,7 @@ extern "C"{
 
 void bsp_timer_init( void);
 void bsp_tim2_delay(u16 ms);
+void bsp_tim9_delay(u16 us);
 
 #ifdef __cplusplus
 }

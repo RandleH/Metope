@@ -232,11 +232,8 @@ void bsp_screen_smooth_on(void){
   u32 cnt = 0;
   while(cnt < sizeof(tmp)/sizeof(*tmp)){
     bsp_screen_set_bright(tmp[cnt++]);
-
-    /**
-     * @todo: Use non-block delay!!!
-     */
-    cmn_timer_delay(20);
+    cmn_tim9_sleep(20000); // 20ms
+    // vTaskDelay(20);
   }
 }
 
@@ -244,11 +241,8 @@ void bsp_screen_smooth_off(void){
   u32 cnt = sizeof(tmp)/sizeof(*tmp);
   while(cnt--){
     bsp_screen_set_bright(tmp[cnt]);
-
-    /**
-     * @todo: Use non-block delay!!!
-     */
-    cmn_timer_delay(20);
+    cmn_tim9_sleep(20000); // 20ms
+    // vTaskDelay(20);
   }
 }
 
@@ -452,6 +446,9 @@ cmnBoolean_t bsp_screen_init( void){
   
   bsp_screen_scan_mode(0);
   PIN_CS(1);
+
+  bsp_screen_on();
+  bsp_screen_set_bright(metope.bsp.screen._brightness);
   return true;
 }
 

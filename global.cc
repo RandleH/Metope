@@ -64,10 +64,16 @@ tMainSystemStatus  metope = {
         .year   = 0,
         .month  = 11,
         .day    = 17,
-        .hour   = 11,
-        .minute = 45,
-        .second = 17
+        .hour   = 22,
+        .minute = 33,
+        .second = 0
 #endif
+      }
+    },
+    .status = {
+      {
+        .display_off = 0,
+        .reserved    = 0
       }
     }
   }

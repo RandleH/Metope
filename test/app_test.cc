@@ -9,6 +9,7 @@
 #include "test.hh"
 #include "cmn_type.h"
 #include "cmn_delay.h"
+#include "bsp_screen.h"
 #include "lvgl.h"
 
 
@@ -83,15 +84,37 @@ namespace paramsTestAppTaskFreeRTOS{
 /**
  * @note: 3 Task functions with their customized stack depth
  */
-typedef std::array<std::pair<TaskFunction_t,u16>,3> Input;
+typedef std::array<std::pair<TaskFunction_t,u16>,4> Input;
 
 /**
  * @note: No output
  */
 typedef u8 Output;
 
+
+static void task_screen_switch(void*){
+  while(1){
+    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M|CMN_EVENT_SCREEN_NEED_OFF, pdTRUE, pdFALSE, portMAX_DELAY);
+    
+    /* Always process the user button clicking first */
+    if(uxBits & CMN_EVENT_USER_KEY_M){
+      if(metope.info.status.display_off==true){
+        bsp_screen_smooth_on();
+      }else{
+        bsp_screen_smooth_off();
+      }
+      metope.info.status.display_off = !metope.info.status.display_off;
+    }
+
+    /* Now it's time to process the long time inactive screen */
+    else if(uxBits & CMN_EVENT_SCREEN_NEED_OFF){
+      bsp_screen_smooth_off();
+      metope.info.status.display_off = 1;
+    }
+  }
 }
 
+} /* Namespace paramsTestAppTaskFreeRTOS */
 
 class TestAppTaskFreeRTOS : public TestUnitWrapper_withInputOutput< paramsTestAppTaskFreeRTOS::Input ,paramsTestAppTaskFreeRTOS::Output>{
 private:
@@ -153,7 +176,7 @@ public:
     cmnBoolean_t result;
     cmnBoolean_t ret;
 
-    for(int i=0; i<3; ++i){
+    for(int i=0; i<input.size(); ++i){
       ret = xTaskCreate(\
         input[i].first,\
         "0",\
@@ -202,10 +225,11 @@ void add_app_test( void){
 #if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
   tb_infra_os.insert(
     TestAppTaskFreeRTOS(),
-    std::array<std::pair<TaskFunction_t,u16>,3>{{
+    paramsTestAppTaskFreeRTOS::Input{{
       {TestAppTaskFreeRTOS::task0, 512},
       {TestAppTaskFreeRTOS::task1, 512},
       {TestAppTaskFreeRTOS::task2, 128},
+      {paramsTestAppTaskFreeRTOS::task_screen_switch, 128}
     }},
     '\0'
   );
