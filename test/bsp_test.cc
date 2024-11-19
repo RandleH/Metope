@@ -1,6 +1,25 @@
+/**
+ ******************************************************************************
+ * @file    bsp_test.cc
+ * @author  RandleH
+ * @brief   BSP Test Program
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 RandleH.
+ * All rights reserved.
+ *
+ * This software component is licensed by RandleH under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+*/
 
-
-
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include <stdlib.h>
 #include <bitset>
 #include "test.hh"
@@ -11,17 +30,23 @@
 #include "cmn_math.h"
 #include "cmn_utility.h"
 
+#include "bsp_screen.h"
+
 
 
 /* ************************************************************************** */
-/*                             Default Namespace                              */
+/*                          Class: TestBspUsartEcho                           */
 /* ************************************************************************** */
 
-
-class TestBspUsartEcho : public TestUnitWrapper_withInputOutput<std::array<char,6>,char>{
+namespace paramsTestBspUsartEcho{
+typedef std::array<char,6> Input;
+typedef char               Output;  // Dummy
+}
+class TestBspUsartEcho : public TestUnitWrapper_withInputOutput
+<paramsTestBspUsartEcho::Input, paramsTestBspUsartEcho::Output>{
 public:
   TestBspUsartEcho():TestUnitWrapper_withInputOutput("test_bsp_usart_echo"){}
-
+  
   bool run( std::array<char,6>& input, char& ref ) override{
     for( const auto& ref_ch : input){
       char       dut_ch = '\0';
@@ -40,7 +65,15 @@ public:
   }
 };
 
-#include "bsp_screen.h"
+
+
+/* ************************************************************************** */
+/*                       Class: TestBspScreenBrightness                       */
+/* ************************************************************************** */
+namespace paramsTestBspScreenBrightness{
+typedef char Input;   // Dummy
+typedef char output;  // Dummy
+}
 class TestBspScreenBrightness : public TestUnitWrapper_withInputOutput<char,char>{
 public:
   TestBspScreenBrightness():TestUnitWrapper_withInputOutput("test_bsp_screen_brightness"){}
@@ -81,6 +114,11 @@ public:
 };
 
 
+
+
+/* ************************************************************************** */
+/*                       Class: TestBspScreenSmoothness                       */
+/* ************************************************************************** */
 class TestBspScreenSmoothness : public TestUnitWrapper_withInputOutput<char,char>{
 public:
   TestBspScreenSmoothness():TestUnitWrapper_withInputOutput("test_bsp_screen_smoothness"){}
@@ -120,6 +158,9 @@ public:
 
 
 
+/* ************************************************************************** */
+/*                          Class: TestBspScreenFill                          */
+/* ************************************************************************** */
 class TestBspScreenFill : public TestUnitWrapper_withInputOutput<char,char>{
 public:
   TestBspScreenFill():TestUnitWrapper_withInputOutput("test_bsp_screen_filling"){}
@@ -164,6 +205,9 @@ public:
 };
 
 
+/* ************************************************************************** */
+/*                        Class: TestBspScreenDrawArea                        */
+/* ************************************************************************** */
 class TestBspScreenDrawArea : public TestUnitWrapper_withInputOutput<char,char>{
 public:
   TestBspScreenDrawArea():TestUnitWrapper_withInputOutput("test_bsp_screen_draw_area"){}

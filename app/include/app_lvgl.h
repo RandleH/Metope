@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    app_lvgl.h
  * @author  RandleH
- * @brief   Common Program - LVGL Library Application Interface
+ * @brief   Application Program - LVGL Library Application Interface
  ******************************************************************************
  * @attention
  *

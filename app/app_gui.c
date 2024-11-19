@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    app_gui.c
  * @author  RandleH
- * @brief   Common Program - GUI Program
+ * @brief   Application Program - GUI Program
  ******************************************************************************
  * @attention
  *
@@ -17,16 +17,23 @@
  ******************************************************************************
 */
 
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include "global.h"
 #include "app_gui.h"
 #include "cmn_utility.h"
 
+
+
+/* ************************************************************************** */
+/*                     Static Clock UI Function - clock1                      */
+/* ************************************************************************** */
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-
-void ui_clock1_init(tAppGuiClockParam *pClient)
+static void ui_clock1_init(tAppGuiClockParam *pClient)
 {
   pClient->pScreen = lv_scr_act();
   lv_obj_clear_flag( pClient->pScreen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
@@ -71,9 +78,109 @@ void ui_clock1_init(tAppGuiClockParam *pClient)
   lv_obj_set_style_border_color(ui_InnerLoop, lv_color_hex(0xADADAD), LV_PART_MAIN | LV_STATE_DEFAULT );
   lv_obj_set_style_border_opa(ui_InnerLoop, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_shadow_color(ui_InnerLoop, lv_color_hex(0xADADAD), LV_PART_MAIN | LV_STATE_DEFAULT );
-  // lv_obj_set_style_shadow_opa(ui_InnerLoop, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-  // lv_obj_set_style_shadow_width(ui_InnerLoop, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-  // lv_obj_set_style_shadow_spread(ui_InnerLoop, 40, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+  /**
+   * @note: Vivinne Westwood
+   */
+  {
+    lv_obj_t *ui_vvw = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_vvw, 26);
+    lv_obj_set_height( ui_vvw, 28);
+    lv_obj_set_x( ui_vvw, 0 );
+    lv_obj_set_y( ui_vvw, -35 );
+    lv_obj_set_align( ui_vvw, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_vvw, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_vvw, 90, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_vvw, lv_color_hex(0x9F9703), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_vvw, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_vvw, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_vvw, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_vvw, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_vvwc = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_vvwc, 36);
+    lv_obj_set_height( ui_vvwc, 8);
+    lv_obj_set_x( ui_vvwc, 0 );
+    lv_obj_set_y( ui_vvwc, -35 );
+    lv_obj_set_align( ui_vvwc, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_vvwc, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_vvwc, 90, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_vvwc, lv_color_hex(0xC8B000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_vvwc, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_vvwc, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_vvwc, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_vvwc, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_vvwc2 = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_vvwc2, 49);
+    lv_obj_set_height( ui_vvwc2, 4);
+    lv_obj_set_x( ui_vvwc2, 0 );
+    lv_obj_set_y( ui_vvwc2, -35 );
+    lv_obj_set_align( ui_vvwc2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_vvwc2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_vvwc2, 90, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_vvwc2, lv_color_hex(0xA28B04), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_vvwc2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_vvwc2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_vvwc2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_vvwc2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_vvwc1 = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_vvwc1, 65);
+    lv_obj_set_height( ui_vvwc1, 2);
+    lv_obj_set_x( ui_vvwc1, 0 );
+    lv_obj_set_y( ui_vvwc1, -35 );
+    lv_obj_set_align( ui_vvwc1, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_vvwc1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_vvwc1, 90, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_vvwc1, lv_color_hex(0x777101), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_vvwc1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_vvwc1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_vvwc1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_vvwc1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_vvwh = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_vvwh, 18);
+    lv_obj_set_height( ui_vvwh, 8);
+    lv_obj_set_x( ui_vvwh, 0 );
+    lv_obj_set_y( ui_vvwh, -57 );
+    lv_obj_set_align( ui_vvwh, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_vvwh, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_vvwh, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_vvwh, lv_color_hex(0x9F9703), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_vvwh, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_vvwh, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_vvwh, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_vvwh, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_vvwv = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_vvwv, 8);
+    lv_obj_set_height( ui_vvwv, 18);
+    lv_obj_set_x( ui_vvwv, 0 );
+    lv_obj_set_y( ui_vvwv, -57 );
+    lv_obj_set_align( ui_vvwv, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_vvwv, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_vvwv, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_vvwv, lv_color_hex(0x9F9703), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_vvwv, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_vvwv, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_vvwv, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_vvwv, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_vvwvo = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_vvwvo, 8);
+    lv_obj_set_height( ui_vvwvo, 8);
+    lv_obj_set_x( ui_vvwvo, 0 );
+    lv_obj_set_y( ui_vvwvo, -57 );
+    lv_obj_set_align( ui_vvwvo, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_vvwvo, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_vvwvo, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_vvwvo, lv_color_hex(0xF71616), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_vvwvo, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_vvwvo, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_vvwvo, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_vvwvo, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+  }
 
   lv_obj_t *ui_PinMin = lv_obj_create(pClient->pScreen);
   lv_obj_set_width( ui_PinMin, 8);
@@ -129,11 +236,10 @@ void ui_clock1_init(tAppGuiClockParam *pClient)
   lv_obj_set_style_border_color(ui_Knotch, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
   lv_obj_set_style_border_opa(ui_Knotch, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-  // ui_clock1_set_time( pClient, pClient->time);
 }
 
 
-void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
+static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
   cmn_utility_angleset( &pClient->_degree_hour, &pClient->_degree_minute, NULL, &time);
   lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_transform_angle(pClient->pPinMinute, pClient->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -142,7 +248,7 @@ void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
 /**
  * @todo: Add assertion for microseconds range
  */
-void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
+static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
   uint16_t hour_inc, minute_inc;
   cmn_utility_angleinc(&hour_inc, &minute_inc, NULL, ms);
 
@@ -154,18 +260,34 @@ void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
 }
 
 
-void ui_clock1_deinit(tAppGuiClockParam *pClient){
+static void ui_clock1_deinit(tAppGuiClockParam *pClient){
   lv_obj_del(pClient->pScreen);
   pClient->pPinHour   = NULL;
   pClient->pPinMinute = NULL;
   pClient->p_anything = NULL;
 }
 
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/* ************************************************************************** */
+/*                          Public Clock UI Function                          */
+/* ************************************************************************** */
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+
+/**
+ * @brief Switch the Clock GUI
+ * @param [in] x  - The GUI Enumeration. `0` means deactivating the clock UI.
+ * @warning
+ *  This function assumes the `deinit()` is NULL when clock ui is deactivated, vice versa.
+ */
 void app_gui_switch( AppGuiClockEnum_t x){
-  /**
-   * @warning
-   *  Assume the `deinit()` is NULL when clock ui is deactivated, vice versa.
-   */
   if(NULL!=metope.app.clock.gui.deinit){
     metope.app.clock.gui.deinit( &metope.app.clock.gui.param );
   }
@@ -194,6 +316,7 @@ void app_gui_switch( AppGuiClockEnum_t x){
 
   metope.app.clock.gui.init( &metope.app.clock.gui.param );
 }
+
 
 #ifdef __cplusplus
 }

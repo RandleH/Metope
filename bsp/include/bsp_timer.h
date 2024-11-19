@@ -17,8 +17,10 @@
  ******************************************************************************
 */
 
-
 #include "cmn_type.h"
+
+#ifndef BSP_TIMER_H
+#define BSP_TIMER_H 
 
 #ifdef __cplusplus
 extern "C"{
@@ -30,4 +32,6 @@ void bsp_tim9_delay(u16 us);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

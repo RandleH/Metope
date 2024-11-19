@@ -18,9 +18,6 @@
 */
 
 
-
-
-
 #include "cmn_type.h"
 #include "cmn_device.h"
 #include "bsp_type.h"

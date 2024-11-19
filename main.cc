@@ -53,10 +53,8 @@ int main(int argc, char *argv[]){
   bsp_init();
   app_init();
   os_init();
-  
-  bsp_led__switch(ON);
 
-  vTaskStartScheduler();
+  app_rtos_start();
   
   while(1){
 
@@ -69,7 +67,7 @@ int main(int argc, char *argv[]){
 
 #else
 
-  #include "cmn_delay.h"
+#include "cmn_delay.h"
 
 #include "test.hh"
 #include "cmn_test.hh"
@@ -82,6 +80,7 @@ int main(int argc, char *argv[]){
   bsp_init();
   app_init();
   os_init();
+  cout<<"Hardware Initialization Completed.\n\n"<<endl;
   
   {
     size_t len = 0;
@@ -90,15 +89,9 @@ int main(int argc, char *argv[]){
     for(size_t i=0; i<len; ++i){
       std::cout << std::setfill('0')<<std::setw(2)<<(int)uuid[i]<< ((i==len-1)?'\n':'-');
     }
-
-    std::cout<<"System time set to: "<< metope.info.system_initial_time.hour << ":" << metope.info.system_initial_time.minute << ":" << metope.info.system_initial_time.second << std::endl;
-
-    std::cout<<"TIMESTAMP: "<<__TIMESTAMP__<<std::endl;
+    std::cout << "\n\n";
   }
 
-  cout<<"Hardware Initialization Completed.\n\n"<<endl;
-  
-  
   add_cmn_test();
   add_bsp_test();
   add_app_test();

@@ -18,9 +18,6 @@
 */
 
 #include <stdint.h>
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-  
-#endif
 #include "cmn_type.h"
 
 #ifndef BSP_TYPE_H
@@ -47,9 +44,7 @@ extern "C"{
 #endif
 
 
-
-
-typedef uint16_t bspScreenBrightness_t;
+typedef u16 bspScreenBrightness_t;
 
 typedef union{
   struct{
