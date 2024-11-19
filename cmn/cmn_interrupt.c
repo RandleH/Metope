@@ -412,6 +412,15 @@ void DEFAULT DMA1_Stream4_IRQHandler(void){
      */
     cmn_callback_screen_spi_completed(&hspi2);
   }
+  if(metope.app.rtos.status==ON){
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+    xHigherPriorityTaskWoken = pdFALSE;
+    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_SCREEN_REFRESH_CPLT, &xHigherPriorityTaskWoken );
+    if( xResult != pdFAIL ){
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
+  }
+  metope.dev.status.spi2 = IDLE;
 #else
   HAL_DMA_IRQHandler(&hdma_spi2_tx);
   cmn_callback_screen_spi_completed(&hspi2);

@@ -157,8 +157,6 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
 #endif
     
     /**
-     * @todo: Change to the system escape function. Will return here after `DMA1_Stream4_IRQHandler()` was called.
-     * 
      * @note
      *  Phase 1: DMA Request to send bytes
      *  Phase 2: DMA Interrupt will be triggered. Entering the `DMA1_Stream4_IRQHandler()`
@@ -167,7 +165,11 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
      *  Phase 5: `HAL_SPI_TxCpltCallback()` will be called if no error. This is a weak function.
      *  Phase 6: The escape function shall be notified to come back.
      */
-    while(IDLE!=metope.dev.status.spi2);
+    if(metope.app.rtos.status==ON){
+      xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_SCREEN_REFRESH_CPLT, pdTRUE, pdFALSE, portMAX_DELAY);
+    }else{
+      while(IDLE!=metope.dev.status.spi2);
+    }
   }
   return ret;
 }

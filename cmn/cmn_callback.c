@@ -79,11 +79,6 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
   UNUSED(tmpreg_ovr);
 #endif
   // SPI_DMATransmitCplt(&hdma_spi2_tx);
-  
-  /**
-   * @todo: Escape hook function
-   */
-  metope.dev.status.spi2 = IDLE;
 }
 
 

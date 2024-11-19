@@ -195,7 +195,7 @@ public:
     cmnBoolean_t result;
     cmnBoolean_t ret;
 
-    for(int i=0; i<input.size(); ++i){
+    for(unsigned int i=0; i<input.size(); ++i){
       ret = xTaskCreate(\
         input[i].first,\
         "0",\

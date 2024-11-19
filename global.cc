@@ -63,9 +63,9 @@ tMainSystemStatus  metope = {
 #else
         .year   = 0,
         .month  = 11,
-        .day    = 17,
-        .hour   = 23,
-        .minute = 27,
+        .day    = 19,
+        .hour   = 11,
+        .minute = 54,
         .second = 0
 #endif
       }
