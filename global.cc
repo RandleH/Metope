@@ -44,13 +44,13 @@ tMainSystemStatus  metope = {
           .year   = 0,
           .month  = 11,
           .day    = 20,
-          .hour   = 19,
-          .minute = 50,
+          .hour   = 23,
+          .minute = 57,
           .second = 0
         }
       },
       ._handle = NULL,
-      .style = kAppGuiClock_NANA,
+      .style = kAppGuiClock_LVVVW,
       .gui = {0},
     }
   },
