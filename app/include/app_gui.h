@@ -38,6 +38,7 @@ extern "C"{
 #endif
 
 void app_gui_switch( AppGuiClockEnum_t x);
+void app_clock_gui_main(void*param) RTOSTHREAD;
 
 #ifdef __cplusplus
 }

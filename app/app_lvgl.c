@@ -78,9 +78,6 @@ STATIC void app_lvgl_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8
 }
 
 
-STATIC bspScreenPixel_t gram[2][BSP_SCREEN_WIDTH*4] = {0};
-
-
 u32 app_lvgl_get_tick(void){
   return HAL_GetTick();
 }

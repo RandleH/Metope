@@ -29,8 +29,11 @@
 #ifndef APP_TYPE_H
 #define APP_TYPE_H
 
-#define APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE (400U)
+#define APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE (2048U)
+#define APP_CFG_TASK_CLOCK_UI_STACK_SIZE     (512U)
+#define APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE (128U)
 
+#define RTOSTHREAD
 
 
 typedef enum AppTaskPriority{
@@ -58,7 +61,8 @@ typedef struct{
  */
 typedef enum{
   kAppGuiClock_None   = 255,
-  kAppGuiClock_Clock1 = 0
+  kAppGuiClock_Clock1 = 0,
+  kAppGuiClock_NANA = 1,
 } AppGuiClockEnum_t;
 
 

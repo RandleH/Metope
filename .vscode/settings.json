@@ -84,6 +84,7 @@
         "stm32f4xx_ll_rcc.h": "c",
         "global.h": "c",
         "cmn_type.h": "c",
-        "cmn_delay.h": "c"
+        "cmn_delay.h": "c",
+        "app_gui_asset": "c"
     }
 }

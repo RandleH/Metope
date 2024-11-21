@@ -91,31 +91,42 @@ void app_init(void){
 }
 
 
-
+#include "app_gui.h"
 void os_init(void){
-
   metope.app.rtos.event._handle = xEventGroupCreateStatic( &metope.app.rtos.event._eg_buffer);
 
 #if (defined TEST_ONLY) && (TEST_ONLY==1)
   
-#else 
-  extern TaskHandle_t xTaskCreateStatic(	TaskFunction_t pxTaskCode,
-									const char * const pcName,		/*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-									const uint32_t ulStackDepth,
-									void * const pvParameters,
-									UBaseType_t uxPriority,
-									StackType_t * const puxStackBuffer,
-									StaticTask_t * const pxTaskBuffer );
+#else
 
-
-  metope.app.rtos.task.screen_refresh.handle = xTaskCreateStatic(\
-    app_task_screen_refresh,\
+  metope.app.rtos.task.screen_refresh._handle = xTaskCreateStatic(\
+    bsp_screen_main,\
     "0",\
     sizeof(metope.app.rtos.task.screen_refresh._stack) / sizeof(metope.app.rtos.task.screen_refresh._stack[0]),\
-    NULL,\
+    &metope.bsp.screen,\
     kAppPriority_VERY_IMPORTANT,\
     &metope.app.rtos.task.screen_refresh._stack[0],\
     &metope.app.rtos.task.screen_refresh._tcb\
+  );
+  
+  metope.app.rtos.task.clock_ui._handle = xTaskCreateStatic(\
+    app_clock_gui_main,\
+    "0",\
+    sizeof(metope.app.rtos.task.clock_ui._stack) / sizeof(metope.app.rtos.task.clock_ui._stack[0]),\
+    &metope.app.clock ,\
+    kAppPriority_VERY_IMPORTANT,\
+    &metope.app.rtos.task.clock_ui._stack[0],\
+    &metope.app.rtos.task.clock_ui._tcb\
+  );
+  
+  metope.app.rtos.task.screen_onoff._handle = xTaskCreateStatic(\
+    bsp_screen_onoff,\
+    "0",\
+    sizeof(metope.app.rtos.task.screen_onoff._stack) / sizeof(metope.app.rtos.task.screen_onoff._stack[0]),\
+    NULL ,\
+    kAppPriority_VERY_IMPORTANT,\
+    &metope.app.rtos.task.screen_onoff._stack[0],\
+    &metope.app.rtos.task.screen_onoff._tcb\
   );
 #endif
 

@@ -23,7 +23,7 @@
 #include "global.h"
 #include "app_gui.h"
 #include "cmn_utility.h"
-
+#include "app_gui_asset"
 
 
 /* ************************************************************************** */
@@ -83,7 +83,7 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
    * @note: Vivinne Westwood
    */
   {
-    lv_obj_t *ui_vvw = lv_obj_create(pClient->pScreen);
+    lv_obj_t* ui_vvw = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_vvw, 26);
     lv_obj_set_height( ui_vvw, 28);
     lv_obj_set_x( ui_vvw, 0 );
@@ -91,13 +91,15 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
     lv_obj_set_align( ui_vvw, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_vvw, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_vvw, 90, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_vvw, lv_color_hex(0x9F9703), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(ui_vvw, lv_color_hex(0xE4E4E4), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_vvw, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_vvw, lv_color_hex(0x484848), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_grad_dir(ui_vvw, LV_GRAD_DIR_VER, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_vvw, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_vvw, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_vvw, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    lv_obj_t *ui_vvwc = lv_obj_create(pClient->pScreen);
+  
+    lv_obj_t* ui_vvwc = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_vvwc, 36);
     lv_obj_set_height( ui_vvwc, 8);
     lv_obj_set_x( ui_vvwc, 0 );
@@ -105,13 +107,13 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
     lv_obj_set_align( ui_vvwc, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_vvwc, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_vvwc, 90, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_vvwc, lv_color_hex(0xC8B000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(ui_vvwc, lv_color_hex(0x4C4C4C), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_vvwc, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_vvwc, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_vvwc, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_vvwc, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    lv_obj_t *ui_vvwc2 = lv_obj_create(pClient->pScreen);
+    
+    lv_obj_t* ui_vvwc2 = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_vvwc2, 49);
     lv_obj_set_height( ui_vvwc2, 4);
     lv_obj_set_x( ui_vvwc2, 0 );
@@ -119,13 +121,13 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
     lv_obj_set_align( ui_vvwc2, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_vvwc2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_vvwc2, 90, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_vvwc2, lv_color_hex(0xA28B04), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(ui_vvwc2, lv_color_hex(0x5B5B5B), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_vvwc2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_vvwc2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_vvwc2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_vvwc2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    lv_obj_t *ui_vvwc1 = lv_obj_create(pClient->pScreen);
+    
+    lv_obj_t* ui_vvwc1 = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_vvwc1, 65);
     lv_obj_set_height( ui_vvwc1, 2);
     lv_obj_set_x( ui_vvwc1, 0 );
@@ -133,13 +135,13 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
     lv_obj_set_align( ui_vvwc1, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_vvwc1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_vvwc1, 90, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_vvwc1, lv_color_hex(0x777101), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(ui_vvwc1, lv_color_hex(0x6C6C69), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_vvwc1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_vvwc1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_vvwc1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_vvwc1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    lv_obj_t *ui_vvwh = lv_obj_create(pClient->pScreen);
+    
+    lv_obj_t* ui_vvwh = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_vvwh, 18);
     lv_obj_set_height( ui_vvwh, 8);
     lv_obj_set_x( ui_vvwh, 0 );
@@ -147,13 +149,13 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
     lv_obj_set_align( ui_vvwh, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_vvwh, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_vvwh, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_vvwh, lv_color_hex(0x9F9703), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(ui_vvwh, lv_color_hex(0xBDBDBD), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_vvwh, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_vvwh, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_vvwh, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_vvwh, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    lv_obj_t *ui_vvwv = lv_obj_create(pClient->pScreen);
+    
+    lv_obj_t* ui_vvwv = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_vvwv, 8);
     lv_obj_set_height( ui_vvwv, 18);
     lv_obj_set_x( ui_vvwv, 0 );
@@ -161,13 +163,13 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
     lv_obj_set_align( ui_vvwv, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_vvwv, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_vvwv, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_vvwv, lv_color_hex(0x9F9703), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(ui_vvwv, lv_color_hex(0xBDBDBD), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_vvwv, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_vvwv, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_vvwv, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_vvwv, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-    lv_obj_t *ui_vvwvo = lv_obj_create(pClient->pScreen);
+    lv_obj_t* ui_vvwvo = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_vvwvo, 8);
     lv_obj_set_height( ui_vvwvo, 8);
     lv_obj_set_x( ui_vvwvo, 0 );
@@ -175,7 +177,7 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
     lv_obj_set_align( ui_vvwvo, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_vvwvo, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_vvwvo, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_vvwvo, lv_color_hex(0xF71616), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(ui_vvwvo, lv_color_hex(0x780B0B), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_vvwvo, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_vvwvo, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_vvwvo, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -273,6 +275,227 @@ static void ui_clock1_deinit(tAppGuiClockParam *pClient){
 #endif
 
 
+
+
+/* ************************************************************************** */
+/*                   Static Clock UI Function - clock_nana                    */
+/* ************************************************************************** */
+#ifdef __cplusplus
+extern "C"{
+#endif
+typedef struct{
+  lv_obj_t      *ui_nanaeyeclosed;
+  lv_obj_t      *ui_nanaeyeopen;
+  cmnDateTime_t  time;
+}tClockNanaInternalParam;
+
+static void ui_clocknana_init(tAppGuiClockParam *pClient){
+  pClient->pScreen = lv_scr_act();
+  lv_obj_t *ui_NANA = pClient->pScreen;
+  lv_obj_clear_flag( ui_NANA, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+  lv_obj_set_style_bg_color(ui_NANA, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_bg_opa(ui_NANA, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+  {
+    lv_obj_t *ui_MainPanel2 = lv_obj_create(ui_NANA);
+    lv_obj_set_width( ui_MainPanel2, 240);
+    lv_obj_set_height( ui_MainPanel2, 240);
+    lv_obj_set_align( ui_MainPanel2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_MainPanel2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_MainPanel2, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_MainPanel2, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_MainPanel2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_MainPanel2, lv_color_hex(0xC4C4C4), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_MainPanel2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_MainPanel2, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_MainPanel2, LV_BORDER_SIDE_FULL, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_set_style_outline_width(ui_MainPanel2, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(ui_MainPanel2, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(ui_MainPanel2, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_MainPanel2, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_MainPanel2, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_MainPanel2, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_row(ui_MainPanel2, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_column(ui_MainPanel2, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_Pit12_2 = lv_obj_create(ui_MainPanel2);
+    lv_obj_set_width( ui_Pit12_2, 2);
+    lv_obj_set_height( ui_Pit12_2, 240);
+    lv_obj_set_align( ui_Pit12_2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_Pit12_2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_bg_color(ui_Pit12_2, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_Pit12_2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_Pit12_2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_Pit12_2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_Pit12_2, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_angle(ui_Pit12_2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_Pit12_2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_Pit12_2, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_Pit1_2 = lv_obj_create(ui_MainPanel2);
+    lv_obj_set_width( ui_Pit1_2, 2);
+    lv_obj_set_height( ui_Pit1_2, 240);
+    lv_obj_set_align( ui_Pit1_2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_Pit1_2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_border_color(ui_Pit1_2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_Pit1_2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_angle(ui_Pit1_2, 300, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_Pit1_2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_Pit1_2, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_Pit2_2 = lv_obj_create(ui_MainPanel2);
+    lv_obj_set_width( ui_Pit2_2, 2);
+    lv_obj_set_height( ui_Pit2_2, 240);
+    lv_obj_set_align( ui_Pit2_2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_Pit2_2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_border_color(ui_Pit2_2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_Pit2_2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_angle(ui_Pit2_2, 600, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_Pit2_2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_Pit2_2, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_Pit3_2 = lv_obj_create(ui_MainPanel2);
+    lv_obj_set_width( ui_Pit3_2, 2);
+    lv_obj_set_height( ui_Pit3_2, 240);
+    lv_obj_set_align( ui_Pit3_2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_Pit3_2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_border_color(ui_Pit3_2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_Pit3_2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_angle(ui_Pit3_2, 900, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_Pit3_2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_Pit3_2, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_Pit4_2 = lv_obj_create(ui_MainPanel2);
+    lv_obj_set_width( ui_Pit4_2, 2);
+    lv_obj_set_height( ui_Pit4_2, 240);
+    lv_obj_set_align( ui_Pit4_2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_Pit4_2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_border_color(ui_Pit4_2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_Pit4_2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_angle(ui_Pit4_2, 1200, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_Pit4_2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_Pit4_2, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_Pit5_2 = lv_obj_create(ui_MainPanel2);
+    lv_obj_set_width( ui_Pit5_2, 2);
+    lv_obj_set_height( ui_Pit5_2, 240);
+    lv_obj_set_align( ui_Pit5_2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_Pit5_2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_border_color(ui_Pit5_2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_Pit5_2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_angle(ui_Pit5_2, 1500, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_Pit5_2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_Pit5_2, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t *ui_InnerLoop2 = lv_obj_create(ui_MainPanel2);
+    lv_obj_set_width( ui_InnerLoop2, 200);
+    lv_obj_set_height( ui_InnerLoop2, 200);
+    lv_obj_set_align( ui_InnerLoop2, LV_ALIGN_CENTER );
+    lv_obj_clear_flag( ui_InnerLoop2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_radius(ui_InnerLoop2, 180, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_InnerLoop2, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_InnerLoop2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_InnerLoop2, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_InnerLoop2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+  }
+  
+  tClockNanaInternalParam *p_internal_param = pvPortMalloc(sizeof(tClockNanaInternalParam));
+  p_internal_param->ui_nanaeyeclosed = lv_img_create(ui_NANA);
+  lv_img_set_src(p_internal_param->ui_nanaeyeclosed, &ui_img_eyes_close_240_png);
+  lv_obj_set_width( p_internal_param->ui_nanaeyeclosed, LV_SIZE_CONTENT);  /// 187
+  lv_obj_set_height( p_internal_param->ui_nanaeyeclosed, LV_SIZE_CONTENT);   /// 58
+  lv_obj_set_x( p_internal_param->ui_nanaeyeclosed, 8 );
+  lv_obj_set_y( p_internal_param->ui_nanaeyeclosed, -5 );
+  lv_obj_set_align( p_internal_param->ui_nanaeyeclosed, LV_ALIGN_CENTER );
+  lv_obj_add_flag( p_internal_param->ui_nanaeyeclosed, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
+  lv_obj_clear_flag( p_internal_param->ui_nanaeyeclosed, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+  
+  p_internal_param->ui_nanaeyeopen = lv_img_create(ui_NANA);
+  lv_img_set_src(p_internal_param->ui_nanaeyeopen, &ui_img_eyes_open_240_png);
+  lv_obj_set_width( p_internal_param->ui_nanaeyeopen, LV_SIZE_CONTENT);  /// 187
+  lv_obj_set_height( p_internal_param->ui_nanaeyeopen, LV_SIZE_CONTENT);   /// 60
+  lv_obj_set_x( p_internal_param->ui_nanaeyeopen, 6 );
+  lv_obj_set_y( p_internal_param->ui_nanaeyeopen, -7 );
+  lv_obj_set_align( p_internal_param->ui_nanaeyeopen, LV_ALIGN_CENTER );
+  lv_obj_add_flag( p_internal_param->ui_nanaeyeopen, LV_OBJ_FLAG_ADV_HITTEST | LV_OBJ_FLAG_HIDDEN );   /// Flags
+  lv_obj_clear_flag( p_internal_param->ui_nanaeyeopen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+  pClient->p_anything = p_internal_param;
+
+  lv_obj_t *ui_pinMinute = lv_img_create(ui_NANA);
+  lv_img_set_src(ui_pinMinute, &ui_img_pin_minute_classic);
+  lv_obj_set_width( ui_pinMinute, 16);
+  lv_obj_set_height( ui_pinMinute, 96);
+  lv_obj_set_x( ui_pinMinute, 0 );
+  lv_obj_set_y( ui_pinMinute, -112 );
+  lv_obj_set_align( ui_pinMinute, LV_ALIGN_BOTTOM_MID );
+  lv_obj_add_flag( ui_pinMinute, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
+  lv_obj_clear_flag( ui_pinMinute, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+  lv_obj_set_style_transform_angle(ui_pinMinute, 900, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_pivot_x(ui_pinMinute, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_pivot_y(ui_pinMinute, 88, LV_PART_MAIN| LV_STATE_DEFAULT);
+  pClient->pPinMinute = ui_pinMinute;
+
+  lv_obj_t *ui_pinHour = lv_img_create(ui_NANA);
+  lv_img_set_src(ui_pinHour, &ui_img_pin_hour_classic);
+  lv_obj_set_width( ui_pinHour, 16);
+  lv_obj_set_height( ui_pinHour, 63);
+  lv_obj_set_x( ui_pinHour, 0 );
+  lv_obj_set_y( ui_pinHour, -112 );
+  lv_obj_set_align( ui_pinHour, LV_ALIGN_BOTTOM_MID );
+  lv_obj_add_flag( ui_pinHour, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
+  lv_obj_clear_flag( ui_pinHour, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+  lv_obj_set_style_transform_angle(ui_pinHour, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_pivot_x(ui_pinHour, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_pivot_y(ui_pinHour, 55, LV_PART_MAIN| LV_STATE_DEFAULT);
+  pClient->pPinHour = ui_pinHour;
+
+}
+
+static void ui_clocknana_daynight(tAppGuiClockParam *pClient){
+  lv_obj_t *ui_nanaeyeopen   = ((tClockNanaInternalParam*)pClient->p_anything)->ui_nanaeyeopen;
+  lv_obj_t *ui_nanaeyeclosed = ((tClockNanaInternalParam*)pClient->p_anything)->ui_nanaeyeclosed;
+
+  if(((tClockNanaInternalParam*)(pClient->p_anything))->time.hour >= 18){
+    if(!lv_obj_has_flag(ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN) || lv_obj_has_flag(ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN)){ 
+      /* Close Eyes */
+      lv_obj_add_flag( ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN );
+      lv_obj_clear_flag( ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN);
+    }
+  }else if(((tClockNanaInternalParam*)(pClient->p_anything))->time.hour >= 8){
+    if(lv_obj_has_flag(ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN) || !lv_obj_has_flag(ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN)){
+      /* Open Eyes */
+      lv_obj_add_flag( ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_clear_flag( ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN );
+    }
+  }
+}
+
+static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
+  ((tClockNanaInternalParam*)(pClient->p_anything))->time = time;
+  ui_clock1_set_time(pClient, time);
+  ui_clocknana_daynight(pClient);
+}
+
+
+static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
+  ui_clock1_inc_time(pClient, ms);
+  cmn_utility_timeinc( &(((tClockNanaInternalParam*)(pClient->p_anything))->time), ms);
+  ui_clocknana_daynight(pClient);
+}
+
+
+static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
+  vPortFree(pClient->p_anything);
+  ui_clock1_deinit(pClient);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+
 /* ************************************************************************** */
 /*                          Public Clock UI Function                          */
 /* ************************************************************************** */
@@ -293,6 +516,9 @@ void app_gui_switch( AppGuiClockEnum_t x){
   }
   switch(x){
     case kAppGuiClock_None:{
+      /**
+       * @todo: Can't be NULL. Too dangerous.
+       */
       metope.app.clock.gui.init     = NULL;
       metope.app.clock.gui.set_time = NULL;
       metope.app.clock.gui.inc_time = NULL;
@@ -312,9 +538,67 @@ void app_gui_switch( AppGuiClockEnum_t x){
        */
       break;
     }
+#ifndef TEST_ONLY
+    /**
+     * @note: The rest of UI is ONLY for main program because of the memory usage
+     */
+    case kAppGuiClock_NANA:{
+      metope.app.clock.gui.init     = ui_clocknana_init;
+      metope.app.clock.gui.set_time = ui_clocknana_set_time;
+      metope.app.clock.gui.inc_time = ui_clocknana_inc_time;
+      metope.app.clock.gui.deinit   = ui_clocknana_deinit;
+      break;
+    }
+#endif
   }
 
   metope.app.clock.gui.init( &metope.app.clock.gui.param );
+}
+
+
+
+
+
+
+/**
+ * @param [in] param  - will cast to `tAppClock`
+ */
+void app_clock_gui_main(void *param) RTOSTHREAD{
+  tAppClock *parsed_param = (tAppClock *)param;
+
+  portTICK_TYPE_ENTER_CRITICAL();
+  app_gui_switch(parsed_param->style);
+  portTICK_TYPE_EXIT_CRITICAL();
+
+  parsed_param->gui.set_time( &parsed_param->gui.param, parsed_param->time);
+  
+  /**
+   * @todo: Need to update the time from RTC
+   */
+  TickType_t old_tick = xTaskGetTickCount();
+  while(1){
+    /**
+     * @note
+     *  Control Part:
+     *    1) Perpare the updated time.
+     *    2) Calculate the increased ms.
+     */
+    TickType_t tmp = xTaskGetTickCount();
+    TickType_t ms_delta = tmp - old_tick;
+    old_tick = tmp;
+    cmn_utility_timeinc( &parsed_param->time, ms_delta);
+    
+    /**
+     * @note
+     *  View Part:
+     *    1) Update the increased ms.
+     */
+    portTICK_TYPE_ENTER_CRITICAL();
+    parsed_param->gui.inc_time( &parsed_param->gui.param, ms_delta);
+    portTICK_TYPE_EXIT_CRITICAL();
+
+    vTaskDelay(64);
+  }
 }
 
 

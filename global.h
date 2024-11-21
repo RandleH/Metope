@@ -18,6 +18,29 @@
 extern "C"{
 #endif
 
+
+typedef struct stBspScreen{
+  bspScreenBrightness_t brightness;
+  TickType_t            refresh_rate_ms;
+  //...//
+} tBspScreen;
+
+
+
+typedef struct stAppClock{
+  cmnDateTime_t time;
+  TaskHandle_t  _handle;
+  
+  AppGuiClockEnum_t style;
+  struct{
+    tAppGuiClockParam param;
+    void (*init)(tAppGuiClockParam *);
+    void (*set_time)(tAppGuiClockParam *, cmnDateTime_t);
+    void (*inc_time)(tAppGuiClockParam *, uint32_t);
+    void (*deinit)(tAppGuiClockParam *);
+  } gui;
+} tAppClock;
+
 /**
  * @note
  *  Naming convention: 
@@ -27,10 +50,7 @@ extern "C"{
  */
 typedef struct{
   struct{
-    struct{
-      bspScreenBrightness_t _brightness;
-      //...//
-    }screen;
+    tBspScreen screen;
 
     struct{
       volatile u32 *_port;
@@ -72,11 +92,22 @@ typedef struct{
     struct{
       struct{
         struct{
-          TaskHandle_t handle;
+          TaskHandle_t _handle;
           StaticTask_t _tcb;
-          StackType_t  _stack[APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE];    
+          StackType_t  _stack[APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE];
         }screen_refresh;
 
+        struct{
+          TaskHandle_t _handle;
+          StaticTask_t _tcb;
+          StackType_t  _stack[APP_CFG_TASK_CLOCK_UI_STACK_SIZE];
+        }clock_ui;
+        
+        struct{
+          TaskHandle_t _handle;
+          StaticTask_t _tcb;
+          StackType_t  _stack[APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE];
+        }screen_onoff;
       }task;
 
       struct{
@@ -87,17 +118,9 @@ typedef struct{
       cmnBoolean_t status; /*!< `ON` | `OFF` */
     }rtos;
 
-    struct{
-      struct{
-        tAppGuiClockParam param;
-        void (*init)(tAppGuiClockParam *);
-        void (*set_time)(tAppGuiClockParam *, cmnDateTime_t);
-        void (*inc_time)(tAppGuiClockParam *, uint32_t);
-        void (*deinit)(tAppGuiClockParam *);
-      }gui;
-      cmnDateTime_t time;
-      TaskHandle_t _handle;
-    }clock;
+    
+    tAppClock clock;
+
   }app;
 
   struct {

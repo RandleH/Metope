@@ -21,6 +21,8 @@
 #include "init.h"
 #include "cmn_type.h"
 #include "bsp_led.h"
+
+#include "app_rtos.h"
 #include "global.h"
 
 

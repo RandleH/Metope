@@ -91,7 +91,6 @@ STATIC cmnBoolean_t bsp_screen_spi_polling_send( const uint8_t *buf, size_t nIte
   return 0;
 }
 
-
 /**
  * @brief
  *    BSP Screen Non-Block SPI transmission function using DMA
@@ -173,11 +172,6 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
   }
   return ret;
 }
-
-
-
-
-
 
 
 /**
@@ -450,7 +444,7 @@ cmnBoolean_t bsp_screen_init( void){
   PIN_CS(1);
 
   bsp_screen_on();
-  bsp_screen_set_bright(metope.bsp.screen._brightness);
+  bsp_screen_set_bright(metope.bsp.screen.brightness);
   return true;
 }
 
@@ -477,8 +471,6 @@ void bsp_screen_fill( const bspScreenPixel_t color, bspScreenCood_t xs, bspScree
 }
 
 
-
-
 void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye){
   PIN_CS(0);
   bsp_screen_area( xs, ys, xe, ye);
@@ -486,6 +478,57 @@ void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScr
   bsp_screen_spi_dma_send( (const u8*)buf, (xe-xs+1)*(ye-ys+1)*sizeof(bspScreenPixel_t), 1);
   PIN_CS(1);
 }
+
+
+/**
+ * @brief Screen Circular Refresh Function
+ * @note  Recommanded stack depth: 512 Bytes
+ * @param [in] param  - will be cast to `tBspScreen *`
+ */
+void bsp_screen_main(void *param) RTOSTHREAD{
+  tBspScreen *parsed_param = (tBspScreen *)(param);
+  bspScreenBrightness_t xLastBrightness = parsed_param->brightness;
+  TickType_t  xLastWakeTime = xTaskGetTickCount();
+  bsp_screen_set_bright(xLastBrightness);
+  while(1){
+    vTaskDelayUntil( &xLastWakeTime, parsed_param->refresh_rate_ms);
+    lv_tick_inc(parsed_param->refresh_rate_ms);
+    lv_timer_handler();
+    if(xLastBrightness!=parsed_param->brightness){
+      xLastBrightness = parsed_param->brightness;
+      bsp_screen_set_bright(xLastBrightness);
+    }
+  }
+}
+
+/**
+ * @brief Screen ON/OFF switch
+ * @note  Recommanded stack depth: 128 Bytes
+ * @param [in] param  - NOT used
+ */
+void bsp_screen_onoff(void *param) RTOSTHREAD{
+  UNUSED(param);
+
+  while(1){
+    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M|CMN_EVENT_SCREEN_NEED_OFF, pdTRUE, pdFALSE, portMAX_DELAY);
+    
+    /* Always process the user button clicking first */
+    if(uxBits & CMN_EVENT_USER_KEY_M){
+      if(metope.info.status.display_off==true){
+        bsp_screen_smooth_on();
+      }else{
+        bsp_screen_smooth_off();
+      }
+      metope.info.status.display_off = !metope.info.status.display_off;
+    }
+    /* Now it's time to process the long time inactive screen */
+    else if(uxBits & CMN_EVENT_SCREEN_NEED_OFF){
+      bsp_screen_smooth_off();
+      metope.info.status.display_off = 1;
+    }
+  }
+}
+
 
 #ifdef __cplusplus
 }

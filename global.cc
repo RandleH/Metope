@@ -12,7 +12,8 @@ extern "C"{
 tMainSystemStatus  metope = {
   .bsp = {
     .screen = {
-      ._brightness = BSP_SCREEN_DEFAULT_BRIGHTNESS,
+      .brightness = BSP_SCREEN_DEFAULT_BRIGHTNESS,
+      .refresh_rate_ms = 10
     },
     .led = {
       ._port = &LED_GPIO_Port->ODR
@@ -37,39 +38,23 @@ tMainSystemStatus  metope = {
 #endif
     },
     .rtos = {.status = OFF},
-    .clock = {0}
+    .clock = {
+      .time = {
+        {
+          .year   = 0,
+          .month  = 11,
+          .day    = 20,
+          .hour   = 19,
+          .minute = 50,
+          .second = 0
+        }
+      },
+      ._handle = NULL,
+      .style = kAppGuiClock_NANA,
+      .gui = {0},
+    }
   },
   .info = {
-    .system_initial_time = {
-      /**
-       * @name    Time Stamp  __TIME_STAMP__
-       * @example Thu Oct 19 22:41:50 2023
-       * @note    [0:2]   Weekday
-       *          [4:6]   Month
-       *          [8:9]   Date
-       *          [11:12] Hour
-       *          [14:15] Minute
-       *          [17:18] Second
-       *          [20:23] Year
-      */
-      {
-#if 0 // No idea why this doesn't work
-        .year   = (__TIMESTAMP__[20]-'0')*1000 + (__TIMESTAMP__[21]-'0')*100 + (__TIMESTAMP__[22]-'0')*10 + (__TIMESTAMP__[23]-'0') - 2024,
-        .month  = 11, // @todo: Fix the correct month
-        .day    = (__TIMESTAMP__[8]-'0')*10 + (__TIMESTAMP__[9]-'0'),
-        .hour   = (__TIMESTAMP__[11]-'0')*10 + (__TIMESTAMP__[12]-'0'),
-        .minute = (__TIMESTAMP__[14]-'0')*10 + (__TIMESTAMP__[15]-'0'),
-        .second = (__TIMESTAMP__[17]-'0')*10 + (__TIMESTAMP__[18]-'0')
-#else
-        .year   = 0,
-        .month  = 11,
-        .day    = 19,
-        .hour   = 11,
-        .minute = 54,
-        .second = 0
-#endif
-      }
-    },
     .status = {
       {
         .display_off = 0,

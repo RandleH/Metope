@@ -55,7 +55,7 @@ cmnBoolean_t cmn_tim2_sleep(u16 ms){
   
   /* Wait until event was called */
   if(metope.app.rtos.status==ON){
-    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM2, pdTRUE, pdFALSE, portMAX_DELAY);
+    xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM2, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
     u32 tmp;
     do{
