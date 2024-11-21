@@ -182,10 +182,10 @@ void add_app_test( void){
   tb_infra_os.insert(
     TestAppTaskFreeRTOS(),
     paramsTestAppTaskFreeRTOS::Input{{
-      {TestAppTaskFreeRTOS::task0, 512},
-      {TestAppTaskFreeRTOS::task1, 512},
+      {app_clock_gui_main, 512},
+      {bsp_screen_main, 512},
       {TestAppTaskFreeRTOS::task2, 128},
-      {paramsTestAppTaskFreeRTOS::task_screen_switch, 128}
+      {bsp_screen_onoff, 128}
     }},
     '\0'
   );

@@ -33,6 +33,11 @@
 extern "C"{
 #endif
 
+/**
+ * @brief UI Clock1 Initialization
+ * @param [out] pClient - The UI Widget Structure Variable
+ * @note UI Clock1 has no special parameters. `pClient->p_anything` will set to `NULL`
+ */
 static void ui_clock1_init(tAppGuiClockParam *pClient)
 {
   pClient->pScreen = lv_scr_act();
@@ -240,7 +245,11 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
 
 }
 
-
+/**
+ * @brief UI Clock1 Set Time
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @note Update needle angle
+ */
 static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
   cmn_utility_angleset( &pClient->_degree_hour, &pClient->_degree_minute, NULL, &time);
   lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -248,6 +257,9 @@ static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
 }
 
 /**
+ * @brief UI Clock1 Inc Time (ms)
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @note Update needle angle
  * @todo: Add assertion for microseconds range
  */
 static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
@@ -261,12 +273,14 @@ static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
   lv_obj_set_style_transform_angle(pClient->pPinMinute, pClient->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
 }
 
-
+/**
+ * @brief UI Clock1 Deinitialization
+ * @param [in] pClient - The UI Widget Structure Variable
+ * @note Everything in `pClient` will set to `NULL` or `0`
+ */
 static void ui_clock1_deinit(tAppGuiClockParam *pClient){
   lv_obj_del(pClient->pScreen);
-  pClient->pPinHour   = NULL;
-  pClient->pPinMinute = NULL;
-  pClient->p_anything = NULL;
+  memset(pClient, 0, sizeof(tAppGuiClockParam));
 }
 
 
@@ -280,6 +294,7 @@ static void ui_clock1_deinit(tAppGuiClockParam *pClient){
 /* ************************************************************************** */
 /*                   Static Clock UI Function - clock_nana                    */
 /* ************************************************************************** */
+#ifndef TEST_ONLY
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -453,6 +468,11 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
 
 }
 
+/**
+ * @brief UI Clock1 Set Day Night
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @note Update NaNa's eyes
+ */
 static void ui_clocknana_daynight(tAppGuiClockParam *pClient){
   lv_obj_t *ui_nanaeyeopen   = ((tClockNanaInternalParam*)pClient->p_anything)->ui_nanaeyeopen;
   lv_obj_t *ui_nanaeyeclosed = ((tClockNanaInternalParam*)pClient->p_anything)->ui_nanaeyeclosed;
@@ -478,13 +498,11 @@ static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time
   ui_clocknana_daynight(pClient);
 }
 
-
 static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
   ui_clock1_inc_time(pClient, ms);
   cmn_utility_timeinc( &(((tClockNanaInternalParam*)(pClient->p_anything))->time), ms);
   ui_clocknana_daynight(pClient);
 }
-
 
 static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
   vPortFree(pClient->p_anything);
@@ -494,6 +512,7 @@ static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
 #ifdef __cplusplus
 }
 #endif
+#endif  // #ifndef TEST_ONLY
 
 
 /* ************************************************************************** */
