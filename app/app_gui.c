@@ -522,8 +522,16 @@ static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+typedef struct stClockLvvvwInternalParam{
+  lv_color_t ruby_color;
+  lv_obj_t * ui_ruby;
+} tClockLvvvwInternalParam;
+
 static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
   pClient->pScreen = lv_scr_act();
+  pClient->p_anything = pvPortMalloc(sizeof(tClockLvvvwInternalParam));
+
   lv_obj_clear_flag( pClient->pScreen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
   lv_obj_set_style_bg_color(pClient->pScreen, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
   lv_obj_set_style_bg_opa(pClient->pScreen, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -634,16 +642,26 @@ static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
     lv_obj_set_style_border_width(ui_crossver, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
     lv_obj_t *ui_ruby = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( ui_ruby, 18+1); /*!< An offset of 1 looks better on the screen */
-    lv_obj_set_height( ui_ruby, 18);
+    lv_obj_set_width( ui_ruby, 16+1); /*!< An offset of 1 looks better on the screen */
+    lv_obj_set_height( ui_ruby, 16);
     lv_obj_set_align( ui_ruby, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_ruby, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_ruby, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_ruby, lv_color_hex(0xF00707), LV_PART_MAIN | LV_STATE_DEFAULT );
+    ((tClockLvvvwInternalParam*)(pClient->p_anything))->ruby_color = lv_color_hex(0xFF0000);
+    lv_obj_set_style_bg_color(ui_ruby, ((tClockLvvvwInternalParam*)(pClient->p_anything))->ruby_color, LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_ruby, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_ruby, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+#if 0
+    lv_obj_set_style_shadow_color(ui_ruby, ((tClockLvvvwInternalParam*)(pClient->p_anything))->ruby_color, LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_shadow_opa(ui_ruby, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_width(ui_ruby, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_spread(ui_ruby, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_ofs_x(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_ofs_y(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+#endif
+    ((tClockLvvvwInternalParam*)(pClient->p_anything))->ui_ruby = ui_ruby;
   }
   
   {/* Digits Icons: 3,9 */
@@ -751,11 +769,23 @@ static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
     pClient->pPinMinute = ui_pinMinute;
   }
   
-  
 }
 
 static void ui_clocklvvvw_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
   ui_clock1_set_time(pClient, time);
+
+  /**
+   * @todo: Screen shows a glich when moving to init()
+   */
+#if 1
+  lv_obj_t *ui_ruby = ((tClockLvvvwInternalParam*)(pClient->p_anything))->ui_ruby;
+  lv_obj_set_style_shadow_color(ui_ruby, ((tClockLvvvwInternalParam*)(pClient->p_anything))->ruby_color, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_shadow_opa(ui_ruby, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_shadow_width(ui_ruby, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_shadow_spread(ui_ruby, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_shadow_ofs_x(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_shadow_ofs_y(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+#endif
 }
 
 static void ui_clocklvvvw_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
@@ -763,6 +793,7 @@ static void ui_clocklvvvw_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
 }
 
 static void ui_clocklvvvw_deinit(tAppGuiClockParam *pClient){
+  vPortFree(pClient->p_anything);
   ui_clock1_deinit(pClient);
 }
 
