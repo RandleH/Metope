@@ -24,6 +24,7 @@
 #include "FreeRTOS.h"
 #include "global.h"
 #include "app_rtos.h"
+#include "app_gui.h"
 #include "cmn_type.h"
 
 
@@ -40,6 +41,13 @@ void app_rtos_stop( void){
   metope.app.rtos.status = OFF;
   vTaskEndScheduler();
 }
+
+#define app_rtos_idle_callback vApplicationIdleHook
+
+void app_rtos_idle_callback( void ) {
+  app_gui_update_modulo( &metope.app.clock.gui.param);
+}
+
 
 
 #ifdef __cplusplus

@@ -34,7 +34,7 @@
 #define APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE (128U)
 
 #define RTOSTHREAD
-
+#define RTOSIDLE
 
 typedef enum AppTaskPriority{
   kAppPriority_VERY_IMPORTANT = 50,

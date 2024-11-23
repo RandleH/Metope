@@ -39,6 +39,7 @@ extern "C"{
 
 void app_gui_switch( AppGuiClockEnum_t x);
 void app_clock_gui_main(void*param) RTOSTHREAD;
+void app_gui_update_modulo(tAppGuiClockParam *pClient) RTOSIDLE;
 
 #ifdef __cplusplus
 }
