@@ -289,8 +289,6 @@ static void ui_clock1_deinit(tAppGuiClockParam *pClient){
 #endif
 
 
-
-
 /* ************************************************************************** */
 /*                   Static Clock UI Function - clock_nana                    */
 /* ************************************************************************** */
@@ -768,7 +766,6 @@ static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
     lv_obj_set_style_transform_pivot_y(ui_pinMinute, 88, LV_PART_MAIN| LV_STATE_DEFAULT);
     pClient->pPinMinute = ui_pinMinute;
   }
-  
 }
 
 static void ui_clocklvvvw_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
@@ -857,7 +854,6 @@ void app_gui_switch( AppGuiClockEnum_t x){
       metope.app.clock.gui.deinit   = ui_clocknana_deinit;
       break;
     }
-
     case kAppGuiClock_LVVVW:{
       metope.app.clock.gui.init     = ui_clocklvvvw_init;
       metope.app.clock.gui.set_time = ui_clocklvvvw_set_time;

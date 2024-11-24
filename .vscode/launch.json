@@ -115,8 +115,62 @@
 
             }
         },
+        {
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/model1.elf",
+            "name": "ST-Link Download (STM32F411CE)",
+            "request": "launch",
+            "type": "cortex-debug",
+            "device": "STM32F411CE",
+            "runToEntryPoint": "main",
+            "svdFile": "${workspaceFolder}/lib/cmsis-svd-stm32/stm32f4/STM32F411.svd",
+            "interface": "swd",
+            "servertype": "stlink",
+            "showDevDebugOutput":"raw",
+            "swoConfig": {
+                "enabled": false,
+                "cpuFrequency": 96000000,
+                "swoFrequency": 1000000,
+                "source": "probe",
+                "decoders": [
+                    {
+                        "label": "ITM port 0 output",
+                        "type": "console",
+                        "port": 0,
+                        "showOnStartup": true,
+                        "encoding": "ascii"
+                    }
+                ]
 
-
+            }
+        },
+        {
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/model1.elf",
+            "name": "ST-Link Attach (STM32F411CE)",
+            "request": "attach",
+            "type": "cortex-debug",
+            "device": "STM32F411CE",
+            "runToEntryPoint": "main",
+            "svdFile": "${workspaceFolder}/lib/cmsis-svd-stm32/stm32f4/STM32F411.svd",
+            "interface": "swd",
+            "servertype": "stutil",
+            "swoConfig": {
+                "enabled": true,
+                "cpuFrequency": 96000000,
+                "swoFrequency": 1000000,
+                "source": "probe",
+                "decoders": [
+                    {
+                        "label": "ITM port 0 output",
+                        "type": "console",
+                        "port": 0,
+                        "showOnStartup": true,
+                        "encoding": "ascii"
+                    }
+                ]
+            }
+        },
         {
             "cwd": "${workspaceFolder}",
             "executable": "./build/model1.elf",
