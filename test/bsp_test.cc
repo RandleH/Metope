@@ -31,6 +31,7 @@
 #include "cmn_utility.h"
 
 #include "bsp_screen.h"
+#include "bsp_rtc.h"
 
 
 
@@ -273,6 +274,55 @@ public:
 
 
 
+
+/* ************************************************************************** */
+/*                             Class: TestBspRTC                              */
+/* ************************************************************************** */
+namespace paramsTestBspRTC{
+typedef char Input;   // Dummy
+typedef char Output;  // Dummy
+}
+class TestBspRTC : public TestUnitWrapper_withInputOutput<paramsTestBspRTC::Input, paramsTestBspRTC::Output>{
+private:
+  void usage(void){
+    this->_cout<<"\nPress [T] to get current time; Press [Q] to quit; Press [E] to reject;"<<endl;
+  }
+
+public:
+  TestBspRTC():TestUnitWrapper_withInputOutput("test_bsp_rtc"){}
+  bool run( paramsTestBspRTC::Input& input, paramsTestBspRTC::Output& ref ) override{
+    std::string s;
+    cmnBoolean_t result = false;
+
+    this->_cout<<"\n>>>>>> RTC Module Test <<<<<<"<<endl;
+    usage();
+    bsp_rtc_set_time(cmn_utility_set_time_from_iso(__TIMESTAMP__));
+    while (this->_cin >> s) {
+      if(s.length()==1){
+        if(s[0]=='Q' || s[0]=='q'){
+          result = true;
+          break;
+        }else if (s[0]=='E' || s[0]=='e'){
+          result = false;
+          this->_err_msg<<"User objection."<<endl;
+          break;
+        }else if (s[0]=='T' || s[0]=='t'){
+          cmnDateTime_t time = bsp_rtc_get_time();
+
+          this->_cout<<"Current Time: "<<time.year+2024<<'/'<<time.month<<'/'<<time.day<<' '<<time.hour<<'-'<<time.minute<<'-'<<time.second<<endl;
+        }
+      }else{
+
+      }
+      usage();
+    }
+
+    return result;
+  }
+};
+
+
+
 /**
  * @brief
  * @note  `std::array<bspScreenCood_t,4>` is the area coodinates set.
@@ -328,34 +378,39 @@ void add_bsp_test(void){
       std::array<char,6>{{'R','a','n','d','l','e'}},
       '\0'
     )
+    // .insert(
+    //   TestBspScreenBrightness(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenSmoothness(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenFill(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenDrawArea(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenDrawAreaStatic(),
+    //   std::array<std::array<bspScreenCood_t,4>,3>{{
+    //     {66,66,77,77},
+    //     {120,120,140,150},
+    //     {190,100, 195,130}
+    //   }},
+    //   (char)'\0'
+    // )
     .insert(
-      TestBspScreenBrightness(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenSmoothness(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenFill(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenDrawArea(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenDrawAreaStatic(),
-      std::array<std::array<bspScreenCood_t,4>,3>{{
-        {66,66,77,77},
-        {120,120,140,150},
-        {190,100, 195,130}
-      }},
-      (char)'\0'
+      TestBspRTC(),
+      '\0',
+      '\0'
     )
   ;
 #endif

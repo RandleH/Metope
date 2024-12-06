@@ -25,6 +25,7 @@
 #endif
 
 #include "bsp_screen.h"
+#include "bsp_rtc.h"
 #include "app_type.h"
 #include "app_task.h"
 
@@ -72,6 +73,8 @@ void hw_init(void){
 
   MX_TIM3_Init();
 
+  MX_I2C2_Init();
+
   MX_USB_OTG_FS_USB_Init();
   
   cmn_interrupt_init_priority();
@@ -82,6 +85,12 @@ void hw_init(void){
 
 void bsp_init(void){
   bsp_screen_init();
+#if (defined TEST_ONLY) && (TEST_ONLY==1)
+  /**
+   * @note: We only initialize and reset the rtc module when testing.
+   */
+  bsp_rtc_init();
+#endif
 }
 
 
