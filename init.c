@@ -65,6 +65,8 @@ void hw_init(void){
 
   MX_SPI2_Init();
 
+  MX_I2C1_Init();
+
 #if (defined USE_REGISTER) && (USE_REGISTER==1)
   bsp_timer_init();
 #else
