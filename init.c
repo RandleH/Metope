@@ -96,7 +96,10 @@ void bsp_init(void){
 
 #include "app_lvgl.h"
 void app_init(void){
+
+#if (defined TEST_ONLY) && (TEST_ONLY==1) && (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
   app_lvgl_init();
+#endif
 }
 
 
@@ -105,7 +108,10 @@ void os_init(void){
   metope.app.rtos.event._handle = xEventGroupCreateStatic( &metope.app.rtos.event._eg_buffer);
 
 #if (defined TEST_ONLY) && (TEST_ONLY==1)
-  
+  /**
+   * @note
+   *  Tasks were defined in the Test Bench 
+   */
 #else
 
   metope.app.rtos.task.screen_refresh._handle = xTaskCreateStatic(\

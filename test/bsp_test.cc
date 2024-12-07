@@ -22,6 +22,7 @@
 /* ************************************************************************** */
 #include <stdlib.h>
 #include <bitset>
+#include <regex>
 #include "test.hh"
 #include "global.h"
 
@@ -286,6 +287,7 @@ class TestBspRTC : public TestUnitWrapper_withInputOutput<paramsTestBspRTC::Inpu
 private:
   void usage(void){
     this->_cout<<"\nPress [T] to get current time; Press [Q] to quit; Press [E] to reject;"<<endl;
+    this->_cout<<"Type time in format `YYYY-MM-DD-HH:MM:SS` to set time."<<endl;
   }
 
 public:
@@ -296,8 +298,14 @@ public:
 
     this->_cout<<"\n>>>>>> RTC Module Test <<<<<<"<<endl;
     usage();
-    bsp_rtc_set_time(cmn_utility_set_time_from_iso(__TIMESTAMP__));
-    while (this->_cin >> s) {
+
+#if 0
+    cmnDateTime_t time = cmn_utility_set_time_from_iso(__TIMESTAMP__);
+    bsp_rtc_set_time(time);
+#else
+    cmnDateTime_t time;
+#endif
+    while (this->_cin >> std::skipws >> s) {
       if(s.length()==1){
         if(s[0]=='Q' || s[0]=='q'){
           result = true;
@@ -307,12 +315,23 @@ public:
           this->_err_msg<<"User objection."<<endl;
           break;
         }else if (s[0]=='T' || s[0]=='t'){
-          cmnDateTime_t time = bsp_rtc_get_time();
-
+          time = bsp_rtc_get_time();
           this->_cout<<"Current Time: "<<time.year+2024<<'/'<<time.month<<'/'<<time.day<<' '<<time.hour<<'-'<<time.minute<<'-'<<time.second<<endl;
         }
       }else{
-
+        std::regex e("(\\d+)-(\\d+)-(\\d+)-(\\d+):(\\d+):(\\d+)");
+        std::smatch m;
+        if(!std::regex_search (s,m,e)){
+          this->_cout<<"Can NOT parse the timming inputs."<<endl;
+          continue;
+        }
+        time.year   = atoi(m[1].str().c_str())-2024;
+        time.month  = atoi(m[2].str().c_str());
+        time.day    = atoi(m[3].str().c_str());
+        time.hour   = atoi(m[4].str().c_str());
+        time.minute = atoi(m[5].str().c_str());
+        time.second = atoi(m[6].str().c_str());
+        bsp_rtc_set_time(time);
       }
       usage();
     }
@@ -371,8 +390,8 @@ public:
  * @addtogroup TestBench
  */
 void add_bsp_test(void){
-#if (defined INCLUDE_TB_HMI) && (INCLUDE_TB_HMI==1)
-  tb_infra_hmi
+#if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
+  tb_infra_bsp
     .insert(
       TestBspUsartEcho(),
       std::array<char,6>{{'R','a','n','d','l','e'}},

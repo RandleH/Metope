@@ -159,7 +159,7 @@ extern I2C_HandleTypeDef   hi2c2;
 
 
 extern LocalProjectTest     tb_infra_local;
-extern HumanInteractionTest tb_infra_hmi;
+extern HumanInteractionTest tb_infra_bsp;
 extern Test                 tb_infra_os;
 
 #endif
