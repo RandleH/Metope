@@ -61,6 +61,9 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED_Pin GPIO_PIN_13
 #define LED_GPIO_Port GPIOC
+#define KEY_M_Pin GPIO_PIN_0
+#define KEY_M_GPIO_Port GPIOA
+#define KEY_M_EXTI_IRQn EXTI0_IRQn
 #define KEY_R_Pin GPIO_PIN_1
 #define KEY_R_GPIO_Port GPIOA
 #define KEY_R_EXTI_IRQn EXTI1_IRQn
@@ -90,6 +93,10 @@ void Error_Handler(void);
 #define KEY_L_EXTI_IRQn EXTI15_10_IRQn
 #define FLASH_MISO_Pin GPIO_PIN_4
 #define FLASH_MISO_GPIO_Port GPIOB
+#define GYRO_SCK_Pin GPIO_PIN_8
+#define GYRO_SCK_GPIO_Port GPIOB
+#define GYRO_SDA_Pin GPIO_PIN_9
+#define GYRO_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

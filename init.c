@@ -25,6 +25,7 @@
 #endif
 
 #include "bsp_screen.h"
+#include "bsp_gyro.h"
 #include "app_type.h"
 #include "app_task.h"
 
@@ -84,6 +85,7 @@ void hw_init(void){
 
 void bsp_init(void){
   bsp_screen_init();
+  bsp_gyro_init();
 }
 
 
