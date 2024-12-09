@@ -30,6 +30,7 @@
 // @brief  device address
 #define QMI8658_L_SLAVE_ADDRESS                 (0x6B<<1)  /*!< When SA0 pin was pulled up */
 #define QMI8658_H_SLAVE_ADDRESS                 (0x6A<<1)  /*!< When SA0 pin was NOT connected or pulled down */
+#define QMI8658_SLAVE_ADDRESS                   QMI8658_L_SLAVE_ADDRESS
 
 
 // @brief  registers default value
@@ -228,7 +229,7 @@ operates at 300 kHz.
  */
 STATIC cmnBoolean_t bsp_gyro_i2c_polling_send( u8 reg, const u8 *buf, u8 len){
   
-  if(HAL_OK!=HAL_I2C_Mem_Write( &hi2c1, QMI8658_H_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, (u8*)buf, len, HAL_MAX_DELAY)){
+  if(HAL_OK!=HAL_I2C_Mem_Write( &hi2c1, QMI8658_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, (u8*)buf, len, HAL_MAX_DELAY)){
     return ERROR;
   }
   return SUCCESS;
@@ -244,12 +245,13 @@ STATIC cmnBoolean_t bsp_gyro_i2c_polling_send( u8 reg, const u8 *buf, u8 len){
  * @addtogroup MachineDependent
  */
 STATIC cmnBoolean_t bsp_gyro_i2c_polling_recv(  u8 reg, u8 *buf, u8 len){
-  HAL_StatusTypeDef ret = HAL_I2C_Mem_Read( &hi2c1, QMI8658_H_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, buf, len, HAL_MAX_DELAY);
+  // HAL_I2C_Master_Transmit( &hi2c1, QMI8658_SLAVE_ADDRESS, )
+  HAL_StatusTypeDef ret = HAL_I2C_Mem_Read( &hi2c1, QMI8658_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, buf, len, HAL_MAX_DELAY);
   if(HAL_OK!=ret){
     return ERROR;
   }
 
-  // if(HAL_OK!=HAL_I2C_Master_Receive( &hi2c1, QMI8658_H_SLAVE_ADDRESS, buf, nItems, HAL_MAX_DELAY)){
+  // if(HAL_OK!=HAL_I2C_Master_Receive( &hi2c1, QMI8658_SLAVE_ADDRESS, buf, nItems, HAL_MAX_DELAY)){
     // return ERROR;
   // }
 
@@ -331,6 +333,13 @@ u8 bsp_gyro_get_chip_id(void){
   return data;
 }
 
+u8 bsp_gyro_get_who_am_i(void){
+  u8 data = 0x00;
+  if(ERROR==bsp_gyro_i2c_polling_recv(QMI8658_REG_WHOAMI, &data, 1)){
+    data = 0xFF;
+  }
+  return data;
+}
 
 #ifdef __cplusplus
 }

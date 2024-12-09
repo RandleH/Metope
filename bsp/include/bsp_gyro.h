@@ -30,6 +30,7 @@ void bsp_gyro_init(void);
 void bsp_gyro_switch( cmnBoolean_t on_off);
 void bsp_gyro_reset( void);
 u8 bsp_gyro_get_chip_id(void);
+u8 bsp_gyro_get_who_am_i(void);
 
 #ifdef __cplusplus
 }

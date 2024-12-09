@@ -93,6 +93,8 @@ void Error_Handler(void);
 #define KEY_L_EXTI_IRQn EXTI15_10_IRQn
 #define FLASH_MISO_Pin GPIO_PIN_4
 #define FLASH_MISO_GPIO_Port GPIOB
+#define GYRO_EN_Pin GPIO_PIN_7
+#define GYRO_EN_GPIO_Port GPIOB
 #define GYRO_SCK_Pin GPIO_PIN_8
 #define GYRO_SCK_GPIO_Port GPIOB
 #define GYRO_SDA_Pin GPIO_PIN_9
