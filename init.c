@@ -26,6 +26,7 @@
 
 #include "bsp_screen.h"
 #include "bsp_rtc.h"
+#include "bsp_gyro.h"
 #include "app_type.h"
 #include "app_task.h"
 
@@ -89,12 +90,11 @@ void bsp_init(void){
   bsp_screen_init();
 #if (defined TEST_ONLY) && (TEST_ONLY==1)
   /**
-   * @note: We only initialize and reset the rtc module when testing.
    */
   bsp_rtc_init();
 #endif
+  bsp_gyro_init();
 }
-
 
 #include "app_lvgl.h"
 void app_init(void){

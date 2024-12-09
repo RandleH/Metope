@@ -393,6 +393,45 @@ public:
   }
 };
 
+
+/* ************************************************************************** */
+/*                          Class: TestBspGyroscope                           */
+/* ************************************************************************** */
+#include "bsp_gyro.h"
+namespace paramsTestBspGyroscope{
+typedef char Input;   // Dummy
+typedef char Output;  // Dummy
+}
+
+class TestBspGyroscope : public TestUnitWrapper_withInputOutput<paramsTestBspGyroscope::Input,paramsTestBspGyroscope::Output>{
+public:
+  TestBspGyroscope():TestUnitWrapper_withInputOutput("test_bsp_gyroscope"){}
+
+  bool run( paramsTestBspGyroscope::Input &i,paramsTestBspGyroscope::Output &o ) override{
+    string s;
+    bool result = false;
+    
+    int chip_id = bsp_gyro_get_chip_id();
+    this->_cout << "Chip ID="<<chip_id << endl;
+    while(this->_cin >> s){
+      if(s.length()==1){
+        if(s[0]=='Q' || s[0]=='q'){
+          result = true;
+          break;
+        }else if (s[0]=='E' || s[0]=='e'){
+          result = false;
+          this->_err_msg<<"User objection."<<endl;
+          break;
+        }else{
+        }
+      }
+    }
+    bsp_gyro_switch(OFF);
+    return result;
+  }
+};
+
+
 /**
  * @addtogroup TestBench
  */
@@ -435,6 +474,11 @@ void add_bsp_test(void){
     // )
     .insert(
       TestBspRTC(),
+      '\0',
+      '\0'
+    )
+    .insert(
+      TestBspGyroscope(),
       '\0',
       '\0'
     )
