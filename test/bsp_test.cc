@@ -315,8 +315,15 @@ public:
           this->_err_msg<<"User objection."<<endl;
           break;
         }else if (s[0]=='T' || s[0]=='t'){
-          time = bsp_rtc_get_time();
+          u8 raw_7[7];
+          time = bsp_rtc_get_time__debug(raw_7);
           this->_cout<<"Current Time: "<<time.year+2024<<'/'<<time.month<<'/'<<time.day<<' '<<time.hour<<'-'<<time.minute<<'-'<<time.second<<endl;
+
+          for(int i=0; i<7; ++i){
+            this->_cout << '[' << i << ']'<<'='<<"0x"<<std::hex<<((int)(raw_7[i]))<<endl;
+          }
+          this->_cout<< std::dec << endl;
+
         }
       }else{
         std::regex e("(\\d+)-(\\d+)-(\\d+)-(\\d+):(\\d+):(\\d+)");

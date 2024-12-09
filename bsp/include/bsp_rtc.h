@@ -29,8 +29,9 @@ extern "C"{
 
 
 void bsp_rtc_init(void);
-cmnDateTime_t bsp_rtc_get_time(void);
 void bsp_rtc_set_time( const cmnDateTime_t t);
+cmnDateTime_t bsp_rtc_get_time__debug( u8 *raw_7);
+cmnDateTime_t bsp_rtc_get_time(void);
 
 #ifdef __cplusplus
 }

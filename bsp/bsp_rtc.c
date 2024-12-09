@@ -24,17 +24,20 @@
 /* ************************************************************************** */
 
 #include "bsp_rtc.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_i2c.h"
-#include "stm32f4xx_hal_dma.h"
-
 #include "global.h"
 
+#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+  #include "stm32f4xx_hal.h"
+  #include "stm32f4xx_hal_i2c.h"
+  #include "stm32f4xx_hal_dma.h"
+#endif
 
 
 
 
-
+/* ************************************************************************** */
+/*                                  Macros                                    */
+/* ************************************************************************** */
 #define PCF8563_ADDRESS               (0x51<<1)
 #define PCF8563_I2C_TIMEOUT           100
 
@@ -127,7 +130,64 @@ static void bsp_rtc_write_reg_bit( u8 reg, u8 bit_pos, u8 bit_len, u8 bit_val){
  * @addtogroup MachineDependent
  */
 static void bsp_rtc_read_reg( u8 reg, u8 *buf, u8 len){
+#if 0 //(defined USE_REGISTER) && (USE_REGISTER==1)
+  volatile u32 tmp;
+
+  SET_BIT(I2C2->CR1, I2C_CR1_PE);
+
+  CLEAR_BIT(I2C2->CR1, I2C_CR1_POS);
+
+  /* Send Slave Address and Memory Address */
+  SET_BIT(I2C2->CR1, I2C_CR1_ACK);
+
+  /* Generate Start */
+  SET_BIT(I2C2->CR1, I2C_CR1_START);
+
+  /* Send slave address */
+  I2C2->DR = I2C_7BIT_ADD_WRITE(PCF8563_ADDRESS);
+  
+  /* Wait until ADDR flag is set */
+  while(0==READ_BIT(I2C2->SR1, I2C_SR1_ADDR)){}
+  /* Clear ADDR flag */
+  tmp = I2C2->SR1;
+  tmp = I2C2->SR2;
+
+  while(0==READ_BIT(I2C2->SR1, I2C_SR1_TXE)){
+    /* Detect if Nack exist */
+  }
+  
+  I2C2->DR = I2C_MEM_ADD_LSB(reg);
+
+  while(0==READ_BIT(I2C2->SR1, I2C_SR1_TXE)){
+    /* Detect if Nack exist */
+  }
+
+  /* Generate Restart */
+  SET_BIT(I2C2->CR1, I2C_CR1_START);
+
+  while(0==READ_BIT(I2C2->SR1, I2C_SR1_SB)){
+  }
+
+  // if (READ_BIT(I2C2->CR1, I2C_CR1_START) == I2C_CR1_START){
+  //   while(1);
+  // }
+
+  /* Send slave address */
+  I2C2->DR = I2C_7BIT_ADD_READ(PCF8563_ADDRESS);
+  
+  /* Wait until ADDR flag is set */
+  while(0==READ_BIT(I2C2->SR1, I2C_SR1_ADDR)){}
+  /* Clear ADDR flag */
+  tmp = I2C2->SR1;
+  tmp = I2C2->SR2;
+
+  //...//
+  while(len > 0U){
+
+  }
+#else
   HAL_I2C_Mem_Read( &hi2c2, PCF8563_ADDRESS, reg, 1, buf, len, PCF8563_I2C_TIMEOUT);
+#endif
 }
 
 /**
@@ -196,22 +256,29 @@ void bsp_rtc_init( void){
   bsp_rtc_switch(ON);
 }
 
+/**
+ * @note: PCF8563 only
+ */
+void bsp_rtc_decode_datetime( cmnDateTime_t *x, u8 *raw_7){
+  x->second = bcd2dec(raw_7[0] & 0x7F);
+  x->minute = bcd2dec(raw_7[1] & 0x7F);
+  x->hour   = bcd2dec(raw_7[2] & 0x3F);
+  x->day    = bcd2dec(raw_7[3] & 0x3F);
+  x->month  = bcd2dec(raw_7[5] & 0x1F);
+  x->year   = 2000+bcd2dec(raw_7[6])-2024;
+  // DayOfWeek = bcd2dec(raw_7[4] + 1);
+}
+
+cmnDateTime_t bsp_rtc_get_time__debug( u8 *raw_7){
+  cmnDateTime_t result;
+  bsp_rtc_read_reg( PCF8563_REG_TIME, raw_7, 7);
+  bsp_rtc_decode_datetime( &result, raw_7);
+  return result;
+}
 
 cmnDateTime_t bsp_rtc_get_time( void){
-  u8 tmp[7];
-  cmnDateTime_t result;
-  bsp_rtc_read_reg( PCF8563_REG_TIME, tmp, 7);
-  
-  result.second = bcd2dec(tmp[0] & 0x7F);
-  result.minute = bcd2dec(tmp[1]);
-  result.hour   = bcd2dec(tmp[2]);
-  result.day    = tmp[3];
-  result.month  = bcd2dec(tmp[5] & 0x1F);
-  result.year   = 2000+bcd2dec(tmp[6])-2024;
-
-  // DayOfWeek = bcd2dec(tmp[4] + 1);
-  
-  return result;
+  u8 raw_7[7];
+  return bsp_rtc_get_time__debug(raw_7);
 }
 
 
