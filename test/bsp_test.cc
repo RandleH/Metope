@@ -412,7 +412,8 @@ public:
     bool result = false;
     
     int chip_id = bsp_gyro_get_chip_id();
-    this->_cout << "Chip ID="<<chip_id << endl;
+    int whoami  = bsp_gyro_get_who_am_i();
+    this->_cout << "Chip ID="<<chip_id << " WhoAmI=" << whoami << endl;
     while(this->_cin >> s){
       if(s.length()==1){
         if(s[0]=='Q' || s[0]=='q'){
