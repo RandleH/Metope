@@ -23,6 +23,7 @@
 #include "cmn_interrupt.h"
 #include "cmn_utility.h"
 #include "cmn_callback.h"
+#include "bsp_led.h"
 #include "global.h"
 #include "FreeRTOS.h"
 #include "event_groups.h"
@@ -285,7 +286,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
    * @note: B5 QMI8658C INT1 Rising Edge Trigger
    */
   if(GPIO_Pin==GYRO_INT1_Pin){
-    
     metope.dev.status.B5 = 1;
   }
 
@@ -300,7 +300,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
    * @note: A9 Screen Touch Trigger
    */
   if(GPIO_Pin==TP_INT_Pin){
-    bsp_led__toggle();
+    bsp_led_toggle();
   }
 }
 

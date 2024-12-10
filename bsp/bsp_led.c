@@ -53,7 +53,7 @@ void inline bsp_led__off( void){
 /**
  * @addtogroup MachineDependent
  */
-void inline bsp_led__toggle( void){
+void inline bsp_led_toggle( void){
   LED_GPIO_Port->ODR ^= LED_Pin;
 }
 

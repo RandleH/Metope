@@ -418,29 +418,60 @@ void bsp_qmi8658_switch( cmnBoolean_t on_off){
   HAL_GPIO_WritePin( GYRO_EN_GPIO_Port, GYRO_EN_Pin, on_off!=OFF);
 }
 
+
+/**
+ * @brief Software Reset Chip
+ * @note  Register Address: 0x60 [REG RESET]
+ */
 void bsp_qmi8658_reset( void){
   u8 data = QMI8658_REG_RESET_DEFAULT;
   bsp_qmi8658_i2c_polling_send( QMI8658_REG_RESET, &data, sizeof(data));
 
   /* Wait until an interrupt occurred */
   while(metope.dev.status.B5==0);
-  volatile tQmi8658RegSTATUS1 reg_status1 = {0};
+  tQmi8658RegSTATUS1 reg_status1 = {0};
   bsp_qmi8658_i2c_polling_recv( QMI8658_REG_STATUS1, &reg_status1.reg, 1);
   metope.dev.status.B5 = 0;
 }
 
-/**
- * @todo
- */
-void bsp_qmi8658_select_mode(qmi8658_mode_t qmi8658_mode ) {
-  u8 data;
-  bsp_qmi8658_i2c_polling_recv( QMI8658_REG_CTRL7, &data, 1);
-  data = (0xFC & data) | qmi8658_mode;
-  bsp_qmi8658_i2c_polling_send( QMI8658_REG_CTRL7, &data, 1);
-}
 
 /**
- * @todo
+ * @brief Choose Select mode
+ * @note  Register Address: 0x08 [REG CTRL7]
+ * @param [in] qmi8658_mode
+ */
+void bsp_qmi8658_select_mode(qmi8658_mode_t qmi8658_mode) {
+  tQmi8658RegCTRL7 reg_ctrl7;
+  bsp_qmi8658_i2c_polling_recv( QMI8658_REG_CTRL7, &reg_ctrl7.reg, 1);
+  reg_ctrl7.syncSmpl = 0;
+  switch(qmi8658_mode){
+    case qmi8658_mode_acc_only:{
+      reg_ctrl7.aEN = 1;
+      reg_ctrl7.gEN = 0;
+      break;
+    }
+    case qmi8658_mode_gyro_only:{
+      reg_ctrl7.aEN = 0;
+      reg_ctrl7.gEN = 1;
+      break;
+    }
+    case qmi8658_mode_dual:
+    default:{
+      reg_ctrl7.aEN = 1;
+      reg_ctrl7.gEN = 1;
+      break;
+    }
+  }
+  
+  bsp_qmi8658_i2c_polling_send( QMI8658_REG_CTRL7, &reg_ctrl7.reg, 1);
+}
+
+
+/**
+ * @brief Config Accelerometer Output Data Rate & Scale Sensitivity
+ * @note  Register Address: 0x03 [REG CTRL2]
+ * @param [in] odr   Output Data Rate
+ * @param [in] scale Scale Sensitivity
  */
 static void bsp_qmi8658_acc_setting( acc_odr_t odr, acc_scale_t scale){
   tQmi8658RegCTRL2 reg_ctrl2;
@@ -465,8 +496,12 @@ static enum tBspGyroAccSensitivity bsp_qmi8658_get_acc_scale(void){
   }
 }
 
+
 /**
- * @todo
+ * @brief Config Gyroscope(Angular Rate) Output Data Rate & Scale Sensitivity
+ * @note  Register Address: 0x04 [REG CTRL3]
+ * @param [in] odr   Output Data Rate
+ * @param [in] scale Scale Sensitivity
  */
 static void bsp_qmi8658_gyro_setting(gyro_odr_t odr, gyro_scale_t scale){
   tQmi8658RegCTRL3 reg_ctrl3;
@@ -476,7 +511,11 @@ static void bsp_qmi8658_gyro_setting(gyro_odr_t odr, gyro_scale_t scale){
   bsp_qmi8658_i2c_polling_send( QMI8658_REG_CTRL3, &reg_ctrl3.reg, 1);
 }
 
-
+/**
+ * @brief  Get Gyroscope(Angular Rate) Scale Sensitivity
+ * @note   Register Address: 0x04 [REG CTRL3]
+ * @return Return Gyroscope(Angular Rate) Scale Sensitivity
+ */
 static enum tBspGyroDegreeSensitivity bsp_qmi8658_get_gyro_scale(void){
   tQmi8658RegCTRL3 reg_ctrl3 = {.reg=bsp_qmi8658_i2c_read_reg(QMI8658_REG_CTRL3)};
 
@@ -491,6 +530,11 @@ static enum tBspGyroDegreeSensitivity bsp_qmi8658_get_gyro_scale(void){
 
 /**
  * @brief QMI8658 Device Initialization
+ * @note  Accelerometer Output Rate: 8000Hz
+ * @note  Accelerometer Full Scale: 2g
+ * @note  Gyroscope Output Rate: 8000Hz
+ * @note  Gyroscope Full Scale: 16 degree per second
+ * @return `SUCCESS` | `ERROR`
  */
 cmnBoolean_t bsp_qmi8658_init(void){
   bsp_qmi8658_switch(ON);
@@ -512,6 +556,11 @@ cmnBoolean_t bsp_qmi8658_init(void){
 }
 
 
+/**
+ * @brief  Chip Revision ID
+ * @note   Register Address: 0x01
+ * @return Return Revision ID
+ */
 u8 bsp_qmi8658_get_chip_id(void){
   u8 data = 0x00;
   if(ERROR==bsp_qmi8658_i2c_polling_recv(QMI8658_REG_REVISION, &data, 1)){
@@ -520,6 +569,12 @@ u8 bsp_qmi8658_get_chip_id(void){
   return data;
 }
 
+
+/**
+ * @brief  Chip Who Am I
+ * @note   Register Address: 0x00
+ * @return Return Who Am I value. Always 0x05.
+ */
 u8 bsp_qmi8658_get_who_am_i(void){
   u8 data = 0x00;
   if(ERROR==bsp_qmi8658_i2c_polling_recv(QMI8658_REG_WHOAMI, &data, 1)){
@@ -527,6 +582,7 @@ u8 bsp_qmi8658_get_who_am_i(void){
   }
   return data;
 }
+
 
 /**
  * @brief Update the date for once
@@ -558,6 +614,7 @@ cmnBoolean_t bsp_qmi8658_updating( tBspGyroData *data){
   return false;
 }
 
+
 /**
  * @brief Stop updating the data
  */
@@ -565,9 +622,11 @@ cmnBoolean_t bsp_qmi8658_stop_updating(void){
   return false;
 }
 
+
 u8 bsp_qmi8658_debug_read_reg(u8 reg){
   return bsp_qmi8658_i2c_read_reg(reg);
 }
+
 
 void bsp_qmi8658_debug_write_reg(u8 reg, u8 val){
   bsp_qmi8658_i2c_write_reg(reg, val);

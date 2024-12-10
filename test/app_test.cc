@@ -123,7 +123,7 @@ public:
   static void task2(void*param){
     while(1){
       cmn_tim2_sleep(1000);
-      bsp_led__toggle();
+      bsp_led_toggle();
     }
   }
   TestAppTaskFreeRTOS():TestUnitWrapper_withInputOutput("test_app_task_freertos"){}
