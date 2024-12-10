@@ -85,7 +85,9 @@ void hw_init(void){
 
 void bsp_init(void){
   bsp_screen_init();
-  bsp_gyro_init();
+#ifndef TEST_ONLY
+  bsp_qmi8658_init();
+#endif
 }
 
 

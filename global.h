@@ -62,15 +62,19 @@ typedef struct{
     SPI_HandleTypeDef  * const pHspi2;
     UART_HandleTypeDef * const pHuart2;
     TIM_HandleTypeDef  * const pHtim3;
+    I2C_HandleTypeDef  * const pHi2c1;
 
     union{
       struct{
-        u16 spi2  : 1;
-        u16 uart2 : 1;
-        u16 tim3  : 1;
-        u16 reserved : 13;
+        u16 spi2  : 1; /*!< Display Screen */
+        u16 uart2 : 1; /*!< Uart Debugging Message */
+        u16 tim3  : 1; /*!< System Delay Timer */
+        u16 i2c1  : 1; /*!< QMI8658C - I2C Bus */
+        u16 B5    : 1; /*!< QMI8658C - INT1 */
+        u16 B6    : 1; /*!< QMI8658C - INT2 */
+        u16 reserved : 10;
       };
-      u16 word;
+      volatile u16 word;
     }status;
     //...//
   }dev;
