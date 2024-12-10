@@ -90,10 +90,16 @@ void bsp_init(void){
   bsp_screen_init();
 #if (defined TEST_ONLY) && (TEST_ONLY==1)
   /**
+   * @note: Module need to initialize ONLY in test mode
    */
   bsp_rtc_init();
+#else
+  /**
+   * @note: Module will be initialized during the test
+   */
+  bsp_qmi8658_init();
 #endif
-  bsp_gyro_init();
+
 }
 
 #include "app_lvgl.h"

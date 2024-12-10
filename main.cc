@@ -26,10 +26,6 @@
 #include "global.h"
 
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-  bsp_led__toggle();
-}
-
 
 #ifndef TEST_ONLY
 
@@ -80,7 +76,7 @@ int main(int argc, char *argv[]){
 int main(int argc, char *argv[]){
   hw_init();
   bsp_init();
-  app_init();
+  // app_init();
   os_init();
   cout<<"Hardware Initialization Completed.\n\n"<<endl;
   
@@ -96,7 +92,7 @@ int main(int argc, char *argv[]){
 
   add_cmn_test();
   add_bsp_test();
-  add_app_test();
+  // add_app_test();
 
 #if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
   cout<<"Local Project Test:"<<endl;

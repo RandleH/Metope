@@ -62,6 +62,12 @@
 #define KEY_M_EXTI_IRQn       EXTI0_IRQn
 #define FLASH_MISO_Pin        GPIO_PIN_4
 #define FLASH_MISO_GPIO_Port  GPIOB
+#define GYRO_INT1_Pin         GPIO_PIN_5
+#define GYRO_INT1_GPIO_Port   GPIOB
+#define GYRO_INT1_EXTI_IRQn   EXTI9_5_IRQn
+#define GYRO_INT2_Pin         GPIO_PIN_6
+#define GYRO_INT2_GPIO_Port   GPIOB
+#define GYRO_INT2_EXTI_IRQn   EXTI9_5_IRQn
 #define GYRO_EN_Pin           GPIO_PIN_7
 #define GYRO_EN_GPIO_Port     GPIOB
 #define GYRO_SCK_Pin          GPIO_PIN_8
