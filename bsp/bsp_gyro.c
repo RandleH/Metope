@@ -220,24 +220,82 @@ typedef enum {
   gyro_odr_31_25,    // Gyroscope ODR set to 31.25 Hz.
 } gyro_odr_t;
 
-
+typedef union{
+#if (defined QMI8658A)
+  struct{
+    u8 Avail    : 1;
+    u8 Locked   : 1;
+    u8 Reserved : 5;
+    u8 CmdDone  : 1;
+  };
+#elif (defined QMI8658C)
+  struct{
+    u8 Avail    : 1;
+    u8 Locked   : 1;
+    u8 Reserved : 6;
+  };
+#endif
+  u8 reg;
+} tQmi8658RegSTATUSINT;
 
 typedef union{
+#if (defined QMI8658A)
+  struct{
+    u8 aDA               : 1;
+    u8 gDA               : 1;
+    u8 Reserved          : 6;
+  };
+#elif (defined QMI8658C)
   struct{
     u8 CmdDone  : 1; /*!< Bit read by Host Processor as part of CTRL9 register protocol. Used to indicate ctrl9 Command was done. */
     u8 reserved : 7;
   };
+#endif
+  u8 reg;
+} tQmi8658RegSTATUS0;
+
+typedef union{
+#if (defined QMI8658A)
+  struct{
+    u8 Reserved0         : 1;
+    u8 TAP               : 1;
+    u8 WoM               : 1;
+    u8 Reserved1         : 1;
+    u8 Pedometer         : 1;
+    u8 AnyMotion         : 1;
+    u8 NoMotion          : 1;
+    u8 SignificantMotion : 1;
+  };
+#elif (defined QMI8658C)
+  struct{
+    u8 CmdDone  : 1; /*!< Bit read by Host Processor as part of CTRL9 register protocol. Used to indicate ctrl9 Command was done. */
+    u8 reserved : 7;
+  };
+#endif
   u8 reg;
 } tQmi8658RegSTATUS1;
 
 typedef union{
+#if (defined QMI8658A)
+  struct{
+    u8 SensorDisable : 1; /*!< 0: Enables internal 2 MHz oscillator; 1: Disables internal 2 MHz oscillator */
+    u8 reserved      : 1;
+    u8 FIFO_INT_SEL  : 1; /*!< 0: FIFO interrupt is mapped to INT2 pin; 1: FIFO interrupt is mapped to INT1 pin */
+    u8 INT1_EN       : 1; /*!< 0: INT1 pin is high-Z mode; 1: INT1 pin output is enabled */
+    u8 INT2_EN       : 1; /*!< 0: INT2 pin is high-Z mode; 1: INT2 pin output is enabled */
+    u8 BE            : 1; /*!< 0: Serial interface (SPI, I2C, I3C) read data Little-Endian; 1: Serial interface (SPI, I2C, I3C) read data Big-Endian */
+    u8 ADDR_AI       : 1; /*!< 0: Serial interface (SPI or I2C) address do not auto increment.; 1: Serial interface (SPI or I2C) address auto increment */
+    u8 SIM           : 1; /*!< 0: Enables 4-wire SPI interface; 1: Enables 3-wire SPI interface */
+  };
+#elif (defined QMI8658C)
   struct{
     u8 SensorDisable : 1; /*!< 0: Enables internal 2 MHz oscillator; 1: Disables internal 2 MHz oscillator */
     u8 reserved      : 4;
-    u8 SPI_BE        : 1;
-    u8 AI            : 1; /*!< 0: Serial interface (SPI or I2C) address do not auto increment.; 1: Serial interface (SPI or I2C) address auto increment */
+    u8 BE            : 1; /*!< 0: Serial interface (SPI, I2C, I3C) read data Little-Endian; 1: Serial interface (SPI, I2C, I3C) read data Big-Endian */
+    u8 ADDR_AI       : 1; /*!< 0: Serial interface (SPI or I2C) address do not auto increment.; 1: Serial interface (SPI or I2C) address auto increment */
     u8 SIM           : 1; /*!< 0: Enables 4-wire SPI interface; 1: Enables 3-wire SPI interface */
   };
+#endif
   u8 reg;
 } tQmi8658RegCTRL1;
 
@@ -250,7 +308,6 @@ typedef union{
   u8 reg;
 } tQmi8658RegCTRL2;
 
-
 typedef union{
   struct{
     u8 gODR : 4;
@@ -260,23 +317,91 @@ typedef union{
   u8 reg;
 } tQmi8658RegCTRL3;
 
+#if (defined QMI8658C)
+typedef union{
+  struct{
+    u8 mODR       : 3;
+    u8 mDEV       : 4;
+    u8 Reserved   : 1;
+  };
+  u8 reg;
+} tQmi8658RegCTRL4;
+#endif
 
 typedef union{
   struct{
-    u8 aEN : 1;   /*!<  1: Enable Accelerometer */
-    u8 gEN : 1;   /*!<  1: Enable Gyroscope */
-    u8 mEN : 1;   /*!<  1: Enable Magnetometer */
-    u8 sEN : 1;   /*!<  0: Disable AttitudeEngine orientation and velocity increment computation
-                        1: Enable AttitudeEngine orientation and velocity increment computation */
-    u8 gSN : 1;   /*!<  0: Gyroscope in Full Mode (Drive and Sense are enabled). 
-                        1: Gyroscope in Snooze Mode (only Drive enabled). 
-                        This bit is effective only when gEN is set to 1. */
-    u8 reserved  : 1;
-    u8 sys_hs    : 1;
-    u8 syncSmpl  : 1;
+    u8 aLPF_EN    : 1;
+    u8 aLPF_MODE  : 2;
+    u8 Reserved0  : 1;
+    u8 gLPF_EN    : 1;
+    u8 gLPF_MODE  : 2;
+    u8 Reserved1  : 1;
   };
   u8 reg;
+} tQmi8658RegCTRL5;
+
+#if (defined QMI8658C)
+typedef union{
+  struct{
+    u8 sODR      : 3; /*!< Attitude Engine Output Data Rate (ODR) */
+    u8 Reserved  : 4;
+    u8 sMoD      : 1; /*!< 0: Disables Motion on Demand. 1: Enables Motion on Demand (Requires sEN=1). */
+  };
+  u8 reg;
+} tQmi8658RegCTRL6;
+#endif
+
+typedef union{
+#if (defined QMI8658A)
+  struct{
+    u8 aEN       : 1;   /*!< 1: Enable Accelerometer */
+    u8 gEN       : 1;   /*!< 1: Enable Gyroscope */
+    u8 Reserved0 : 2;
+    u8 gSN       : 1;   /*!< 0: Gyroscope in Full Mode (Drive and Sense are enabled). 1: Gyroscope in Snooze Mode (only Drive enabled). 
+                        This bit is effective only when gEN is set to 1. */
+    u8 DRDY_DIS  : 1;   /*!< 0: DRDY(Data Ready) is enabled, is driven to the INT2 pin. 1: DRDY(Data Ready) is disabled, is blocked from the INT2 pin */
+    u8 Reserved1 : 1;
+    u8 syncSmpl  : 1;   /*!< 0: Disable SyncSample mode; 1: Enable SyncSample mode */
+  };
+#elif (defined QMI8658C)
+  struct{
+    u8 aEN       : 1;   /*!<  1: Enable Accelerometer */
+    u8 gEN       : 1;   /*!<  1: Enable Gyroscope */
+    u8 mEN       : 1;   /*!<  1: Enable Magnetometer */
+    u8 sEN       : 1;   /*!<  0: Disable AttitudeEngine orientation and velocity increment computation
+                              1: Enable AttitudeEngine orientation and velocity increment computation */
+    u8 gSN       : 1;   /*!<  0: Gyroscope in Full Mode (Drive and Sense are enabled). 
+                              1: Gyroscope in Snooze Mode (only Drive enabled). 
+                              This bit is effective only when gEN is set to 1. */
+    u8 Reserved  : 1;
+    u8 sys_hs    : 1;
+    u8 syncSmpl  : 1;   /*!< 0: Disable SyncSample mode; 1: Enable SyncSample mode */
+  };
+#endif
+  u8 reg;
 } tQmi8658RegCTRL7;
+
+typedef union{
+  struct{
+    u8 FIFO_MODE    :2;
+    u8 FIFO_SIZE    :2;
+    u8 Reserved     :3;
+    u8 FIFO_RD_MODE :1;
+  };
+  u8 reg;
+} tQmi8658RegFIFO_CTRL;
+
+typedef union{
+  struct{
+    u8 FIFO_SMPL_CNT_MSB : 2;
+    u8 Reserved          : 2;
+    u8 FIFO_NOT_EMPTY    : 1;
+    u8 FIFO_OVFLOW       : 1;
+    u8 FIFO_WTM          : 1;
+    u8 FIFO_FULL         : 1;
+  };
+  u8 reg;
+} tQmi8658RegFIFO_STATUS;
 
 
 /**

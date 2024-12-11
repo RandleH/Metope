@@ -273,10 +273,17 @@ void SVC_Handler( void){
 /**
  * @note  1ms System Interrupt
  */
-void DEFAULT SysTick_Handler( void){
+void SysTick_Handler( void){
+  // /Users/randleh/Desktop/Metope/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c
   extern void FreeRTOS_SysTick_Handler( void);
-  FreeRTOS_SysTick_Handler();
-  // HAL_IncTick();
+  /* Clear overflow flag */
+  SysTick->CTRL;
+
+  if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+    /* Call tick handler */
+    xPortSysTickHandler();
+  }
+  HAL_IncTick();
 }
 
 void ADC_IRQHandler( void){}
@@ -301,6 +308,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
    */
   if(GPIO_Pin==TP_INT_Pin){
     bsp_led_toggle();
+    metope.dev.status.A9 = 1;
   }
 }
 

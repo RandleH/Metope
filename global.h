@@ -72,6 +72,7 @@ typedef struct{
         u16 i2c1  : 1; /*!< QMI8658C - I2C Bus */
         u16 B5    : 1; /*!< QMI8658C - INT1 */
         u16 B6    : 1; /*!< QMI8658C - INT2 */
+        u16 A9    : 1; /*!< TP_INT - Touch Screen */
         u16 reserved : 10;
       };
       volatile u16 word;

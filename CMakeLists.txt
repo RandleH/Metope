@@ -79,6 +79,14 @@ if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6") OR (CHIP STREQUAL "STM32F405RGT
     list(APPEND CPU_FLAG  "-mcpu=cortex-m4")
 endif()
 
+if((NOT IMU) OR (IMU STREQUAL "QMI8658A") )
+    list(APPEND DEF_LIST "-DQMI8658A=1")
+elseif(IMU STREQUAL "QMI8658C")
+    list(APPEND DEF_LIST "-DQMI8658C=1")
+elseif(IMU STREQUAL "MPU6050")
+    list(APPEND DEF_LIST "-DMPU6050=1")
+endif()
+
 add_compile_options( ${CPU_FLAG})
 add_link_options( ${CPU_FLAG})
 

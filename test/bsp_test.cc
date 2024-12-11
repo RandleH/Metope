@@ -425,18 +425,28 @@ public:
           this->_err_msg<<"User objection."<<endl;
           break;
         }else if (s[0]=='T' || s[0]=='t'){
-          tBspGyroData data = {0};
-          cmnBoolean_t ret = bsp_qmi8658_update( &data);
-          this->_cout << "updated="<<(int)ret<<endl;
-          this->_cout << "g.xyz = ["  << ((float)data.gyro.x / data.gyro.deg_sensitivity) << ',' 
-                                      << ((float)data.gyro.y / data.gyro.deg_sensitivity) << ',' 
-                                      << ((float)data.gyro.z / data.gyro.deg_sensitivity) << ']' << endl;
-          this->_cout << "g_fs  = " << data.gyro.deg_sensitivity << endl;
-          this->_cout << "a.xyz = ["  << ((float)data.acc.x / data.acc.acc_sensitivity) << ',' 
-                                      << ((float)data.acc.y / data.acc.acc_sensitivity) << ',' 
-                                      << ((float)data.acc.z / data.acc.acc_sensitivity) << ']' << endl;
-          this->_cout << "a_fs  = " << data.acc.acc_sensitivity << endl;
-          this->_cout << "temperature=" << (data.temperature / 256.0) << endl;
+          metope.dev.status.A9 = 0;
+          while(metope.dev.status.A9==0){
+            tBspGyroData data = {0};
+            std::stringstream tmp1, tmp2;
+            cmnBoolean_t ret = bsp_qmi8658_update( &data);
+            // this->_cout << "temperature=" << (data.temperature / 256.0) << endl;
+
+            tmp1 << "a.xyz = [" << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.x / data.acc.acc_sensitivity) << ',' 
+                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.y / data.acc.acc_sensitivity) << ',' 
+                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.z / data.acc.acc_sensitivity) << "]";
+            this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp1.str();
+            this->_cout << "\n";
+
+            tmp2 << "g.xyz = [" << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.x / data.gyro.deg_sensitivity) << ',' 
+                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.y / data.gyro.deg_sensitivity) << ',' 
+                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.z / data.gyro.deg_sensitivity) << "]";
+            this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp2.str();
+            this->_cout << "\r" << "\033[F" << "\r" << std::flush;
+
+            bsp_qmi8658_debug_read_reg(0x2E);
+            HAL_Delay(100);
+          }
         }
       }else{
         // std::regex ex_read ("r/0x[0-9a-fA-F]+"); // r/0[xX][0-9a-fA-F]+
