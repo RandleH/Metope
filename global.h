@@ -149,8 +149,12 @@ extern DMA_HandleTypeDef   hdma_spi2_tx;
 extern TIM_HandleTypeDef   htim2;
 extern TIM_HandleTypeDef   htim3;
 extern UART_HandleTypeDef  huart2;
-extern I2C_HandleTypeDef   hi2c2;
 extern I2C_HandleTypeDef   hi2c1;
+extern DMA_HandleTypeDef   hdma_i2c1_rx;
+extern DMA_HandleTypeDef   hdma_i2c1_tx;
+extern I2C_HandleTypeDef   hi2c2;
+extern DMA_HandleTypeDef   hdma_i2c2_rx;
+extern DMA_HandleTypeDef   hdma_i2c2_tx;
 
 
 #ifdef __cplusplus
