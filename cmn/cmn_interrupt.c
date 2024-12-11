@@ -23,6 +23,7 @@
 #include "cmn_interrupt.h"
 #include "cmn_utility.h"
 #include "cmn_callback.h"
+#include "bsp_led.h"
 #include "global.h"
 #include "FreeRTOS.h"
 #include "event_groups.h"
@@ -272,15 +273,48 @@ void SVC_Handler( void){
 /**
  * @note  1ms System Interrupt
  */
-void DEFAULT SysTick_Handler( void){
+void SysTick_Handler( void){
+  // /Users/randleh/Desktop/Metope/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c
   extern void FreeRTOS_SysTick_Handler( void);
-  FreeRTOS_SysTick_Handler();
-  // HAL_IncTick();
+  /* Clear overflow flag */
+  SysTick->CTRL;
+
+  if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+    /* Call tick handler */
+    xPortSysTickHandler();
+  }
+  HAL_IncTick();
 }
 
 void ADC_IRQHandler( void){}
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+  /**
+   * @note: B5 QMI8658C INT1 Rising Edge Trigger
+   */
+  if(GPIO_Pin==GYRO_INT1_Pin){
+    metope.dev.status.B5 = 1;
+  }
+
+  /**
+   * @note: B6 QMI8658C INT2 Rising Edge Trigger
+   */
+  if(GPIO_Pin==GYRO_INT2_Pin){
+    metope.dev.status.B6 = 1;
+  }
+  
+  /**
+   * @note: A9 Screen Touch Trigger
+   */
+  if(GPIO_Pin==TP_INT_Pin){
+    bsp_led_toggle();
+    metope.dev.status.A9 = 1;
+  }
+}
+
 void EXTI9_5_IRQHandler(void){
+  HAL_GPIO_EXTI_IRQHandler(GYRO_INT1_Pin);
+  HAL_GPIO_EXTI_IRQHandler(GYRO_INT2_Pin);
   HAL_GPIO_EXTI_IRQHandler(TP_INT_Pin);
 }
 
@@ -381,8 +415,32 @@ void DEFAULT EXTI1_IRQHandler( void){
 void EXTI2_IRQHandler( void){}       
 void EXTI3_IRQHandler( void){}       
 void EXTI4_IRQHandler( void){}       
-void DMA1_Stream0_IRQHandler( void){}
-void DMA1_Stream1_IRQHandler( void){}
+
+/**
+ * @note  QMI8658 I2C RX Interrupt
+ */
+void DMA1_Stream0_IRQHandler( void){
+  extern DMA_HandleTypeDef hdma_i2c1_rx;
+  HAL_DMA_IRQHandler(&hdma_i2c1_rx);
+}
+
+/**
+ * @note  QMI8658 I2C TX Interrupt
+ */
+void DMA1_Stream1_IRQHandler( void){
+  extern DMA_HandleTypeDef hdma_i2c1_tx;
+  HAL_DMA_IRQHandler(&hdma_i2c1_tx);
+  if(metope.app.rtos.status==ON){
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+    xHigherPriorityTaskWoken = pdFALSE;
+    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_GYRO_TX_CPLT, &xHigherPriorityTaskWoken );
+    if( xResult != pdFAIL ){
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
+  }
+  metope.dev.status.i2c1 = IDLE;
+}
+
 void DMA1_Stream2_IRQHandler( void){}
 void DMA1_Stream3_IRQHandler( void){}
 

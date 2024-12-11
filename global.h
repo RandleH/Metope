@@ -62,15 +62,20 @@ typedef struct{
     SPI_HandleTypeDef  * const pHspi2;
     UART_HandleTypeDef * const pHuart2;
     TIM_HandleTypeDef  * const pHtim3;
+    I2C_HandleTypeDef  * const pHi2c1;
 
     union{
       struct{
-        u16 spi2  : 1;
-        u16 uart2 : 1;
-        u16 tim3  : 1;
-        u16 reserved : 13;
+        u16 spi2  : 1; /*!< Display Screen */
+        u16 uart2 : 1; /*!< Uart Debugging Message */
+        u16 tim3  : 1; /*!< System Delay Timer */
+        u16 i2c1  : 1; /*!< QMI8658C - I2C Bus */
+        u16 B5    : 1; /*!< QMI8658C - INT1 */
+        u16 B6    : 1; /*!< QMI8658C - INT2 */
+        u16 A9    : 1; /*!< TP_INT - Touch Screen */
+        u16 reserved : 10;
       };
-      u16 word;
+      volatile u16 word;
     }status;
     //...//
   }dev;
@@ -144,7 +149,12 @@ extern DMA_HandleTypeDef   hdma_spi2_tx;
 extern TIM_HandleTypeDef   htim2;
 extern TIM_HandleTypeDef   htim3;
 extern UART_HandleTypeDef  huart2;
+extern I2C_HandleTypeDef   hi2c1;
+extern DMA_HandleTypeDef   hdma_i2c1_rx;
+extern DMA_HandleTypeDef   hdma_i2c1_tx;
 extern I2C_HandleTypeDef   hi2c2;
+extern DMA_HandleTypeDef   hdma_i2c2_rx;
+extern DMA_HandleTypeDef   hdma_i2c2_tx;
 
 
 #ifdef __cplusplus

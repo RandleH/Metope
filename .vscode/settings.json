@@ -85,6 +85,10 @@
         "global.h": "c",
         "cmn_type.h": "c",
         "cmn_delay.h": "c",
-        "app_gui_asset": "c"
+        "app_gui_asset": "c",
+        "*.tpp": "cpp",
+        "stm32f4xx_hal_i2c.h": "c",
+        "ranges": "cpp",
+        "cinttypes": "cpp"
     }
 }

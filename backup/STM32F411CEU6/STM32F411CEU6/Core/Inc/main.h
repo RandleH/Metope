@@ -85,14 +85,15 @@ void Error_Handler(void);
 #define SCREEN_MISO_GPIO_Port GPIOB
 #define SCREEN_MOSI_Pin GPIO_PIN_15
 #define SCREEN_MOSI_GPIO_Port GPIOB
-#define TP_INT_Pin GPIO_PIN_9
-#define TP_INT_GPIO_Port GPIOA
-#define TP_INT_EXTI_IRQn EXTI9_5_IRQn
 #define KEY_L_Pin GPIO_PIN_15
 #define KEY_L_GPIO_Port GPIOA
 #define KEY_L_EXTI_IRQn EXTI15_10_IRQn
 #define FLASH_MISO_Pin GPIO_PIN_4
 #define FLASH_MISO_GPIO_Port GPIOB
+#define GYRO_SCK_Pin GPIO_PIN_8
+#define GYRO_SCK_GPIO_Port GPIOB
+#define GYRO_SDA_Pin GPIO_PIN_9
+#define GYRO_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

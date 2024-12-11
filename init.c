@@ -26,6 +26,7 @@
 
 #include "bsp_screen.h"
 #include "bsp_rtc.h"
+#include "bsp_gyro.h"
 #include "app_type.h"
 #include "app_task.h"
 
@@ -65,6 +66,8 @@ void hw_init(void){
 
   MX_SPI2_Init();
 
+  MX_I2C1_Init();
+
 #if (defined USE_REGISTER) && (USE_REGISTER==1)
   bsp_timer_init();
 #else
@@ -87,12 +90,17 @@ void bsp_init(void){
   bsp_screen_init();
 #if (defined TEST_ONLY) && (TEST_ONLY==1)
   /**
-   * @note: We only initialize and reset the rtc module when testing.
+   * @note: Module need to initialize ONLY in test mode
    */
   bsp_rtc_init();
+#else
+  /**
+   * @note: Module will be initialized during the test
+   */
+  bsp_qmi8658_init();
 #endif
-}
 
+}
 
 #include "app_lvgl.h"
 void app_init(void){

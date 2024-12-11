@@ -393,6 +393,95 @@ public:
   }
 };
 
+
+/* ************************************************************************** */
+/*                          Class: TestBspGyroscope                           */
+/* ************************************************************************** */
+#include "bsp_gyro.h"
+namespace paramsTestBspGyroscope{
+typedef char Input;   // Dummy
+typedef char Output;  // Dummy
+}
+
+class TestBspGyroscope : public TestUnitWrapper_withInputOutput<paramsTestBspGyroscope::Input,paramsTestBspGyroscope::Output>{
+public:
+  TestBspGyroscope():TestUnitWrapper_withInputOutput("test_bsp_gyroscope"){}
+
+  bool run( paramsTestBspGyroscope::Input &i,paramsTestBspGyroscope::Output &o ) override{
+    string s;
+    bool result = false;
+    
+    auto initSuccess = bsp_qmi8658_init();
+    int chip_id      = bsp_qmi8658_get_chip_id();
+    int whoami       = bsp_qmi8658_get_who_am_i();
+    this->_cout << "\nChip ID="<<chip_id << " WhoAmI=" << whoami << " IsInitSuccess=" << (initSuccess==SUCCESS) <<endl;
+    while(this->_cin >> s){
+      if(s.length()==1){
+        if(s[0]=='Q' || s[0]=='q'){
+          result = true;
+          break;
+        }else if (s[0]=='E' || s[0]=='e'){
+          result = false;
+          this->_err_msg<<"User objection."<<endl;
+          break;
+        }else if (s[0]=='T' || s[0]=='t'){
+          metope.dev.status.A9 = 0;
+          while(metope.dev.status.A9==0){
+            tBspGyroData data = {0};
+            std::stringstream tmp1, tmp2;
+            cmnBoolean_t ret = bsp_qmi8658_update( &data);
+            // this->_cout << "temperature=" << (data.temperature / 256.0) << endl;
+
+            tmp1 << "a.xyz = [" << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.x / data.acc.acc_sensitivity) << ',' 
+                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.y / data.acc.acc_sensitivity) << ',' 
+                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.z / data.acc.acc_sensitivity) << "]";
+            this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp1.str();
+            this->_cout << "\n";
+
+            tmp2 << "g.xyz = [" << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.x / data.gyro.deg_sensitivity) << ',' 
+                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.y / data.gyro.deg_sensitivity) << ',' 
+                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.z / data.gyro.deg_sensitivity) << "]";
+            this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp2.str();
+            this->_cout << "\r" << "\033[F" << "\r" << std::flush;
+
+            bsp_qmi8658_debug_read_reg(0x2E);
+            HAL_Delay(100);
+          }
+        }
+      }else{
+        // std::regex ex_read ("r/0x[0-9a-fA-F]+"); // r/0[xX][0-9a-fA-F]+
+        // std::regex ex_write("w/0x[0-9a-fA-F]+/0x[0-9a-fA-F]+");
+        // std::smatch m;
+        // w/0x89/0x45
+
+        if(s.length()==4){
+          cmnBoolean_t isHexValid = false;
+          u8           reg = (u8)cmn_utility_str2hex( s.substr(2,2).c_str(), &isHexValid);
+          if(isHexValid){
+            this->_cout << "[REG]["<<s.substr(0,4).c_str()<<"] = "<<std::bitset<8>(bsp_qmi8658_debug_read_reg(reg))<<endl;
+          }else{
+            this->_cout << "Invalid Register Value String" << endl;
+          }
+        }else if(s.length()==8){
+          cmnBoolean_t isHexValid = false;
+          
+          u8 reg = (u8)cmn_utility_str2hex( s.substr(2,2).c_str(), &isHexValid);
+          u8 val = (u8)cmn_utility_str2hex( s.substr(6,2).c_str(), &isHexValid);
+          if(isHexValid){
+            bsp_qmi8658_debug_write_reg(reg, val);
+            this->_cout << "[REG]["<<s.substr(0,4).c_str()<<"] => "<<std::bitset<8>(val)<<endl;
+          }else{
+            this->_cout << "Invalid Register Value String" << endl;
+          }
+        }
+      }
+    }
+    bsp_qmi8658_switch(OFF);
+    return result;
+  }
+};
+
+
 /**
  * @addtogroup TestBench
  */
@@ -435,6 +524,11 @@ void add_bsp_test(void){
     // )
     .insert(
       TestBspRTC(),
+      '\0',
+      '\0'
+    )
+    .insert(
+      TestBspGyroscope(),
       '\0',
       '\0'
     )
