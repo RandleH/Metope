@@ -22,6 +22,7 @@
 /* ************************************************************************** */
 #include <stdlib.h>
 #include <bitset>
+#include <regex>
 #include "test.hh"
 #include "global.h"
 
@@ -31,6 +32,7 @@
 #include "cmn_utility.h"
 
 #include "bsp_screen.h"
+#include "bsp_rtc.h"
 
 
 
@@ -273,6 +275,80 @@ public:
 
 
 
+
+/* ************************************************************************** */
+/*                             Class: TestBspRTC                              */
+/* ************************************************************************** */
+namespace paramsTestBspRTC{
+typedef char Input;   // Dummy
+typedef char Output;  // Dummy
+}
+class TestBspRTC : public TestUnitWrapper_withInputOutput<paramsTestBspRTC::Input, paramsTestBspRTC::Output>{
+private:
+  void usage(void){
+    this->_cout<<"\nPress [T] to get current time; Press [Q] to quit; Press [E] to reject;"<<endl;
+    this->_cout<<"Type time in format `YYYY-MM-DD-HH:MM:SS` to set time."<<endl;
+  }
+
+public:
+  TestBspRTC():TestUnitWrapper_withInputOutput("test_bsp_rtc"){}
+  bool run( paramsTestBspRTC::Input& input, paramsTestBspRTC::Output& ref ) override{
+    std::string s;
+    cmnBoolean_t result = false;
+
+    this->_cout<<"\n>>>>>> RTC Module Test <<<<<<"<<endl;
+    usage();
+
+#if 0
+    cmnDateTime_t time = cmn_utility_set_time_from_iso(__TIMESTAMP__);
+    bsp_rtc_set_time(time);
+#else
+    cmnDateTime_t time;
+#endif
+    while (this->_cin >> std::skipws >> s) {
+      if(s.length()==1){
+        if(s[0]=='Q' || s[0]=='q'){
+          result = true;
+          break;
+        }else if (s[0]=='E' || s[0]=='e'){
+          result = false;
+          this->_err_msg<<"User objection."<<endl;
+          break;
+        }else if (s[0]=='T' || s[0]=='t'){
+          u8 raw_7[7];
+          time = bsp_rtc_get_time__debug(raw_7);
+          this->_cout<<"Current Time: "<<time.year+2024<<'/'<<time.month<<'/'<<time.day<<' '<<time.hour<<'-'<<time.minute<<'-'<<time.second<<endl;
+
+          for(int i=0; i<7; ++i){
+            this->_cout << '[' << i << ']'<<'='<<"0x"<<std::hex<<((int)(raw_7[i]))<<endl;
+          }
+          this->_cout<< std::dec << endl;
+
+        }
+      }else{
+        std::regex e("(\\d+)-(\\d+)-(\\d+)-(\\d+):(\\d+):(\\d+)");
+        std::smatch m;
+        if(!std::regex_search (s,m,e)){
+          this->_cout<<"Can NOT parse the timming inputs."<<endl;
+          continue;
+        }
+        time.year   = atoi(m[1].str().c_str())-2024;
+        time.month  = atoi(m[2].str().c_str());
+        time.day    = atoi(m[3].str().c_str());
+        time.hour   = atoi(m[4].str().c_str());
+        time.minute = atoi(m[5].str().c_str());
+        time.second = atoi(m[6].str().c_str());
+        bsp_rtc_set_time(time);
+      }
+      usage();
+    }
+
+    return result;
+  }
+};
+
+
+
 /**
  * @brief
  * @note  `std::array<bspScreenCood_t,4>` is the area coodinates set.
@@ -321,41 +397,46 @@ public:
  * @addtogroup TestBench
  */
 void add_bsp_test(void){
-#if (defined INCLUDE_TB_HMI) && (INCLUDE_TB_HMI==1)
-  tb_infra_hmi
+#if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
+  tb_infra_bsp
     .insert(
       TestBspUsartEcho(),
       std::array<char,6>{{'R','a','n','d','l','e'}},
       '\0'
     )
+    // .insert(
+    //   TestBspScreenBrightness(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenSmoothness(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenFill(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenDrawArea(),
+    //   (char)'\0',
+    //   (char)'\0'
+    // )
+    // .insert(
+    //   TestBspScreenDrawAreaStatic(),
+    //   std::array<std::array<bspScreenCood_t,4>,3>{{
+    //     {66,66,77,77},
+    //     {120,120,140,150},
+    //     {190,100, 195,130}
+    //   }},
+    //   (char)'\0'
+    // )
     .insert(
-      TestBspScreenBrightness(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenSmoothness(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenFill(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenDrawArea(),
-      (char)'\0',
-      (char)'\0'
-    )
-    .insert(
-      TestBspScreenDrawAreaStatic(),
-      std::array<std::array<bspScreenCood_t,4>,3>{{
-        {66,66,77,77},
-        {120,120,140,150},
-        {190,100, 195,130}
-      }},
-      (char)'\0'
+      TestBspRTC(),
+      '\0',
+      '\0'
     )
   ;
 #endif

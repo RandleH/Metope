@@ -166,16 +166,16 @@ public:
 void add_app_test( void){
 
 
-#if (defined INCLUDE_TB_HMI) && (INCLUDE_TB_HMI==1)
-  tb_infra_hmi.insert(
-    TestAppGuiMainDisplayClock1(),
-    std::array<cmnDateTime_t,4>{{
-      {
+#if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
+  // tb_infra_bsp.insert(
+  //   TestAppGuiMainDisplayClock1(),
+  //   std::array<cmnDateTime_t,4>{{
+  //     {
         
-      },{0},{0},{0}
-    }},
-    '\0'
-  );
+  //     },{0},{0},{0}
+  //   }},
+  //   '\0'
+  // );
 #endif
 
 #if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)

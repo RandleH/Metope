@@ -48,6 +48,8 @@ void cmn_utility_angleinc( uint16_t *hour_inc, uint16_t *minute_inc, uint16_t NU
 void cmn_utility_angleset( uint16_t *hour_deg, uint16_t *minute_deg, uint16_t NULLABLE *second_deg, const cmnDateTime_t *pTime);
 void cmn_utility_timeinc( cmnDateTime_t *pTime, uint32_t ms);
 
+cmnDateTime_t cmn_utility_set_time_from_iso( const char* __timestamp__);
+
 #ifdef __cplusplus
 }
 #endif

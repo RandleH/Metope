@@ -77,8 +77,8 @@ volatile u32 gDummy = 0;
 LocalProjectTest     tb_infra_local;
 #endif
 
-#if (defined INCLUDE_TB_HMI) && (INCLUDE_TB_HMI==1)
-HumanInteractionTest tb_infra_hmi;
+#if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
+HumanInteractionTest tb_infra_bsp;
 #endif
 
 #if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)

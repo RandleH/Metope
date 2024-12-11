@@ -190,6 +190,78 @@ void cmn_utility_timeinc( cmnDateTime_t *pTime, uint32_t ms){
   }
 }
 
+/**
+ * @brief Assign the datetime from an ISO string 
+ * @param [in] __timestamp__  An ISO string for time representation. Use C/C++ `__TIMESTAMP__`.
+ * @example
+ *  "Thu Dec  5 23:47:39 2024"
+ */
+cmnDateTime_t cmn_utility_set_time_from_iso( const char* __timestamp__){
+  cmnDateTime_t result = {
+    .year   = (__timestamp__[20]-'0')*1000 + (__timestamp__[21]-'0')*100 + (__timestamp__[22]-'0')*10 + (__timestamp__[23]-'0') - 2024,
+    .month  = 0, // @todo: Fix the correct month
+    .day    = (__timestamp__[8]-'0')*10 + (__timestamp__[9]-'0'),
+    .hour   = (__timestamp__[11]-'0')*10 + (__timestamp__[12]-'0'),
+    .minute = (__timestamp__[14]-'0')*10 + (__timestamp__[15]-'0'),
+    .second = (__timestamp__[17]-'0')*10 + (__timestamp__[18]-'0')
+  };
+
+  switch(__timestamp__[4]+__timestamp__[5]+__timestamp__[6]){
+    case 'J'+'a'+'n':{
+      result.month = 1;
+      break;
+    }
+    case 'F'+'e'+'b':{
+      result.month = 2;
+      break;
+    }
+    case 'M'+'a'+'r':{
+      result.month = 3;
+      break;
+    }
+    case 'A'+'p'+'r':{
+      result.month = 4;
+      break;
+    }
+    case 'M'+'a'+'y':{
+      result.month = 5;
+      break;
+    }
+    case 'J'+'u'+'n':{
+      result.month = 6;
+      break;
+    }
+    case 'J'+'u'+'l':{
+      result.month = 7;
+      break;
+    }
+    case 'A'+'u'+'g':{
+      result.month = 8;
+      break;
+    }
+    case 'S'+'e'+'p':{
+      result.month = 9;
+      break;
+    }
+    case 'O'+'c'+'t':{
+      result.month = 10;
+      break;
+    }
+    case 'N'+'o'+'v':{
+      result.month = 11;
+      break;
+    }
+    case 'D'+'e'+'c':{
+      result.month = 12;
+      break;
+    }
+    default:{
+      result.month = 0; // Impossible
+      break;
+    }
+  }
+  return result;
+}
 
 #ifdef __cplusplus
 }

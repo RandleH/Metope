@@ -322,7 +322,8 @@ public:
   virtual void callback_if_failed( void){}
 
   void verdict(void){
-    _cout<<"Number of tests in this batch: "<< _package.size()<<'\n'<<endl;
+    const auto num_tests = _package.size();
+    _cout<<"Number of tests in this batch: "<< num_tests<<'\n'<<endl;
     uint32_t cnt = 0;
     bool     v_result = true;
     
@@ -333,9 +334,9 @@ public:
        * @todo: Local iostream doesn't support this.
        */
 #if USE_LOCAL_IOSTREAM
-      _cout<<"Running test ["<<cnt+1<<'/'<<_package.size()<<']'<<' '<< "......."                                                         << std::get<0>(item)->name()<<' ';
+      _cout<<"Running test ["<<cnt+1<<'/'<<num_tests<<']'<<' '<< "......."                                                         << std::get<0>(item)->name()<<' ';
 #else
-      _cout<<"Running test ["<<cnt+1<<'/'<<_package.size()<<']'<<' '<< std::setfill('.') << std::left << std::setw(MAX_TEST_NAME_LENGTH) << std::get<0>(item)->name()<<' ';
+      _cout<<"Running test ["<<cnt+1<<'/'<<num_tests<<']'<<' '<< std::setfill('.') << std::left << std::setw(MAX_TEST_NAME_LENGTH) << std::get<0>(item)->name()<<' ';
 #endif
       bool result = std::get<0>(item)->run( std::get<1>(item), std::get<2>(item));
       if(result==false){
