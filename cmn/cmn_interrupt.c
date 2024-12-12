@@ -347,6 +347,7 @@ void TIM2_IRQHandler(void){
 #else
   HAL_TIM_IRQHandler(&htim2);
 #endif
+  metope.dev.status.tim2 = 1;
   if(metope.app.rtos.status==ON){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
@@ -356,7 +357,11 @@ void TIM2_IRQHandler(void){
     }
   }
 }              
-void TIM3_IRQHandler(void){}              
+void TIM3_IRQHandler(void){
+  metope.dev.status.tim3 = 1;
+} 
+
+
 void TIM4_IRQHandler(void){}              
 void I2C1_EV_IRQHandler(void){}           
 void I2C1_ER_IRQHandler(void){}           

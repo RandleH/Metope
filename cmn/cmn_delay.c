@@ -51,21 +51,17 @@ void cmn_timer_delay(u32 ms){
  */
 cmnBoolean_t cmn_tim2_sleep(u16 ms){
   /* Config Timer Register */
+  if(metope.dev.status.tim2==1){
+    return BUSY;
+  }
   bsp_tim2_delay(ms);
-  
   /* Wait until event was called */
   if(metope.app.rtos.status==ON){
     xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM2, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
-    u32 tmp;
-    do{
-      // Wait until an update was generated
-      tmp = TIM2->SR;
-    }while( 0==READ_BIT( tmp, TIM_SR_UIF ));
-    
-    TIM2->SR = ~(TIM_SR_UIF);
+    while(metope.dev.status.tim2==0);
   }
-  
+  metope.dev.status.tim2 = 0;
   return SUCCESS;
 }
 

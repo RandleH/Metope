@@ -30,6 +30,7 @@
 #include "cmn_type.h"
 #include "cmn_math.h"
 #include "cmn_utility.h"
+#include "cmn_delay.h"
 
 #include "bsp_screen.h"
 #include "bsp_rtc.h"
@@ -427,6 +428,11 @@ public:
         }else if (s[0]=='T' || s[0]=='t'){
           metope.dev.status.A9 = 0;
           while(metope.dev.status.A9==0){
+            if(false==bsp_qmi8658_is_ready()){
+              this->_cout << "Not ready\r" << std::flush;
+              cmn_tim2_sleep(100);
+              continue;
+            }
             tBspGyroData data = {0};
             std::stringstream tmp1, tmp2;
             cmnBoolean_t ret = bsp_qmi8658_update( &data);
@@ -443,9 +449,7 @@ public:
                                 << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.z / data.gyro.deg_sensitivity) << "]";
             this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp2.str();
             this->_cout << "\r" << "\033[F" << "\r" << std::flush;
-
-            bsp_qmi8658_debug_read_reg(0x2E);
-            HAL_Delay(100);
+            cmn_tim2_sleep(100);
           }
         }
       }else{

@@ -17,8 +17,14 @@
  ******************************************************************************
 */
 
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include "cmn_type.h"
 
+/* ************************************************************************** */
+/*                              Headfile Guards                               */
+/* ************************************************************************** */
 #ifndef BSP_GYRO_H
 #define BSP_GYRO_H
 
@@ -78,6 +84,7 @@ typedef struct{
 cmnBoolean_t bsp_qmi8658_init(void);
 void bsp_qmi8658_switch( cmnBoolean_t on_off);
 void bsp_qmi8658_reset( void);
+cmnBoolean_t bsp_qmi8658_is_ready(void);
 u8 bsp_qmi8658_get_chip_id(void);
 u8 bsp_qmi8658_get_who_am_i(void);
 

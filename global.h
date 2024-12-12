@@ -68,7 +68,8 @@ typedef struct{
       struct{
         u16 spi2  : 1; /*!< Display Screen */
         u16 uart2 : 1; /*!< Uart Debugging Message */
-        u16 tim3  : 1; /*!< System Delay Timer */
+        u16 tim2  : 1; /*!< System Delay Timer 2 */
+        u16 tim3  : 1; /*!< System Delay Timer 3 */
         u16 i2c1  : 1; /*!< QMI8658C - I2C Bus */
         u16 B5    : 1; /*!< QMI8658C - INT1 */
         u16 B6    : 1; /*!< QMI8658C - INT2 */
