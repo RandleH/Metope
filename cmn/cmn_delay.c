@@ -71,6 +71,7 @@ cmnBoolean_t cmn_tim2_sleep(u16 ms){
  * @note  The current process will pause until wake up
  *        TIM9 was runnning on 1MHz. The maximum delay ms is `65535`
  * @param [in]  us - Microseconds
+ * @todo  Dead loop occurs when rtos was off !!!
  * @return  Return `BUSY` when timer is currently unavailable
  *          Return `SUCCESS` when finished.
  */

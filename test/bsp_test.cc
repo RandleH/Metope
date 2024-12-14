@@ -396,26 +396,79 @@ public:
 
 
 /* ************************************************************************** */
-/*                          Class: TestBspGyroscope                           */
+/*                           Class: TestBspQMI8658A                           */
 /* ************************************************************************** */
 #include "bsp_gyro.h"
-namespace paramsTestBspGyroscope{
+namespace paramsTestBspQMI8658A{
 typedef char Input;   // Dummy
 typedef char Output;  // Dummy
 }
 
-class TestBspGyroscope : public TestUnitWrapper_withInputOutput<paramsTestBspGyroscope::Input,paramsTestBspGyroscope::Output>{
+class TestBspQMI8658A : public TestUnitWrapper_withInputOutput<paramsTestBspQMI8658A::Input,paramsTestBspQMI8658A::Output>{
 public:
-  TestBspGyroscope():TestUnitWrapper_withInputOutput("test_bsp_gyroscope"){}
+  TestBspQMI8658A(const char *name):TestUnitWrapper_withInputOutput(name){}
+  TestBspQMI8658A():TestBspQMI8658A("test_bsp_qmi8658a"){}
 
-  bool run( paramsTestBspGyroscope::Input &i,paramsTestBspGyroscope::Output &o ) override{
-    string s;
-    bool result = false;
+  /**
+   * @brief Watch the sensor data populating without line changing
+   * @param [in] data - Sensor Output Data
+   */
+  void live_watch( tBspGyroData &data) const{
+    std::stringstream tmp1, tmp2, tmp3;
+
+    tmp1 << "a.xyz = [" << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.x / data.acc_sensitivity) << ',' 
+                        << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.y / data.acc_sensitivity) << ',' 
+                        << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.z / data.acc_sensitivity) << "]";
+    this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp1.str();
+    this->_cout << "\n";
+
+    tmp2 << "g.xyz = [" << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.x / data.deg_sensitivity) << ',' 
+                        << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.y / data.deg_sensitivity) << ',' 
+                        << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.z / data.deg_sensitivity) << "]";
+    this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp2.str();
+    this->_cout << "\n";
     
+    tmp3 << "t = "      << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(8) << ((float)(data.temp_H+data.temp_L/256.0));
+    this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp3.str();
+    this->_cout << "\r" << "\033[F" << "\r" << "\033[F" << "\r" << std::flush;
+  }
+
+  void init_sensor(void){
     auto initSuccess = bsp_qmi8658_init();
     int chip_id      = bsp_qmi8658_get_chip_id();
     int whoami       = bsp_qmi8658_get_who_am_i();
     this->_cout << "\nChip ID="<<chip_id << " WhoAmI=" << whoami << " IsInitSuccess=" << (initSuccess==SUCCESS) <<endl;
+  }
+
+  void debug_sensor_register(std::string &s) const{
+    if(s.length()==4){
+      cmnBoolean_t isHexValid = false;
+      u8           reg = (u8)cmn_utility_str2hex( s.substr(2,2).c_str(), &isHexValid);
+      if(isHexValid){
+        this->_cout << "[REG]["<<s.substr(0,4).c_str()<<"] = "<<std::bitset<8>(bsp_qmi8658_debug_read_reg(reg))<<endl;
+      }else{
+        this->_cout << "Invalid Register Value String" << endl;
+      }
+    }else if(s.length()==8){
+      cmnBoolean_t isHexValid = false;
+      
+      u8 reg = (u8)cmn_utility_str2hex( s.substr(2,2).c_str(), &isHexValid);
+      u8 val = (u8)cmn_utility_str2hex( s.substr(6,2).c_str(), &isHexValid);
+      if(isHexValid){
+        bsp_qmi8658_debug_write_reg(reg, val);
+        this->_cout << "[REG]["<<s.substr(0,4).c_str()<<"] => "<<std::bitset<8>(val)<<endl;
+      }else{
+        this->_cout << "Invalid Register Value String" << endl;
+      }
+    }
+  }
+
+  virtual bool run( paramsTestBspQMI8658A::Input &i,paramsTestBspQMI8658A::Output &o ) override{
+    string s;
+    bool result = false;
+    
+    init_sensor();
+
     while(this->_cin >> s){
       if(s.length()==1){
         if(s[0]=='Q' || s[0]=='q'){
@@ -428,61 +481,81 @@ public:
         }else if (s[0]=='T' || s[0]=='t'){
           metope.dev.status.A9 = 0;
           while(metope.dev.status.A9==0){
-            if(false==bsp_qmi8658_is_ready()){
-              this->_cout << "Not ready\r" << std::flush;
-              cmn_tim2_sleep(100);
-              continue;
-            }
             tBspGyroData data = {0};
-            std::stringstream tmp1, tmp2;
             cmnBoolean_t ret = bsp_qmi8658_update( &data);
-            // this->_cout << "temperature=" << (data.temperature / 256.0) << endl;
-
-            tmp1 << "a.xyz = [" << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.x / data.acc.acc_sensitivity) << ',' 
-                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.y / data.acc.acc_sensitivity) << ',' 
-                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.acc.z / data.acc.acc_sensitivity) << "]";
-            this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp1.str();
-            this->_cout << "\n";
-
-            tmp2 << "g.xyz = [" << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.x / data.gyro.deg_sensitivity) << ',' 
-                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.y / data.gyro.deg_sensitivity) << ',' 
-                                << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(10) << ((float)data.gyro.z / data.gyro.deg_sensitivity) << "]";
-            this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp2.str();
-            this->_cout << "\r" << "\033[F" << "\r" << std::flush;
+            if(ret==SUCCESS){
+              live_watch(data);
+            }else{
+              this->_cout << "Not ready\r" << std::flush;
+            }
             cmn_tim2_sleep(100);
           }
         }
       }else{
+        // Register Debugger
+
         // std::regex ex_read ("r/0x[0-9a-fA-F]+"); // r/0[xX][0-9a-fA-F]+
         // std::regex ex_write("w/0x[0-9a-fA-F]+/0x[0-9a-fA-F]+");
         // std::smatch m;
         // w/0x89/0x45
-
-        if(s.length()==4){
-          cmnBoolean_t isHexValid = false;
-          u8           reg = (u8)cmn_utility_str2hex( s.substr(2,2).c_str(), &isHexValid);
-          if(isHexValid){
-            this->_cout << "[REG]["<<s.substr(0,4).c_str()<<"] = "<<std::bitset<8>(bsp_qmi8658_debug_read_reg(reg))<<endl;
-          }else{
-            this->_cout << "Invalid Register Value String" << endl;
-          }
-        }else if(s.length()==8){
-          cmnBoolean_t isHexValid = false;
-          
-          u8 reg = (u8)cmn_utility_str2hex( s.substr(2,2).c_str(), &isHexValid);
-          u8 val = (u8)cmn_utility_str2hex( s.substr(6,2).c_str(), &isHexValid);
-          if(isHexValid){
-            bsp_qmi8658_debug_write_reg(reg, val);
-            this->_cout << "[REG]["<<s.substr(0,4).c_str()<<"] => "<<std::bitset<8>(val)<<endl;
-          }else{
-            this->_cout << "Invalid Register Value String" << endl;
-          }
-        }
+        debug_sensor_register(s);
       }
     }
     bsp_qmi8658_switch(OFF);
     return result;
   }
+};
+
+
+class TestBspQMI8658A_FIFO : public TestBspQMI8658A{
+public:
+  TestBspQMI8658A_FIFO():TestBspQMI8658A("test_bsp_qmi8658a_fifo"){}
+  
+  bool run( paramsTestBspQMI8658A::Input &i,paramsTestBspQMI8658A::Output &o ) override{
+    string       s;
+    bool         result = false;
+    tBspGyroData data   = {0};
+
+    this->init_sensor();
+
+    // bsp_qmi8658_enable_fifo();
+    
+    while(this->_cin >> s){
+      if(s.length()==1){
+        if(s[0]=='Q' || s[0]=='q'){
+          result = true;
+          break;
+        }else if (s[0]=='E' || s[0]=='e'){
+          result = false;
+          this->_err_msg<<"User objection."<<endl;
+          break;
+        }else if (s[0]=='T' || s[0]=='t'){
+          metope.dev.status.A9 = 0;
+          while(metope.dev.status.A9==0){
+            cmnBoolean_t ret = ERROR;
+
+            if(metope.dev.status.i2c1!=BUSY){
+              metope.dev.status.i2c1 = BUSY;
+              ret = bsp_qmi8658_dma_update(&data);
+            }
+
+            if(ret==SUCCESS){
+              live_watch(data);
+            }else{
+              this->_cout << "Not ready\r" << std::flush;
+            }
+            
+            cmn_tim2_sleep(100);
+          }
+        }
+      }else{
+        // Register Debugger
+        this->debug_sensor_register(s);
+      }
+    }
+    return result;
+  }
+
 };
 
 
@@ -492,11 +565,11 @@ public:
 void add_bsp_test(void){
 #if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
   tb_infra_bsp
-    .insert(
-      TestBspUsartEcho(),
-      std::array<char,6>{{'R','a','n','d','l','e'}},
-      '\0'
-    )
+    // .insert(
+    //   TestBspUsartEcho(),
+    //   std::array<char,6>{{'R','a','n','d','l','e'}},
+    //   '\0'
+    // )
     // .insert(
     //   TestBspScreenBrightness(),
     //   (char)'\0',
@@ -526,15 +599,14 @@ void add_bsp_test(void){
     //   }},
     //   (char)'\0'
     // )
+    // .insert(
+    //   TestBspRTC(),'\0','\0'
+    // )
+    // .insert(
+    //   TestBspQMI8658A(),'\0','\0'
+    // )
     .insert(
-      TestBspRTC(),
-      '\0',
-      '\0'
-    )
-    .insert(
-      TestBspGyroscope(),
-      '\0',
-      '\0'
+      TestBspQMI8658A_FIFO(),'\0','\0'
     )
   ;
 #endif

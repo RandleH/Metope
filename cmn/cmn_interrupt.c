@@ -206,6 +206,9 @@ void cmn_interrupt_init_priority( void){
   
   HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, CMN_NVIC_PRIORITY_NORMAL);
   HAL_NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
+
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, CMN_NVIC_PRIORITY_NORMAL);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
 #endif
 }
 
@@ -427,23 +430,24 @@ void EXTI4_IRQHandler( void){}
 void DMA1_Stream0_IRQHandler( void){
   extern DMA_HandleTypeDef hdma_i2c1_rx;
   HAL_DMA_IRQHandler(&hdma_i2c1_rx);
+  metope.dev.status.i2c1 = IDLE;
 }
 
 /**
  * @note  QMI8658 I2C TX Interrupt
  */
 void DMA1_Stream1_IRQHandler( void){
-  extern DMA_HandleTypeDef hdma_i2c1_tx;
-  HAL_DMA_IRQHandler(&hdma_i2c1_tx);
-  if(metope.app.rtos.status==ON){
-    BaseType_t xHigherPriorityTaskWoken, xResult;
-    xHigherPriorityTaskWoken = pdFALSE;
-    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_GYRO_TX_CPLT, &xHigherPriorityTaskWoken );
-    if( xResult != pdFAIL ){
-      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-    }
-  }
-  metope.dev.status.i2c1 = IDLE;
+  // extern DMA_HandleTypeDef hdma_i2c1_tx;
+  // HAL_DMA_IRQHandler(&hdma_i2c1_tx);
+  // if(metope.app.rtos.status==ON){
+  //   BaseType_t xHigherPriorityTaskWoken, xResult;
+  //   xHigherPriorityTaskWoken = pdFALSE;
+  //   xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_QMI8658_TX_CPLT, &xHigherPriorityTaskWoken );
+  //   if( xResult != pdFAIL ){
+  //     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+  //   }
+  // }
+  // metope.dev.status.i2c1 = IDLE;
 }
 
 void DMA1_Stream2_IRQHandler( void){}

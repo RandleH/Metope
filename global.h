@@ -63,7 +63,10 @@ typedef struct{
     UART_HandleTypeDef * const pHuart2;
     TIM_HandleTypeDef  * const pHtim3;
     I2C_HandleTypeDef  * const pHi2c1;
-
+    
+    /**
+     * @todo Rename tim3 -> tim9
+     */
     union{
       struct{
         u16 spi2  : 1; /*!< Display Screen */
@@ -71,10 +74,10 @@ typedef struct{
         u16 tim2  : 1; /*!< System Delay Timer 2 */
         u16 tim3  : 1; /*!< System Delay Timer 3 */
         u16 i2c1  : 1; /*!< QMI8658C - I2C Bus */
-        u16 B5    : 1; /*!< QMI8658C - INT1 */
-        u16 B6    : 1; /*!< QMI8658C - INT2 */
+        u16 B5    : 1; /*!< QMI8658C - INT1 CTRL9 Command Done */
+        u16 B6    : 1; /*!< QMI8658C - INT2 FIFO Watermark */
         u16 A9    : 1; /*!< TP_INT - Touch Screen */
-        u16 reserved : 10;
+        u16 reserved : 8;
       };
       volatile u16 word;
     }status;
