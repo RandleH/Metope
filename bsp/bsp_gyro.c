@@ -126,7 +126,7 @@
  *  Based on my observation, the address for Acceleration and Angular Rate are inverted.
  *  Try both to verify which one is correct. Do NOT fully trust the datasheet.
  */
-#if 1
+#if 0
   #define QMI8658_REG_AX_L                        (0x35)
   #define QMI8658_REG_AX_H                        (0x36)
   #define QMI8658_REG_AY_L                        (0x37)
@@ -186,24 +186,14 @@
 #define QMI8658_REG_RST_RESULT                  (0x4D)
 #define QMI8658_REG_RST_RESULT_VAL              (0x80)
 
-
 /* Temperature sensor resolution */
-#define TEMPERATURE_SENSOR_RESOLUTION           (1 << 8 )  // Telperature sensor resolution (ADC)
+#define TEMPERATURE_SENSOR_RESOLUTION           (1<<8)  // Telperature sensor resolution (ADC)
 
-#define SENSOR_PIN_NONE                         (-1)
-#define DEV_WIRE_NONE                           (0)
-#define DEV_WIRE_ERR                            (-1)
-#define DEV_WIRE_TIMEOUT                        (-2)
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-
-typedef enum{
-  kGyroFreq_25KHz,
-  kGyroFreq_300KHz
-}tBspGyroI2cFreq;
 
 typedef enum {
   qmi8658_mode_acc_only = 1,   // Mode for accelerometer-only operation.
@@ -216,7 +206,7 @@ typedef enum {
   kAccScale_4g,        // Accelerometer scale set to ±4g.
   kAccScale_8g,        // Accelerometer scale set to ±8g.
   kAccScale_16g,       // Accelerometer scale set to ±16g.
-} acc_scale_t;
+} tQmi8658AccScale;
 
 /* Enum representing the output data rate (ODR) settings for the accelerometer */
 typedef enum {
@@ -233,7 +223,7 @@ typedef enum {
   kAccOdr_21Hz,        // Accelerometer ODR set to 21 Hz.
   kAccOdr_11Hz,        // Accelerometer ODR set to 11 Hz.
   kAccOdr_3Hz,         // Accelerometer ODR set to 3 Hz.
-} acc_odr_t;
+} tQmi8658AccOdr;
 
 /* Enum representing the scale settings for the gyroscope */
 /**
@@ -249,7 +239,7 @@ typedef enum {
   kGyroScale_512dps,    // Gyroscope scale set to ±512 degrees per second.
   kGyroScale_1024dps,   // Gyroscope scale set to ±1024 degrees per second.
   kGyroScale_2048dps,   // Gyroscope scale set to ±2048 degrees per second.
-} gyro_scale_t;
+} tQmi8658GyroScale;
 
 typedef enum {
   kGyroOdr_8000Hz,     // Gyroscope ODR set to 8000 Hz.
@@ -261,11 +251,13 @@ typedef enum {
   kGyroOdr_125Hz,      // Gyroscope ODR set to 125 Hz.
   kGyroOdr_62_5Hz,     // Gyroscope ODR set to 62.5 Hz.
   kGyroOdr_31_25Hz,    // Gyroscope ODR set to 31.25 Hz.
-} gyro_odr_t;
+} tQmi8658GyroOdr;
 
 
 
-
+/* ************************************************************************** */
+/*                          Macros Default Settings                           */
+/* ************************************************************************** */
 #define QMI8658_DEFAULT_ACC_SCALE     kAccScale_2g
 #define QMI8658_DEFAULT_ACC_ODR       kAccOdr_2000Hz
 #define QMI8658_DEFAULT_GYRO_SCALE    kGyroScale_2048dps
@@ -500,8 +492,8 @@ typedef union{
 /* ************************************************************************** */
 /*                             Private Functions                              */
 /* ************************************************************************** */
-STATIC INLINE tBspGyroAccSensitivity    bsp_qmi8658_acc_scale_2_sensitivity  ( acc_scale_t scale);
-STATIC INLINE tBspGyroDegreeSensitivity bsp_qmi8658_gyro_scale_2_sensitivity ( gyro_scale_t scale);
+STATIC INLINE tBspGyroAccSensitivity    bsp_qmi8658_acc_scale_2_sensitivity  ( tQmi8658AccScale scale);
+STATIC INLINE tBspGyroDegreeSensitivity bsp_qmi8658_gyro_scale_2_sensitivity ( tQmi8658GyroScale scale);
 STATIC cmnBoolean_t                     bsp_qmi8658_i2c_polling_send         ( u8 reg, const u8 *buf, u8 len);
 STATIC cmnBoolean_t                     bsp_qmi8658_i2c_polling_recv         ( u8 reg, u8 *buf, u8 len);
 STATIC cmnBoolean_t                     bsp_qmi8658_i2c_dma_send             ( u8 reg, const u8 *buf, u8 len);
@@ -509,8 +501,8 @@ STATIC cmnBoolean_t                     bsp_qmi8658_i2c_dma_recv             ( u
 STATIC u8                               bsp_qmi8658_i2c_polling_recv_1byte   ( u8 reg);
 STATIC void                             bsp_qmi8658_i2c_polling_send_1byte   ( u8 reg, u8 val);
 STATIC INLINE cmnBoolean_t              bsp_qmi8658_is_ready                 (void);
-STATIC void                             bsp_qmi8658_set_acc                  ( acc_odr_t odr, acc_scale_t scale);
-STATIC void                             bsp_qmi8658_set_gyro                 ( gyro_odr_t odr, gyro_scale_t scale);
+STATIC void                             bsp_qmi8658_set_acc                  ( tQmi8658AccOdr odr, tQmi8658AccScale scale);
+STATIC void                             bsp_qmi8658_set_gyro                 ( tQmi8658GyroOdr odr, tQmi8658GyroScale scale);
 STATIC tBspGyroAccSensitivity           bsp_qmi8658_get_acc_scale            (void);
 STATIC tBspGyroDegreeSensitivity        bsp_qmi8658_get_gyro_scale           (void);
 STATIC INLINE  cmnBoolean_t             bsp_qmi8658_ctrl9_cmddone_ack        (void);
@@ -545,6 +537,7 @@ void bsp_qmi8658_reset( void){
   bsp_qmi8658_i2c_polling_recv( QMI8658_REG_STATUS1, &reg_status1.reg, 1);
   metope.dev.status.B5 = 0;
 }
+
 
 /**
  * @brief QMI8658 Device Initialization
@@ -697,6 +690,7 @@ cmnBoolean_t bsp_qmi8658_update( tBspGyroData *data){
   return bsp_qmi8658_i2c_polling_recv( QMI8658_REG_TEMPERATURE_L, &data->raw[0], sizeof(data->raw));
 }
 
+
 /**
  * 
  * @return `SUCCESS` | `ERROR`
@@ -721,6 +715,7 @@ u16 bsp_qmi8658_fifo_get_sample_cnt(void){
 
   return (u16)(((reg_fifo_status.FIFO_SMPL_CNT_MSB<<8) | FIFO_SMPL_CNT_LSB)<<1);
 }
+
 
 /**
  * @note
@@ -793,6 +788,7 @@ cmnBoolean_t bsp_qmi8658_fifo_enable(void){
   return ret;
 }
 
+
 /**
  * @brief Keep updating the data
  * @attention Buffer `data` MUST be valid until `bsp_qmi8658_stop_updating()` is called
@@ -816,14 +812,26 @@ cmnBoolean_t bsp_qmi8658_dma_update( tBspGyroData *data){
 
 
 
-STATIC INLINE tBspGyroAccSensitivity bsp_qmi8658_acc_scale_2_sensitivity(acc_scale_t scale){
+/* ************************************************************************** */
+/*                             Private Functions                              */
+/* ************************************************************************** */
+/**
+ * @brief Convert Register Value to Mathematical one
+ * @param [in] scale - Register Value
+ * @return Return Mathematical Value
+ */
+STATIC INLINE tBspGyroAccSensitivity bsp_qmi8658_acc_scale_2_sensitivity( tQmi8658AccScale scale){
   return (enum tBspGyroAccSensitivity)(1<<(14-scale));
 }
 
-STATIC INLINE tBspGyroDegreeSensitivity bsp_qmi8658_gyro_scale_2_sensitivity(gyro_scale_t scale){
+/**
+ * @brief Convert Register Value to Mathematical one
+ * @param [in] scale - Register Value
+ * @return Return Mathematical Value
+ */
+STATIC INLINE tBspGyroDegreeSensitivity bsp_qmi8658_gyro_scale_2_sensitivity( tQmi8658GyroScale scale){
   return (enum tBspGyroDegreeSensitivity)(1<<(11-scale));
 }
-
 
 /**
  * @brief
@@ -961,7 +969,7 @@ STATIC INLINE cmnBoolean_t bsp_qmi8658_is_ready(void){
  * @param [in] odr   Output Data Rate
  * @param [in] scale Scale Sensitivity
  */
-STATIC void bsp_qmi8658_set_acc( acc_odr_t odr, acc_scale_t scale){
+STATIC void bsp_qmi8658_set_acc( tQmi8658AccOdr odr, tQmi8658AccScale scale){
   tQmi8658RegCTRL2 reg_ctrl2;
   bsp_qmi8658_i2c_polling_recv( QMI8658_REG_CTRL2, &reg_ctrl2.reg, 1);
   reg_ctrl2.aODR = odr;
@@ -975,7 +983,7 @@ STATIC void bsp_qmi8658_set_acc( acc_odr_t odr, acc_scale_t scale){
  * @param [in] odr   Output Data Rate
  * @param [in] scale Scale Sensitivity
  */
-STATIC void bsp_qmi8658_set_gyro(gyro_odr_t odr, gyro_scale_t scale){
+STATIC void bsp_qmi8658_set_gyro(tQmi8658GyroOdr odr, tQmi8658GyroScale scale){
   tQmi8658RegCTRL3 reg_ctrl3;
   bsp_qmi8658_i2c_polling_recv( QMI8658_REG_CTRL3, &reg_ctrl3.reg, 1);
   reg_ctrl3.gODR = odr;
@@ -995,7 +1003,7 @@ STATIC enum tBspGyroAccSensitivity bsp_qmi8658_get_acc_scale(void){
   // 1 -> 1<<13
   // 2 -> 1<<12
   // 3 -> 1<<11
-  return bsp_qmi8658_acc_scale_2_sensitivity((acc_scale_t)reg_ctrl2.aFS);
+  return bsp_qmi8658_acc_scale_2_sensitivity((tQmi8658AccScale)reg_ctrl2.aFS);
 }
 
 /**
@@ -1011,10 +1019,13 @@ STATIC enum tBspGyroDegreeSensitivity bsp_qmi8658_get_gyro_scale(void){
   // 2 -> 1<< 9
   // ...
   // 7 -> 1<< 4
-  return bsp_qmi8658_gyro_scale_2_sensitivity((gyro_scale_t)reg_ctrl3.gFS);
+  return bsp_qmi8658_gyro_scale_2_sensitivity((tQmi8658GyroScale)reg_ctrl3.gFS);
 }
 
-
+/**
+ * @brief  CTRL9 Register Protocol Ack
+ * @return `SUCCESS` | `ERROR`
+ */
 STATIC INLINE cmnBoolean_t bsp_qmi8658_ctrl9_cmddone_ack(void){
   u8 data = 0x00;
   return bsp_qmi8658_i2c_polling_send( QMI8658_REG_CTRL9, &data, 1);
@@ -1083,17 +1094,19 @@ STATIC cmnBoolean_t bsp_qmi8658_ctrl9_protocol(u8 QMI8658_CTRL9_CMD_XXXX){
 
 
 
-
+/* ************************************************************************** */
+/*                            Debugging Functions                             */
+/* ************************************************************************** */
+#if (defined TEST_ONLY) && (TEST_ONLY==1)
 u8 bsp_qmi8658_debug_read_reg(u8 reg){
   return bsp_qmi8658_i2c_polling_recv_1byte(reg);
 }
-
 
 void bsp_qmi8658_debug_write_reg(u8 reg, u8 val){
   bsp_qmi8658_i2c_polling_send_1byte(reg, val);
 }
 
-
+#endif
 
 #ifdef __cplusplus
 }

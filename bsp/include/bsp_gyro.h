@@ -32,6 +32,10 @@
 extern "C"{
 #endif
 
+
+/* ************************************************************************** */
+/*                                    Types                                   */
+/* ************************************************************************** */
 /* Accelerometer sensitivity table */
 typedef enum tBspGyroAccSensitivity{
   ACC_SCALE_SENSITIVITY_2G  = (1 << 14),   // Sensitivity for ±2g range.
@@ -100,19 +104,25 @@ typedef union{
 } tBspGyroData;
 
 
-cmnBoolean_t bsp_qmi8658_init(void);
-void bsp_qmi8658_switch( cmnBoolean_t on_off);
-void bsp_qmi8658_reset( void);
-cmnBoolean_t bsp_qmi8658_is_ready(void);
-u8 bsp_qmi8658_get_chip_id(void);
-u8 bsp_qmi8658_get_who_am_i(void);
+/* ************************************************************************** */
+/*                             Public Functions                               */
+/* ************************************************************************** */
+void         bsp_qmi8658_reset        (void);
+cmnBoolean_t bsp_qmi8658_init         (void);
+u8           bsp_qmi8658_get_chip_id  (void);
+u8           bsp_qmi8658_get_who_am_i (void);
+void         bsp_qmi8658_switch       ( cmnBoolean_t on_off);
+cmnBoolean_t bsp_qmi8658_update       ( tBspGyroData *data);
+cmnBoolean_t bsp_qmi8658_fifo_enable  (void);
+cmnBoolean_t bsp_qmi8658_dma_update   ( tBspGyroData *data);
 
-cmnBoolean_t bsp_qmi8658_enable_fifo(void);
-cmnBoolean_t bsp_qmi8658_update( tBspGyroData *data);
-cmnBoolean_t bsp_qmi8658_dma_update( tBspGyroData *data);
-
-u8 bsp_qmi8658_debug_read_reg(u8 reg);
-void bsp_qmi8658_debug_write_reg(u8 reg, u8 val);
+/* ************************************************************************** */
+/*                            Debugging Functions                             */
+/* ************************************************************************** */
+#if (defined TEST_ONLY) && (TEST_ONLY==1)
+u8   bsp_qmi8658_debug_read_reg  ( u8 reg);
+void bsp_qmi8658_debug_write_reg ( u8 reg, u8 val);
+#endif
 
 #ifdef __cplusplus
 }
