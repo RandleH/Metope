@@ -89,6 +89,7 @@
         "*.tpp": "cpp",
         "stm32f4xx_hal_i2c.h": "c",
         "ranges": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "lv_examples.h": "c"
     }
 }

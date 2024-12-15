@@ -155,6 +155,35 @@ public:
   }
 };
 
+
+
+#include "bsp_gyro.h"
+
+namespace paramsTestCmnStructAlignment{
+typedef std::array<void*,6> Input;
+typedef std::array<void*,6> Output;
+}
+
+class TestCmnStructAlignment : public TestUnitWrapper<paramsTestCmnStructAlignment::Input,paramsTestCmnStructAlignment::Output>{
+public:
+  TestCmnStructAlignment():TestUnitWrapper("test_cmn_struct_alignment"){}
+  bool run( paramsTestCmnStructAlignment::Input &i,paramsTestCmnStructAlignment::Output &o ) override{
+
+    if(i.size()!=o.size()){
+      this->_err_msg << "Test parameters length mismatched" << "DUT: "<<i.size()<<" REF: "<<o.size()<<endl;
+      return false;
+    }
+    bool result = true;
+    for(u8 x=0; x<i.size(); ++x){
+      result &= (i[x]==o[x]);
+      // if(i[x]!=o[x])
+      std::cout<<"DUT: "<<i[x]<<" REF: "<<o[x]<<std::endl;
+    }
+
+    return result;
+  }
+};
+
 void add_cmn_test(void){
 
 #if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
@@ -219,6 +248,25 @@ void add_cmn_test(void){
       std::array<uint32_t,10>{
         {9}             /*!< Ref: Counting Leading Zero */
       }
+    )
+    .insert(
+      TestCmnStructAlignment(),
+      paramsTestCmnStructAlignment::Input{{
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.x),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.y),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.z),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->gyro.x),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->gyro.y),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->gyro.z)
+      }},
+      paramsTestCmnStructAlignment::Output{{
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[0]),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[2]),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[4]),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[6]),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[8]),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[10])
+      }}
     )
   ;
 #endif

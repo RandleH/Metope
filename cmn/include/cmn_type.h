@@ -94,8 +94,10 @@ typedef IRQn_Type cmnIRQn_t;
 #define CMN_EVENT_SCREEN_REFRESH_CPLT (1<<2)
 #define CMN_EVENT_USER_KEY_M          (1<<3)  /*!< Use click the power button */
 #define CMN_EVENT_SCREEN_NEED_OFF     (1<<4)  /*!< Screen has been inactive for a while */
-#define CMN_EVENT_GYRO_TX_CPLT        (1<<5)  /*!< QMI8658 TX completed on I2C1 */
-#define CMN_EVENT_GYRO_RX_CPLT        (1<<6)  /*!< QMI8658 RX completed on I2C1 */
+#define CMN_EVENT_QMI8658_TX_CPLT     (1<<5)  /*!< QMI8658 DMA TX completed on I2C1 */
+#define CMN_EVENT_QMI8658_RX_CPLT     (1<<6)  /*!< QMI8658 DMA RX completed on I2C1 */
+#define CMN_EVENT_QMI8658_INT1        (1<<7)  /*!< CTRL9 Command Done */
+#define CMN_EVENT_QMI8658_INT2        (1<<8)  /*!< FIFO Watermark Reached */
 
 
 typedef union cmnDateTime_t{
