@@ -238,7 +238,6 @@ void bsp_screen_smooth_off(void){
   while(cnt--){
     bsp_screen_set_bright(tmp[cnt]);
     cmn_tim9_sleep(20000); // 20ms
-    // vTaskDelay(20);
   }
 }
 

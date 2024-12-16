@@ -407,7 +407,7 @@ void DEFAULT EXTI0_IRQHandler( void){
   if(metope.app.rtos.status==ON){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
-    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M, &xHigherPriorityTaskWoken );
+    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M | CMN_EVENT_UPDATE_RTC, &xHigherPriorityTaskWoken );
     if( xResult != pdFAIL ){
       portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
     }

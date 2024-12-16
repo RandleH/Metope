@@ -24,7 +24,7 @@
 #include "app_gui.h"
 #include "cmn_utility.h"
 #include "app_gui_asset"
-
+#include "bsp_rtc.h"
 
 /* ************************************************************************** */
 /*                     Static Clock UI Function - clock1                      */
@@ -888,7 +888,7 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
   portTICK_TYPE_ENTER_CRITICAL();
   app_gui_switch(parsed_param->style);
   portTICK_TYPE_EXIT_CRITICAL();
-
+  parsed_param->time = bsp_rtc_get_time();
   parsed_param->gui.set_time( &parsed_param->gui.param, parsed_param->time);
   
   /**
@@ -907,16 +907,28 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
     old_tick = tmp;
     cmn_utility_timeinc( &parsed_param->time, ms_delta);
     
-    /**
-     * @note
-     *  View Part:
-     *    1) Update the increased ms.
-     */
-    portTICK_TYPE_ENTER_CRITICAL();
-    parsed_param->gui.inc_time( &parsed_param->gui.param, ms_delta);
-    portTICK_TYPE_EXIT_CRITICAL();
 
-    vTaskDelay(64);
+    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC, pdTRUE, pdFALSE, 64);
+
+    portTICK_TYPE_ENTER_CRITICAL();
+    if(uxBits & CMN_EVENT_UPDATE_RTC){
+      parsed_param->time = bsp_rtc_get_time();
+      parsed_param->gui.set_time( &parsed_param->gui.param, parsed_param->time);
+      /**
+       * @bug 
+       *  LVGL can not finish a correct partial refreash after a big needle angle change
+       */
+      lv_obj_invalidate(parsed_param->gui.param.pScreen);
+    }else{
+      /**
+       * @note
+       *  View Part:
+       *    1) Update the increased ms.
+       */
+      
+      parsed_param->gui.inc_time( &parsed_param->gui.param, ms_delta);
+    }
+    portTICK_TYPE_EXIT_CRITICAL();
   }
 }
 

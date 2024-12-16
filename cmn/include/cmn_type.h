@@ -94,10 +94,12 @@ typedef IRQn_Type cmnIRQn_t;
 #define CMN_EVENT_SCREEN_REFRESH_CPLT (1<<2)
 #define CMN_EVENT_USER_KEY_M          (1<<3)  /*!< Use click the power button */
 #define CMN_EVENT_SCREEN_NEED_OFF     (1<<4)  /*!< Screen has been inactive for a while */
-#define CMN_EVENT_QMI8658_TX_CPLT     (1<<5)  /*!< QMI8658 DMA TX completed on I2C1 */
-#define CMN_EVENT_QMI8658_RX_CPLT     (1<<6)  /*!< QMI8658 DMA RX completed on I2C1 */
-#define CMN_EVENT_QMI8658_INT1        (1<<7)  /*!< CTRL9 Command Done */
-#define CMN_EVENT_QMI8658_INT2        (1<<8)  /*!< FIFO Watermark Reached */
+#define CMN_EVENT_SCREEN_NEED_ON      (1<<5)  /*!< Screen activated (NOT used) */
+#define CMN_EVENT_QMI8658_TX_CPLT     (1<<6)  /*!< QMI8658 DMA TX completed on I2C1 */
+#define CMN_EVENT_QMI8658_RX_CPLT     (1<<7)  /*!< QMI8658 DMA RX completed on I2C1 */
+#define CMN_EVENT_QMI8658_INT1        (1<<8)  /*!< CTRL9 Command Done */
+#define CMN_EVENT_QMI8658_INT2        (1<<9)  /*!< FIFO Watermark Reached */
+#define CMN_EVENT_UPDATE_RTC          (1<<10) /*!< System update RTC time */
 
 
 typedef union cmnDateTime_t{
