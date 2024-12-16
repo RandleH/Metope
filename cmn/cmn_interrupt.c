@@ -281,7 +281,7 @@ void SysTick_Handler( void){
   /* Clear overflow flag */
   SysTick->CTRL;
 
-  if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+  if (metope.app.rtos.status == ON) {
     /* Call tick handler */
     FreeRTOS_SysTick_Handler();
   }
