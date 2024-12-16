@@ -277,14 +277,13 @@ void SVC_Handler( void){
  * @note  1ms System Interrupt
  */
 void SysTick_Handler( void){
-  // /Users/randleh/Desktop/Metope/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c
   extern void FreeRTOS_SysTick_Handler( void);
   /* Clear overflow flag */
   SysTick->CTRL;
 
   if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
     /* Call tick handler */
-    xPortSysTickHandler();
+    FreeRTOS_SysTick_Handler();
   }
   HAL_IncTick();
 }

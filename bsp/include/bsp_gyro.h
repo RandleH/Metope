@@ -79,6 +79,12 @@ typedef union{
       i16 temperature;
     };
 
+/**
+ * @attention
+ *  Based on my observation, the address for Acceleration and Angular Rate are inverted.
+ *  Try both to verify which one is correct. Do NOT fully trust the datasheet.
+ */
+#if 0
     /**
      * @note: Ax = acc.x / acc_sensitivity; ...
      */
@@ -96,6 +102,25 @@ typedef union{
       i16 y;
       i16 z;
     }gyro;
+#else
+    /**
+     * @note: Ax = acc.x / acc_sensitivity; ...
+     */
+    struct{
+      i16 x;
+      i16 y;
+      i16 z;
+    }gyro;
+    
+    /**
+     * @note: Gx = gyro.x / deg_sensitivity; ...
+     */
+    struct{
+      i16 x;
+      i16 y;
+      i16 z;
+    }acc;
+#endif
 
     enum tBspGyroAccSensitivity    acc_sensitivity;
     enum tBspGyroDegreeSensitivity deg_sensitivity;

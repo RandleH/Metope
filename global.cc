@@ -52,7 +52,7 @@ tMainSystemStatus  metope = {
         }
       },
       ._handle = NULL,
-      .style = kAppGuiClock_LVVVW,
+      .style = kAppGuiClock_NANA,
       .gui = {0},
     }
   },

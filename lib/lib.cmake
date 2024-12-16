@@ -61,7 +61,7 @@ set( INC_FREERTOS "")
 set( SRC_FREERTOS "")
 set( DEF_FREERTOS "")
 
-aux_source_directory( "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" SRC_FREERTOS)
+# aux_source_directory( "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" SRC_FREERTOS)
 
 list(APPEND SRC_FREERTOS        "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c"

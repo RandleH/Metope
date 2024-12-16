@@ -105,7 +105,7 @@ void bsp_init(void){
 #include "app_lvgl.h"
 void app_init(void){
 
-#if (defined TEST_ONLY) && (TEST_ONLY==1) && (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
+#if ((!(defined TEST_ONLY)) || (TEST_ONLY==0)) || ((defined TEST_ONLY) && (TEST_ONLY==1) && (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1))
   app_lvgl_init();
 #endif
 }
