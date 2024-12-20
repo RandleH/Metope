@@ -23,14 +23,17 @@
   #include "stm32f4xx_hal.h"
 #endif
 #include "bsp_timer.h"
-
+#include "global.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 
-
+/**
+ * @brief
+ * @todo: Add assertion for default
+ */
 void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
   TIMx->ARR = 10U;
   TIMx->PSC = psc;
@@ -48,14 +51,19 @@ void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
   SET_BIT( TIMx->DIER, TIM_DIER_UIE);
   SET_BIT( TIMx->CR1, TIM_CR1_CEN);  // Enable timer
 
-  u32 tmp;
-  u8 cnt = 0xFF;
-  do{
-    // Wait until an update was generated
-    tmp = TIMx->SR;
-  }while( 0==READ_BIT( tmp, TIM_SR_UIF ) && --cnt!=0);
-  
-  TIMx->SR = ~(TIM_SR_UIF);
+  u16 cnt  = 0xFFFF;
+  switch((u32)(TIMx)){
+    case TIM2_BASE:{
+      while( metope.dev.status.tim2==0 && --cnt!=0);
+      metope.dev.status.tim2 = 0;
+      break;
+    }
+    case TIM9_BASE:{
+      while( metope.dev.status.tim9==0 && --cnt!=0);
+      metope.dev.status.tim9 = 0;
+      break;
+    }
+  }
 
   CLEAR_BIT( TIMx->CR1, TIM_CR1_CEN);  // Disable timer
 }
@@ -97,6 +105,7 @@ void bsp_timer_init( void){
  */
 void bsp_tim2_delay(u16 ms){
   TIM2->ARR = ms * 2048 / 1000;
+  CLEAR_BIT( TIM2->SR, TIM_SR_UIF);
   SET_BIT( TIM2->EGR, TIM_EGR_UG);
   SET_BIT( TIM2->CR1, TIM_CR1_CEN);
 }
@@ -110,6 +119,7 @@ void bsp_tim2_delay(u16 ms){
  */
 void bsp_tim9_delay(u16 us){
   TIM9->ARR = us;
+  CLEAR_BIT( TIM9->SR, TIM_SR_UIF);
   SET_BIT( TIM9->EGR, TIM_EGR_UG);
   SET_BIT( TIM9->CR1, TIM_CR1_CEN);
 }

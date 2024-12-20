@@ -327,6 +327,7 @@ void TIM1_BRK_TIM9_IRQHandler(void){
 #else
   HAL_TIM_IRQHandler(&htim9);
 #endif
+  metope.dev.status.tim9 = 1;
   if(metope.app.rtos.status==ON){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
@@ -359,9 +360,7 @@ void TIM2_IRQHandler(void){
     }
   }
 }              
-void TIM3_IRQHandler(void){
-  metope.dev.status.tim3 = 1;
-} 
+void TIM3_IRQHandler(void){}
 
 
 void TIM4_IRQHandler(void){}              

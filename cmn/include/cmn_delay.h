@@ -35,7 +35,7 @@ extern "C"{
 void cmn_timer_delay(u32 ms);
 
 cmnBoolean_t cmn_tim2_sleep(u16 ms);
-cmnBoolean_t cmn_tim9_sleep(u16 us);
+cmnBoolean_t cmn_tim9_sleep(u16 us, cmnBoolean_t async_mode);
 
 #ifdef __cplusplus
 }

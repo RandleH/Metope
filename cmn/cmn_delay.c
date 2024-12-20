@@ -50,10 +50,10 @@ void cmn_timer_delay(u32 ms){
  *          Return `SUCCESS` when finished.
  */
 cmnBoolean_t cmn_tim2_sleep(u16 ms){
-  /* Config Timer Register */
   if(metope.dev.status.tim2==1){
     return BUSY;
   }
+  /* Config Timer Register */
   bsp_tim2_delay(ms);
   /* Wait until event was called */
   if(metope.app.rtos.status==ON){
@@ -70,28 +70,26 @@ cmnBoolean_t cmn_tim2_sleep(u16 ms){
  * @brief TIM9 based Non-block sleep given the microsecond
  * @note  The current process will pause until wake up
  *        TIM9 was runnning on 1MHz. The maximum delay ms is `65535`
- * @param [in]  us - Microseconds
+ * @param [in] us         - Microseconds
+ * @param [in] async_mode - `ENABLE` | `DISABLE` If enabled, context switch is allowed.
  * @todo  Dead loop occurs when rtos was off !!!
  * @return  Return `BUSY` when timer is currently unavailable
  *          Return `SUCCESS` when finished.
  */
-cmnBoolean_t cmn_tim9_sleep(u16 us){
+cmnBoolean_t cmn_tim9_sleep(u16 us, cmnBoolean_t async_mode){
+  if(metope.dev.status.tim9==1){
+    return BUSY;
+  }
   /* Config Timer Register */
   bsp_tim9_delay(us);
   
   /* Wait until event was called */
-  if(metope.app.rtos.status==ON){
+  if(async_mode){
     xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM9, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
-    u32 tmp;
-    do{
-      // Wait until an update was generated
-      tmp = TIM9->SR;
-    }while( 0==READ_BIT( tmp, TIM_SR_UIF ));
-    
-    TIM9->SR = ~(TIM_SR_UIF);
+    while(metope.dev.status.tim9==0);
   }
-  
+  metope.dev.status.tim9 = 0;
   return SUCCESS;
 }
 

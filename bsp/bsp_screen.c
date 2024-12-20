@@ -228,7 +228,7 @@ void bsp_screen_smooth_on(void){
   u32 cnt = 0;
   while(cnt < sizeof(tmp)/sizeof(*tmp)){
     bsp_screen_set_bright(tmp[cnt++]);
-    cmn_tim9_sleep(20000); // 20ms
+    cmn_tim9_sleep(20000, metope.app.rtos.status==ON); // 20ms
     // vTaskDelay(20);
   }
 }
@@ -237,7 +237,7 @@ void bsp_screen_smooth_off(void){
   u32 cnt = sizeof(tmp)/sizeof(*tmp);
   while(cnt--){
     bsp_screen_set_bright(tmp[cnt]);
-    cmn_tim9_sleep(20000); // 20ms
+    cmn_tim9_sleep(20000, metope.app.rtos.status==ON); // 20ms
   }
 }
 
@@ -318,6 +318,8 @@ STATIC void bsp_screen_scan_mode( u8 mode){
  * @brief 
  */
 cmnBoolean_t bsp_screen_init( void){
+  bsp_screen_set_bright(0);
+  bsp_screen_on();
   PIN_CS(0);
   const uint8_t init_code[] = {
         CMD,  1, 0x36,\
@@ -442,8 +444,6 @@ cmnBoolean_t bsp_screen_init( void){
   bsp_screen_scan_mode(0);
   PIN_CS(1);
 
-  bsp_screen_on();
-  bsp_screen_set_bright(metope.bsp.screen.brightness);
   return true;
 }
 
@@ -486,17 +486,11 @@ void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScr
  */
 void bsp_screen_main(void *param) RTOSTHREAD{
   tBspScreen *parsed_param = (tBspScreen *)(param);
-  bspScreenBrightness_t xLastBrightness = parsed_param->brightness;
   TickType_t  xLastWakeTime = xTaskGetTickCount();
-  bsp_screen_set_bright(xLastBrightness);
   while(1){
     vTaskDelayUntil( &xLastWakeTime, parsed_param->refresh_rate_ms);
     lv_tick_inc(parsed_param->refresh_rate_ms);
     lv_timer_handler();
-    if(xLastBrightness!=parsed_param->brightness){
-      xLastBrightness = parsed_param->brightness;
-      bsp_screen_set_bright(xLastBrightness);
-    }
   }
 }
 
@@ -507,7 +501,11 @@ void bsp_screen_main(void *param) RTOSTHREAD{
  */
 void bsp_screen_onoff(void *param) RTOSTHREAD{
   UNUSED(param);
-
+  
+  metope.info.status.display_off = false;
+  bsp_screen_smooth_on();
+  xEventGroupClearBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M);
+  
   while(1){
     EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M|CMN_EVENT_SCREEN_NEED_OFF, pdTRUE, pdFALSE, portMAX_DELAY);
     
