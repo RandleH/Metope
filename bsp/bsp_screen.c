@@ -164,7 +164,7 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
      *  Phase 5: `HAL_SPI_TxCpltCallback()` will be called if no error. This is a weak function.
      *  Phase 6: The escape function shall be notified to come back.
      */
-    if(metope.app.rtos.status==ON){
+    if(metope.app.rtos.status.running){
       xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_SCREEN_REFRESH_CPLT, pdTRUE, pdFALSE, portMAX_DELAY);
     }else{
       while(IDLE!=metope.dev.status.spi2);
@@ -222,23 +222,24 @@ void inline bsp_screen_off(void){
   bsp_screen_set_bright(0);
 }
 
-const u16 tmp[] = {0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377};
-
-void bsp_screen_smooth_on(void){
-  u32 cnt = 0;
-  while(cnt < sizeof(tmp)/sizeof(*tmp)){
-    bsp_screen_set_bright(tmp[cnt++]);
-    cmn_tim9_sleep(20000, metope.app.rtos.status==ON); // 20ms
-    // vTaskDelay(20);
-  }
-}
 
 void bsp_screen_smooth_off(void){
-  u32 cnt = sizeof(tmp)/sizeof(*tmp);
-  while(cnt--){
-    bsp_screen_set_bright(tmp[cnt]);
-    cmn_tim9_sleep(20000, metope.app.rtos.status==ON); // 20ms
+  u32 brightness = metope.bsp.screen.brightness;
+  do{
+    brightness >>= 1;
+    bsp_screen_set_bright(brightness);
+    cmn_tim9_sleep(20000, metope.app.rtos.status.running==true); // 20ms
+  }while(brightness);
+}
+
+void bsp_screen_smooth_on(void){
+  u32 brightness = 1;
+  while(brightness < metope.bsp.screen.brightness){
+    brightness <<= 1;
+    bsp_screen_set_bright(brightness);
+    cmn_tim9_sleep(20000, metope.app.rtos.status.running==true); // 20ms
   }
+  bsp_screen_set_bright(metope.bsp.screen.brightness);
 }
 
 
@@ -502,7 +503,7 @@ void bsp_screen_main(void *param) RTOSTHREAD{
 void bsp_screen_onoff(void *param) RTOSTHREAD{
   UNUSED(param);
   
-  metope.info.status.display_off = false;
+  metope.info.status.scroff = false;
   bsp_screen_smooth_on();
   xEventGroupClearBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M);
   
@@ -511,17 +512,17 @@ void bsp_screen_onoff(void *param) RTOSTHREAD{
     
     /* Always process the user button clicking first */
     if(uxBits & CMN_EVENT_USER_KEY_M){
-      if(metope.info.status.display_off==true){
+      if(metope.info.status.scroff==true){
         bsp_screen_smooth_on();
       }else{
         bsp_screen_smooth_off();
       }
-      metope.info.status.display_off = !metope.info.status.display_off;
+      metope.info.status.scroff = !metope.info.status.scroff;
     }
     /* Now it's time to process the long time inactive screen */
     else if(uxBits & CMN_EVENT_SCREEN_NEED_OFF){
       bsp_screen_smooth_off();
-      metope.info.status.display_off = 1;
+      metope.info.status.scroff = 1;
     }
   }
 }

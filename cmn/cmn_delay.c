@@ -49,14 +49,14 @@ void cmn_timer_delay(u32 ms){
  * @return  Return `BUSY` when timer is currently unavailable
  *          Return `SUCCESS` when finished.
  */
-cmnBoolean_t cmn_tim2_sleep(u16 ms){
+cmnBoolean_t cmn_tim2_sleep(u16 ms, cmnBoolean_t async_mode){
   if(metope.dev.status.tim2==1){
     return BUSY;
   }
   /* Config Timer Register */
   bsp_tim2_delay(ms);
   /* Wait until event was called */
-  if(metope.app.rtos.status==ON){
+  if(async_mode){
     xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM2, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
     while(metope.dev.status.tim2==0);

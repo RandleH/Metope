@@ -488,7 +488,8 @@ public:
             }else{
               this->_cout << "Not ready\r" << std::flush;
             }
-            cmn_tim2_sleep(100);
+            cmnBoolean_t async_mode = false;
+            cmn_tim2_sleep(100, async_mode);
           }
         }
       }else{
@@ -544,8 +545,8 @@ public:
             }else{
               this->_cout << "Not ready\r" << std::flush;
             }
-            
-            cmn_tim2_sleep(100);
+            cmnBoolean_t async_mode = false;
+            cmn_tim2_sleep(100, async_mode);
           }
         }
       }else{

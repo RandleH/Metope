@@ -126,70 +126,7 @@ static void bsp_rtc_write_reg_bit( u8 reg, u8 bit_pos, u8 bit_len, u8 bit_val){
 	HAL_I2C_Mem_Write( &hi2c2, PCF8563_ADDRESS, reg, 1, &tmp, 1, PCF8563_I2C_TIMEOUT);
 }
 
-/**
- * @addtogroup MachineDependent
- */
-static void bsp_rtc_read_reg( u8 reg, u8 *buf, u8 len){
-#if 0 //(defined USE_REGISTER) && (USE_REGISTER==1)
-  volatile u32 tmp;
-
-  SET_BIT(I2C2->CR1, I2C_CR1_PE);
-
-  CLEAR_BIT(I2C2->CR1, I2C_CR1_POS);
-
-  /* Send Slave Address and Memory Address */
-  SET_BIT(I2C2->CR1, I2C_CR1_ACK);
-
-  /* Generate Start */
-  SET_BIT(I2C2->CR1, I2C_CR1_START);
-
-  /* Send slave address */
-  I2C2->DR = I2C_7BIT_ADD_WRITE(PCF8563_ADDRESS);
-  
-  /* Wait until ADDR flag is set */
-  while(0==READ_BIT(I2C2->SR1, I2C_SR1_ADDR)){}
-  /* Clear ADDR flag */
-  tmp = I2C2->SR1;
-  tmp = I2C2->SR2;
-
-  while(0==READ_BIT(I2C2->SR1, I2C_SR1_TXE)){
-    /* Detect if Nack exist */
-  }
-  
-  I2C2->DR = I2C_MEM_ADD_LSB(reg);
-
-  while(0==READ_BIT(I2C2->SR1, I2C_SR1_TXE)){
-    /* Detect if Nack exist */
-  }
-
-  /* Generate Restart */
-  SET_BIT(I2C2->CR1, I2C_CR1_START);
-
-  while(0==READ_BIT(I2C2->SR1, I2C_SR1_SB)){
-  }
-
-  // if (READ_BIT(I2C2->CR1, I2C_CR1_START) == I2C_CR1_START){
-  //   while(1);
-  // }
-
-  /* Send slave address */
-  I2C2->DR = I2C_7BIT_ADD_READ(PCF8563_ADDRESS);
-  
-  /* Wait until ADDR flag is set */
-  while(0==READ_BIT(I2C2->SR1, I2C_SR1_ADDR)){}
-  /* Clear ADDR flag */
-  tmp = I2C2->SR1;
-  tmp = I2C2->SR2;
-
-  //...//
-  while(len > 0U){
-
-  }
-#else
-  HAL_I2C_Mem_Read( &hi2c2, PCF8563_ADDRESS, reg, 1, buf, len, PCF8563_I2C_TIMEOUT);
-#endif
-}
-
+#if 0 /* Currently no requirement for dma tx */
 /**
  * @addtogroup MachineDependent
  */
@@ -200,15 +137,23 @@ static void bsp_rtc_read_reg_dma( u8 reg, u8 *buf, u8 len){
 /**
  * @addtogroup MachineDependent
  */
-static void bsp_rtc_write_reg( u8 reg, const u8 *buf, u8 len){
-  HAL_I2C_Mem_Write( &hi2c2, PCF8563_ADDRESS, reg, 1, (u8*)buf, len, PCF8563_I2C_TIMEOUT);
+static void bsp_rtc_write_reg_dma( u8 reg, const u8 *buf, u8 len){
+  HAL_I2C_Mem_Write_DMA( &hi2c2, PCF8563_ADDRESS, reg, 1, (u8*)buf, len);
+}
+#endif
+
+/**
+ * @addtogroup MachineDependent
+ */
+static void bsp_rtc_read_reg( u8 reg, u8 *buf, u8 len){
+  HAL_I2C_Mem_Read( &hi2c2, PCF8563_ADDRESS, reg, 1, buf, len, PCF8563_I2C_TIMEOUT);
 }
 
 /**
  * @addtogroup MachineDependent
  */
-static void bsp_rtc_write_reg_dma( u8 reg, const u8 *buf, u8 len){
-  HAL_I2C_Mem_Write_DMA( &hi2c2, PCF8563_ADDRESS, reg, 1, (u8*)buf, len);
+static void bsp_rtc_write_reg( u8 reg, const u8 *buf, u8 len){
+  HAL_I2C_Mem_Write( &hi2c2, PCF8563_ADDRESS, reg, 1, (u8*)buf, len, PCF8563_I2C_TIMEOUT);
 }
 
 

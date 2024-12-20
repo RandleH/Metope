@@ -281,7 +281,7 @@ void SysTick_Handler( void){
   /* Clear overflow flag */
   SysTick->CTRL;
 
-  if (metope.app.rtos.status == ON) {
+  if (metope.app.rtos.status.running) {
     /* Call tick handler */
     FreeRTOS_SysTick_Handler();
   }
@@ -328,7 +328,7 @@ void TIM1_BRK_TIM9_IRQHandler(void){
   HAL_TIM_IRQHandler(&htim9);
 #endif
   metope.dev.status.tim9 = 1;
-  if(metope.app.rtos.status==ON){
+  if(metope.app.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
     xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_TIM9, &xHigherPriorityTaskWoken );
@@ -351,7 +351,7 @@ void TIM2_IRQHandler(void){
   HAL_TIM_IRQHandler(&htim2);
 #endif
   metope.dev.status.tim2 = 1;
-  if(metope.app.rtos.status==ON){
+  if(metope.app.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
     xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_TIM2, &xHigherPriorityTaskWoken );
@@ -403,7 +403,7 @@ void DEFAULT EXTI0_IRQHandler( void){
 #else
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 #endif
-  if(metope.app.rtos.status==ON){
+  if(metope.app.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
     xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M | CMN_EVENT_UPDATE_RTC, &xHigherPriorityTaskWoken );
@@ -437,7 +437,7 @@ void DMA1_Stream0_IRQHandler( void){
 void DMA1_Stream1_IRQHandler( void){
   // extern DMA_HandleTypeDef hdma_i2c1_tx;
   // HAL_DMA_IRQHandler(&hdma_i2c1_tx);
-  // if(metope.app.rtos.status==ON){
+  // if(metope.app.rtos.status.running){
   //   BaseType_t xHigherPriorityTaskWoken, xResult;
   //   xHigherPriorityTaskWoken = pdFALSE;
   //   xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_QMI8658_TX_CPLT, &xHigherPriorityTaskWoken );
@@ -477,7 +477,7 @@ void DEFAULT DMA1_Stream4_IRQHandler(void){
      */
     cmn_callback_screen_spi_completed(&hspi2);
   }
-  if(metope.app.rtos.status==ON){
+  if(metope.app.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
     xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_SCREEN_REFRESH_CPLT, &xHigherPriorityTaskWoken );

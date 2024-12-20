@@ -122,7 +122,8 @@ public:
   
   static void task2(void*param){
     while(1){
-      cmn_tim2_sleep(1000);
+      cmnBoolean_t async_mode = true;
+      cmn_tim2_sleep(1000, async_mode);
       bsp_led_toggle();
     }
   }
