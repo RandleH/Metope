@@ -1,10 +1,11 @@
 [submodule "STM32CubeF4"]
-    url: https://github.com/STMicroelectronics/STM32CubeF4.git
-    path: lib/STM32CubeF4
+    path = lib/STM32CubeF4
+    url = https://github.com/STMicroelectronics/STM32CubeF4.git
+    branch = master
 
 
 [submodule "LVGL"]
-    url: https://github.com/lvgl/lvgl.git
-    path: lib/lvgl
-
+    path = lib/lvgl
+    url = https://github.com/lvgl/lvgl.git
+    branch = release/v8.3
 
