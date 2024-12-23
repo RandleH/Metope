@@ -1,0 +1,10 @@
+[submodule "STM32CubeF4"]
+    url: https://github.com/STMicroelectronics/STM32CubeF4.git
+    path: lib/STM32CubeF4
+
+
+[submodule "LVGL"]
+    url: https://github.com/lvgl/lvgl.git
+    path: lib/lvgl
+
+
