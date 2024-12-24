@@ -51,10 +51,6 @@ typedef struct stAppClock{
 typedef struct{
   struct{
     tBspScreen screen;
-
-    struct{
-      volatile u32 *_port;
-    }led;
   
   }bsp;
 
@@ -124,10 +120,14 @@ typedef struct{
         EventGroupHandle_t _handle;     /*!< Event Group Handle */
       }event;
 
-      cmnBoolean_t status; /*!< `ON` | `OFF` */
+      struct{
+        cmnBoolean_t running  : 1; /*!< `ON` | `OFF` */
+        cmnBoolean_t stkovfl  : 1;
+        cmnBoolean_t nomem    : 1;
+        cmnBoolean_t reserved : 5;
+      }status;
     }rtos;
 
-    
     tAppClock clock;
 
   }app;
@@ -136,8 +136,9 @@ typedef struct{
     const cmnDateTime_t system_initial_time;
     union{
       struct{
-        u8 display_off : 1;
-        u8 reserved    : 7;
+        u8 scroff      : 1;
+        u8 debugging   : 1;
+        u8 reserved    : 6;
       };
       u8 word;
     }status;

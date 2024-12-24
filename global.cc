@@ -12,11 +12,8 @@ extern "C"{
 tMainSystemStatus  metope = {
   .bsp = {
     .screen = {
-      .brightness = BSP_SCREEN_DEFAULT_BRIGHTNESS,
-      .refresh_rate_ms = 10
-    },
-    .led = {
-      ._port = &LED_GPIO_Port->ODR
+      .brightness      = BSP_SCREEN_DEFAULT_BRIGHTNESS,
+      .refresh_rate_ms = BSP_SCREEN_DEFAULT_REFREASHRATE
     },
   },
   .dev = {
@@ -39,7 +36,7 @@ tMainSystemStatus  metope = {
       .pLvglTheme     = NULL
 #endif
     },
-    .rtos = {.status = OFF},
+    .rtos = {.status = {0}},
     .clock = {
       .time = {
         {
@@ -52,15 +49,15 @@ tMainSystemStatus  metope = {
         }
       },
       ._handle = NULL,
-      .style = kAppGuiClock_NANA,
-      .gui = {0},
+      .style   = kAppGuiClock_NANA,
+      .gui     = {0},
     }
   },
   .info = {
     .status = {
       {
-        .display_off = 0,
-        .reserved    = 0
+        .scroff   = 0,
+        .reserved = 0
       }
     }
   }

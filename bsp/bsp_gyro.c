@@ -496,7 +496,9 @@ STATIC INLINE tBspGyroAccSensitivity    bsp_qmi8658_acc_scale_2_sensitivity  ( t
 STATIC INLINE tBspGyroDegreeSensitivity bsp_qmi8658_gyro_scale_2_sensitivity ( tQmi8658GyroScale scale);
 STATIC cmnBoolean_t                     bsp_qmi8658_i2c_polling_send         ( u8 reg, const u8 *buf, u8 len);
 STATIC cmnBoolean_t                     bsp_qmi8658_i2c_polling_recv         ( u8 reg, u8 *buf, u8 len);
+#if 0 /* Currently no requirement for dma tx */
 STATIC cmnBoolean_t                     bsp_qmi8658_i2c_dma_send             ( u8 reg, const u8 *buf, u8 len);
+#endif
 STATIC cmnBoolean_t                     bsp_qmi8658_i2c_dma_recv             ( u8 reg, u8 *buf, u8 len);
 STATIC u8                               bsp_qmi8658_i2c_polling_recv_1byte   ( u8 reg);
 STATIC void                             bsp_qmi8658_i2c_polling_send_1byte   ( u8 reg, u8 val);
@@ -550,7 +552,8 @@ void bsp_qmi8658_reset( void){
 cmnBoolean_t bsp_qmi8658_init(void){
   bsp_qmi8658_switch(ON);
   bsp_qmi8658_reset();
-  cmn_tim2_sleep(2000);
+  cmnBoolean_t async_mode = metope.app.rtos.status.running==true;
+  cmn_tim2_sleep(2000, async_mode);
   
   /**
    * @note
@@ -803,7 +806,7 @@ cmnBoolean_t bsp_qmi8658_dma_update( tBspGyroData *data){
   data->acc_sensitivity = bsp_qmi8658_acc_scale_2_sensitivity(QMI8658_DEFAULT_ACC_SCALE);
   data->deg_sensitivity = bsp_qmi8658_gyro_scale_2_sensitivity(QMI8658_DEFAULT_GYRO_SCALE);
 
-  if(metope.app.rtos.status==ON){
+  if(metope.app.rtos.status.running){
     //...//
   }
 
@@ -869,6 +872,7 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_polling_recv( u8 reg, u8 *buf, u8 len){
   return SUCCESS;
 }
 
+#if 0 /* Currently no requirement for dma tx */
 /**
  * @brief
  * @todo
@@ -894,7 +898,7 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_dma_send( u8 reg, const u8 *buf, u8 len){
    *  Phase 6: The escape function shall be notified to come back.
    */
   metope.dev.status.i2c1 = BUSY;
-  if(metope.app.rtos.status==ON){
+  if(metope.app.rtos.status.running){
     xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_QMI8658_TX_CPLT, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
     while(IDLE!=metope.dev.status.i2c1);
@@ -902,6 +906,7 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_dma_send( u8 reg, const u8 *buf, u8 len){
 
   return SUCCESS;
 }
+#endif
 
 /**
  * @brief
@@ -928,7 +933,7 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_dma_recv( u8 reg, u8 *buf, u8 len){
    *  Phase 6: The escape function shall be notified to come back.
    */
   
-  // if(metope.app.rtos.status==ON){
+  // if(metope.app.rtos.status.running){
   //   xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_QMI8658_TX_CPLT, pdTRUE, pdFALSE, portMAX_DELAY);
   // }else{
   //   while(IDLE!=metope.dev.status.i2c1);
@@ -1061,7 +1066,7 @@ STATIC cmnBoolean_t bsp_qmi8658_ctrl9_protocol(u8 QMI8658_CTRL9_CMD_XXXX){
     }
   }
   
-  if(metope.app.rtos.status==ON){
+  if(metope.app.rtos.status.running){
     /* Process Blocked */
     xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_QMI8658_INT1, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
@@ -1079,7 +1084,8 @@ STATIC cmnBoolean_t bsp_qmi8658_ctrl9_protocol(u8 QMI8658_CTRL9_CMD_XXXX){
     if(reg_statusint.CmdDone==0){
       break;
     }
-    cmn_tim2_sleep(1);
+    cmnBoolean_t async_mode = metope.app.rtos.status.running==true;
+    cmn_tim2_sleep( 1, async_mode);
   }
   if(0==timeout){
     bsp_qmi8658_i2c_polling_recv( QMI8658_REG_STATUS_INT, &reg_statusint.reg, 1);

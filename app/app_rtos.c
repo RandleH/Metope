@@ -33,12 +33,12 @@ extern "C"{
 #endif
 
 void app_rtos_start( void){
-  metope.app.rtos.status = ON;
+  metope.app.rtos.status.running = true;
   vTaskStartScheduler();
 }
 
 void app_rtos_stop( void){
-  metope.app.rtos.status = OFF;
+  metope.app.rtos.status.running = false;
   vTaskEndScheduler();
 }
 
