@@ -23,8 +23,8 @@ if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
                                 "-DUSE_HAL_DRIVER" )
 
     aux_source_directory( "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src"  SRC_STM32)
-    list(APPEND SRC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s"
-                                "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c" 
+    list(APPEND SRC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F411CEU6/startup_stm32f411xe.s"
+                                "${PRJ_TOP}/STM32CubeMX/STM32F411CEU6/Core/Src/system_stm32f4xx.c" 
                                 )
 
 
@@ -41,8 +41,8 @@ elseif((CHIP STREQUAL "STM32F405RGT6"))
     list(APPEND DEF_STM32       "-DSTM32F405xx"
                                 "-DUSE_HAL_DRIVER" )
     aux_source_directory( ${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src  SRC_STM32)
-    list(APPEND SRC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f405xx.s"
-                                "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c" )
+    list(APPEND SRC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/startup_stm32f405xx.s"
+                                "${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/Core/Src/system_stm32f4xx.c" )
 
     list(APPEND INC_STM32       "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include/"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/CMSIS/Core/Include/"
