@@ -2,7 +2,7 @@
 # Ref: https://gist.github.com/eugene-babichenko/3118042a23d2082bfba624f3f2039843
 # Ref: https://stackoverflow.com/questions/36122358/visual-studio-code-c-include-path
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.19.2)
 
 
 
@@ -18,6 +18,7 @@ MACRO( GET_SUBDIR result curdir)
 ENDMACRO()
 
 
+
 #########################################################################################################
 # Project Path & Source Files Definition
 #########################################################################################################
@@ -28,9 +29,24 @@ set( INC_DIR_LIST                   "")
 set( TARGET_LIST                    "")
 
 
+message( STATUS "Project Directory        => ${PRJ_TOP}")
+message( STATUS "System Processor         => ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+message( STATUS "System Name              => ${CMAKE_HOST_SYSTEM_NAME}")
+message( STATUS "CMake System             => ${CMAKE_SYSTEM}")
+message( STATUS "CMake System Version     => ${CMAKE_SYSTEM_VERSION}")
+message( STATUS "CMake System Arch        => ${CMAKE_OSX_ARCHITECTURES}")
+message( STATUS "APPLE | WIN32 | UNIX     => ${APPLE} | ${WIN32} | ${UNIX}") # True if running on Mac OSX. | True on windows systems, including win64. | True for UNIX and UNIX like operating systems.
+message( STATUS "Apple Silicon            => ${CMAKE_APPLE_SILICON_PROCESSOR}")
+message( STATUS "Host Unix                => ${CMAKE_HOST_UNIX}")  # True for UNIX and UNIX like operating systems.
+message( STATUS "Host Windows             => ${CMAKE_HOST_WIN32}") # True on windows systems, including win64.
+message( STATUS "Host Apple               => ${CMAKE_HOST_APPLE}") # True for Apple OSXoperating systems.
+
+
+
 # Tool Chain Setup
 set(CMAKE_TOOLCHAIN_FILE                ${CMAKE_SOURCE_DIR}/cmake/arm-gcc-toolchain.cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS       ON)
+
 
 # Project Setup
 project( model1 C CXX ASM)
@@ -40,6 +56,7 @@ set(CMAKE_C_STANDARD_REQUIRED           ON)
 set(CMAKE_C_EXTENSIONS                  ON)
 set(CMAKE_CXX_STANDARD                  17)
 set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Cross-compiling" FORCE)
+
 
 
 #########################################################################################################
