@@ -5,3 +5,7 @@
 	path = lib/lvgl
 	url = https://github.com/lvgl/lvgl.git
 	branch = release/v8.3
+[submodule "lib/arm-toolchain"]
+	path = lib/arm-toolchain
+	url = https://github.com/RandleH/Arm-GNU-Tool-Chain.git
+	branch = master

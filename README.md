@@ -18,6 +18,44 @@ Do not expect me saying anything about it. Picture tells. If you don't like it, 
 
 
 
+
+
+## Workspace Setup
+
+Clone the workspace
+
+```bash
+git clone https://github.com/RandleH/Metope.git
+```
+
+
+
+Download the dependency libraries
+
+```bash
+cd Metope/lib
+git submodule update --init --recursive
+```
+
+
+
+Download the project compiler (Optional)
+
+```
+```
+
+
+
+
+
+```bash
+cp -rf backup/* STM32CubeMX
+```
+
+
+
+
+
 ## Requirement
 
 ### STM32CubeF4

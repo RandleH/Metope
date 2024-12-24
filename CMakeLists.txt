@@ -18,6 +18,16 @@ MACRO( GET_SUBDIR result curdir)
 ENDMACRO()
 
 
+#########################################################################################################
+# Project Path & Source Files Definition
+#########################################################################################################
+set( PRJ_TOP                        ${CMAKE_SOURCE_DIR})
+set( DEF_LIST                       "")
+set( SRC_LIST                       "")
+set( INC_DIR_LIST                   "")
+set( TARGET_LIST                    "")
+
+
 # Tool Chain Setup
 set(CMAKE_TOOLCHAIN_FILE                ${CMAKE_SOURCE_DIR}/cmake/arm-gcc-toolchain.cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS       ON)
@@ -30,16 +40,6 @@ set(CMAKE_C_STANDARD_REQUIRED           ON)
 set(CMAKE_C_EXTENSIONS                  ON)
 set(CMAKE_CXX_STANDARD                  17)
 set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Cross-compiling" FORCE)
-
-
-#########################################################################################################
-# Project Path & Source Files Definition
-#########################################################################################################
-set( PRJ_TOP                        ${CMAKE_SOURCE_DIR})
-set( DEF_LIST                       "")
-set( SRC_LIST                       "")
-set( INC_DIR_LIST                   "")
-set( TARGET_LIST                    "")
 
 
 #########################################################################################################
