@@ -6,17 +6,28 @@
 
 
 
-Do not expect me saying anything about it. Picture tells. If you don't like it, buy an Apple Watch. If you like it, probably buy me a coffee.
+Metope is a project for a smart digital watch system running on the STM32 target.
 
 
 
 ## Overview
 
-### Time Setting
-
-### USB
+<p align="center"> <img src="doc/asset/rdme_hierarchy.jpg" alt="rdme_clk_panel" ;" /> </p>
 
 
+
+Color Capsule contributes to the firmware program. Grey rectangulars are only the auxiliary components.
+
+
+
+
+
+## Requirement
+
+- `CMake>=3.19.2`
+- `make==3.81`
+
+Metope project dosen't require to install the `arm-gnu-tool-chain` on the host system. Tool chain will be provided via `lib/arm-toolchain`
 
 
 
@@ -30,77 +41,45 @@ git clone https://github.com/RandleH/Metope.git
 
 
 
-Download the dependency libraries
+Deploy the environment
 
 ```bash
-cd Metope/lib
-git submodule update --init --recursive
+source setup.env
 ```
 
 
 
-Download the project compiler (Optional)
-
-```
-```
-
-
-
-
+Compile
 
 ```bash
-cp -rf backup/* STM32CubeMX
+sh rebuild.sh
 ```
 
 
 
+The output files will be the following items:
 
-
-## Requirement
-
-### STM32CubeF4
-
-```bash
-cd lib
-git clone --recursive https://github.com/STMicroelectronics/STM32CubeF4.git
-```
-
-
-
-### STM32CubeMX
+- `build/model1.elf` - Executable Linkable File
+- `build/model1.hex` - Hex file for USART download
+- `build/model1.bin`
 
 
 
 
 
-### Others
+## Compilation
 
-```
-cmake make git arm-none-eabi-gdb
-```
+Metope has a bash script for the convenience of compilation. Please take reference for `Compilation Configuration Zone` in `rebuild.sh`.
 
-
+<p align="center"> <img src="doc/asset/rdme_config.jpg" alt="rdme_clk_panel" ;" /> </p>
 
 
 
-### CMSIS-SVD (Optional)
-
-```bash
-cd lib
-git clone https://github.com/modm-ext/cmsis-svd-stm32-zip.git
-```
+Here are some typical configurations. Copy the command and replace the one in `rebuild.sh` in the `Compilation Configuration Zone`
 
 
 
-
-
-
-
-## Compile
-
-
-
-### Firmware
+### Firmware (Debug)
 
 ```bash
 cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F411CEU6 .. && make -j12
@@ -112,6 +91,24 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F411CEU6 .. && make -j12
 
 ```bash
 cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F405RGT6 .. && make -j12
+```
+
+> STM32F405RGT6
+
+
+
+### Firmware (Release)
+
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release -DCHIP=STM32F411CEU6 .. && make -j12
+```
+
+> STM32F411CEU6
+
+
+
+```
+cmake -DCMAKE_BUILD_TYPE=Release -DCHIP=STM32F405RGT6 .. && make -j12
 ```
 
 > STM32F405RGT6
@@ -140,15 +137,9 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F405RGT6 -DTEST_ONLY=1 .. && make -j1
 
 
 
-
-
-
-
 ## Utility
 
 - [**Online GDB**](https://www.onlinegdb.com/)
-
-
 
 
 
