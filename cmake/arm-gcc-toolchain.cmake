@@ -5,11 +5,13 @@ set(TOOLCHAIN_PREFIX arm-none-eabi-)
 
 
 
+
+
 if(${CMAKE_HOST_APPLE})
     if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
-        set(ARM_TOOLCHAIN_DIR ${PRJ_TOP}/lib/arm-toolchain/macOS-AppleSilicon)
+        set(ARM_TOOLCHAIN_REPO "macOS-AppleSilicon")
     else()
-        set(ARM_TOOLCHAIN_DIR ${PRJ_TOP}/lib/arm-toolchain/macOS-Intel)
+        set(ARM_TOOLCHAIN_REPO "macOS-Intel")
     endif()
 elseif(${CMAKE_HOST_UNIX})
     message(FATAL_ERROR "Currently unsupport UNIX/LINUX host system")
@@ -17,7 +19,11 @@ elseif(${CMAKE_HOST_WIN32})
     message(FATAL_ERROR "Currently unsupport WIN32 host system")
 endif()
 
+set(ARM_TOOLCHAIN_DIR  ${PRJ_TOP}/lib/arm-toolchain/${ARM_TOOLCHAIN_REPO})
+
+message(STATUS "Arm-GNU-Tool-Chain Repository was set to ${ARM_TOOLCHAIN_REPO}")
 message(STATUS "Arm-GNU-Tool-Chain Directory was set to ${ARM_TOOLCHAIN_DIR}")
+
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -25,15 +31,14 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     option(GIT_SUBMODULE "Check submodules during build" ON)
     if(GIT_SUBMODULE)
         message(STATUS "Git Submodule Update: Arm-GNU-Tool-Chain")
-        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init
-                        WORKING_DIRECTORY ${ARM_TOOLCHAIN_DIR}
-                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        execute_process(COMMAND           ${GIT_EXECUTABLE} submodule update --init ${ARM_TOOLCHAIN_REPO}
+                        WORKING_DIRECTORY ${PRJ_TOP}/lib/arm-toolchain
+                        RESULT_VARIABLE   GIT_SUBMOD_RESULT)
         if(NOT GIT_SUBMOD_RESULT EQUAL "0")
             message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
         endif()
     endif()
 endif()
-
 
 
 set(BINUTILS_PATH ${ARM_TOOLCHAIN_DIR}/bin/arm-none-eabi-gcc)
