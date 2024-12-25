@@ -91,5 +91,6 @@
         "ranges": "cpp",
         "cinttypes": "cpp",
         "lv_examples.h": "c"
-    }
+    },
+    "git.ignoreLimitWarning": true
 }
