@@ -35,7 +35,7 @@ if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
                                 "${PRJ_TOP}/STM32CubeMX/STM32F411CEU6/Core/Inc/"
                                 )
                                 
-    list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F411CEUX_FLASH.ld")
+    list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32CubeMX/STM32F411CEU6/STM32F411CEUx_FLASH.ld")
 
 elseif((CHIP STREQUAL "STM32F405RGT6"))
     list(APPEND DEF_STM32       "-DSTM32F405xx"
@@ -51,7 +51,7 @@ elseif((CHIP STREQUAL "STM32F405RGT6"))
                                 
     list(APPEND INC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/Core/Inc/")
     
-    list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32F405RGTx_FLASH.ld")
+    list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/STM32F405RGTx_FLASH.ld")
 else()
     message(FATAL_ERROR "Unknown system target")
 endif()
@@ -61,7 +61,6 @@ set( INC_FREERTOS "")
 set( SRC_FREERTOS "")
 set( DEF_FREERTOS "")
 
-# aux_source_directory( "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2" SRC_FREERTOS)
 
 list(APPEND SRC_FREERTOS        "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c"
@@ -119,9 +118,6 @@ add_subdirectory( ${PRJ_TOP}/lib/lvgl ${PRJ_TOP}/build/lvgl/build )
 target_include_directories(lvgl PUBLIC ${INC_DIR_LIST})
 target_compile_options(lvgl  INTERFACE   ${CMAKE_CXX_FLAGS} ${CPU_FLAG} ${CXX_FLAG} )
 target_link_options(lvgl INTERFACE ${LINK_FLAG} ${CPU_FLAG})
-
-# lvgl_demos
-# lvgl_example
 
 
 list( APPEND INC_DIR_LIST   ${PRJ_TOP}/lib/lvgl)
