@@ -61,6 +61,9 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED_Pin GPIO_PIN_13
 #define LED_GPIO_Port GPIOC
+#define KEY_M_Pin GPIO_PIN_0
+#define KEY_M_GPIO_Port GPIOA
+#define KEY_M_EXTI_IRQn EXTI0_IRQn
 #define KEY_R_Pin GPIO_PIN_1
 #define KEY_R_GPIO_Port GPIOA
 #define KEY_R_EXTI_IRQn EXTI1_IRQn
@@ -68,6 +71,12 @@ void Error_Handler(void);
 #define DBG_TX_GPIO_Port GPIOA
 #define DBG_RX_Pin GPIO_PIN_3
 #define DBG_RX_GPIO_Port GPIOA
+#define FLASH_CS_Pin GPIO_PIN_4
+#define FLASH_CS_GPIO_Port GPIOA
+#define FLASH_CLK_Pin GPIO_PIN_5
+#define FLASH_CLK_GPIO_Port GPIOA
+#define FLASH_MOSI_Pin GPIO_PIN_7
+#define FLASH_MOSI_GPIO_Port GPIOA
 #define SCREEN_DC_Pin GPIO_PIN_2
 #define SCREEN_DC_GPIO_Port GPIOB
 #define SCREEN_CLK_Pin GPIO_PIN_13
@@ -76,12 +85,15 @@ void Error_Handler(void);
 #define SCREEN_MISO_GPIO_Port GPIOB
 #define SCREEN_MOSI_Pin GPIO_PIN_15
 #define SCREEN_MOSI_GPIO_Port GPIOB
-#define TP_INT_Pin GPIO_PIN_9
-#define TP_INT_GPIO_Port GPIOA
-#define TP_INT_EXTI_IRQn EXTI9_5_IRQn
 #define KEY_L_Pin GPIO_PIN_15
 #define KEY_L_GPIO_Port GPIOA
 #define KEY_L_EXTI_IRQn EXTI15_10_IRQn
+#define FLASH_MISO_Pin GPIO_PIN_4
+#define FLASH_MISO_GPIO_Port GPIOB
+#define GYRO_SCK_Pin GPIO_PIN_8
+#define GYRO_SCK_GPIO_Port GPIOB
+#define GYRO_SDA_Pin GPIO_PIN_9
+#define GYRO_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
