@@ -15,6 +15,7 @@
             "svdFile": "${workspaceFolder}/lib/cmsis-svd-stm32/stm32f4/STM32F411.svd",
             "interface": "swd",
             "servertype": "jlink",
+            "preLaunchTask": "env",
             "swoConfig": {
                 "enabled": true,
                 "cpuFrequency": 96000000,

@@ -2,8 +2,7 @@
     "cmake.cmakePath": "/opt/homebrew/bin/cmake",
     "cmake.saveBeforeBuild": true,
     "cmake.configureOnEdit": false,
-    "cortex-debug.armToolchainPath": "/opt/homebrew/bin/",
-    "cortex-debug.gdbPath": "/opt/homebrew/bin/arm-none-eabi-gdb",
+    "cortex-debug.armToolchainPath": "${workspaceFolder}/lib/arm-toolchain/macOS-AppleSilicon/bin",
     "cortex-debug.JLinkGDBServerPath": "/usr/local/bin/JLinkGDBServer",
     "cortex-debug.variableUseNaturalFormat": true,
     "files.associations": {
