@@ -192,7 +192,6 @@ target_link_libraries( ${PROJECT_NAME}.elf PUBLIC  ${TARGET_LIST})
 message("================================================================================")
 message( "Executable target property: ${PROJECT_NAME}.elf")
 message("================================================================================")
-# print_target_properties( ${PROJECT_NAME}.elf)
 
 
 #########################################################################################################
@@ -204,5 +203,7 @@ add_custom_command(     TARGET  ${PROJECT_NAME}.elf POST_BUILD
                         COMMAND ${CMAKE_OBJCOPY} -Oihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
                         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
                         COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}"
-                        COMMAND "nm" "--print-size" "--size-sort" "${PROJECT_NAME}.elf" ">" "${PRJ_TOP}/build/${PROJECT_NAME}.nm"
-                        COMMAND "objdump" "-d" "${PROJECT_NAME}.elf"  ">" "${PRJ_TOP}/build/${PROJECT_NAME}.dis" )
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/arm-none-eabi/bin/nm"      "--print-size" "--size-sort" "${PROJECT_NAME}.elf" ">" "${PRJ_TOP}/build/${PROJECT_NAME}.nm"
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/arm-none-eabi/bin/objdump" "-d" "${PROJECT_NAME}.elf"  ">" "${PRJ_TOP}/build/${PROJECT_NAME}.dis" 
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/bin/arm-none-eabi-size"    "${PRJ_TOP}/build/model1.elf"
+                    )
