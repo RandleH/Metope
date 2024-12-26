@@ -2,7 +2,7 @@
 # Ref: https://gist.github.com/eugene-babichenko/3118042a23d2082bfba624f3f2039843
 # Ref: https://stackoverflow.com/questions/36122358/visual-studio-code-c-include-path
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.19.2)
 
 
 
@@ -18,9 +18,35 @@ MACRO( GET_SUBDIR result curdir)
 ENDMACRO()
 
 
+
+#########################################################################################################
+# Project Path & Source Files Definition
+#########################################################################################################
+set( PRJ_TOP                        ${CMAKE_SOURCE_DIR})
+set( DEF_LIST                       "")
+set( SRC_LIST                       "")
+set( INC_DIR_LIST                   "")
+set( TARGET_LIST                    "")
+
+
+message( STATUS "Project Directory        => ${PRJ_TOP}")
+message( STATUS "System Processor         => ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+message( STATUS "System Name              => ${CMAKE_HOST_SYSTEM_NAME}")
+message( STATUS "CMake System             => ${CMAKE_SYSTEM}")
+message( STATUS "CMake System Version     => ${CMAKE_SYSTEM_VERSION}")
+message( STATUS "CMake System Arch        => ${CMAKE_OSX_ARCHITECTURES}")
+message( STATUS "APPLE | WIN32 | UNIX     => ${APPLE} | ${WIN32} | ${UNIX}") # True if running on Mac OSX. | True on windows systems, including win64. | True for UNIX and UNIX like operating systems.
+message( STATUS "Apple Silicon            => ${CMAKE_APPLE_SILICON_PROCESSOR}")
+message( STATUS "Host Unix                => ${CMAKE_HOST_UNIX}")  # True for UNIX and UNIX like operating systems.
+message( STATUS "Host Windows             => ${CMAKE_HOST_WIN32}") # True on windows systems, including win64.
+message( STATUS "Host Apple               => ${CMAKE_HOST_APPLE}") # True for Apple OSXoperating systems.
+
+
+
 # Tool Chain Setup
 set(CMAKE_TOOLCHAIN_FILE                ${CMAKE_SOURCE_DIR}/cmake/arm-gcc-toolchain.cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS       ON)
+
 
 # Project Setup
 project( model1 C CXX ASM)
@@ -31,15 +57,6 @@ set(CMAKE_C_EXTENSIONS                  ON)
 set(CMAKE_CXX_STANDARD                  17)
 set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Cross-compiling" FORCE)
 
-
-#########################################################################################################
-# Project Path & Source Files Definition
-#########################################################################################################
-set( PRJ_TOP                        ${CMAKE_SOURCE_DIR})
-set( DEF_LIST                       "")
-set( SRC_LIST                       "")
-set( INC_DIR_LIST                   "")
-set( TARGET_LIST                    "")
 
 
 #########################################################################################################
@@ -175,7 +192,6 @@ target_link_libraries( ${PROJECT_NAME}.elf PUBLIC  ${TARGET_LIST})
 message("================================================================================")
 message( "Executable target property: ${PROJECT_NAME}.elf")
 message("================================================================================")
-# print_target_properties( ${PROJECT_NAME}.elf)
 
 
 #########################################################################################################
@@ -187,5 +203,7 @@ add_custom_command(     TARGET  ${PROJECT_NAME}.elf POST_BUILD
                         COMMAND ${CMAKE_OBJCOPY} -Oihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
                         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
                         COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}"
-                        COMMAND "nm" "--print-size" "--size-sort" "${PROJECT_NAME}.elf" ">" "${PRJ_TOP}/build/${PROJECT_NAME}.nm"
-                        COMMAND "objdump" "-d" "${PROJECT_NAME}.elf"  ">" "${PRJ_TOP}/build/${PROJECT_NAME}.dis" )
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/arm-none-eabi/bin/nm"      "--print-size" "--size-sort" "${PROJECT_NAME}.elf" ">" "${PRJ_TOP}/build/${PROJECT_NAME}.nm"
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/arm-none-eabi/bin/objdump" "-d" "${PROJECT_NAME}.elf"  ">" "${PRJ_TOP}/build/${PROJECT_NAME}.dis" 
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/bin/arm-none-eabi-size"    "${PRJ_TOP}/build/model1.elf"
+                    )

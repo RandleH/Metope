@@ -9,7 +9,7 @@
 ################################################################################################
 .vscode/*
 !.vscode/settings.json
-# !.vscode/tasks.json
+!.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/c_cpp_properties.json
 # !.vscode/extensions.json
@@ -34,13 +34,6 @@ STM32CubeMX/STM32F405RGT6/*
 !STM32CubeMX/STM32F405RGT6/.mxproject
 
 
-
-lib/*
-!lib/lib.cmake
-!lv_conf.h
-!lv_conf_8_3_6.h
-!lv_conf_9_2_2.h
-!FreeRTOSConfig.h
 
 
 ################################################################################################

@@ -1,0 +1,15 @@
+[submodule "lib/STM32CubeF4"]
+	path = lib/STM32CubeF4
+	url = https://github.com/STMicroelectronics/STM32CubeF4.git
+[submodule "lib/lvgl"]
+	path = lib/lvgl
+	url = https://github.com/lvgl/lvgl.git
+	branch = release/v8.3
+[submodule "lib/arm-toolchain"]
+	path = lib/arm-toolchain
+	url = https://github.com/RandleH/Arm-GNU-Tool-Chain.git
+	branch = master
+[submodule "lib/stm32-svd"]
+	path = lib/stm32-svd
+	url = https://github.com/modm-io/cmsis-svd-stm32.git
+	branch = main

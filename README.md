@@ -6,63 +6,80 @@
 
 
 
-Do not expect me saying anything about it. Picture tells. If you don't like it, buy an Apple Watch. If you like it, probably buy me a coffee.
+Metope is a project for a smart digital watch system running on the STM32 target.
 
 
 
 ## Overview
 
-### Time Setting
+<p align="center"> <img src="doc/asset/rdme_hierarchy.jpg" alt="rdme_clk_panel" ;" /> </p>
 
-### USB
+
+
+Color Capsule contributes to the firmware program. Grey rectangulars are only the auxiliary components.
+
+
 
 
 
 ## Requirement
 
-### STM32CubeF4
+- `CMake>=3.19.2`
+- `make==3.81`
+
+Metope project dosen't require to install the `arm-gnu-tool-chain` on the host system. Tool chain will be provided via `lib/arm-toolchain`
+
+
+
+## Workspace Setup
+
+Clone the workspace
 
 ```bash
-cd lib
-git clone --recursive https://github.com/STMicroelectronics/STM32CubeF4.git
+git clone https://github.com/RandleH/Metope.git
 ```
 
 
 
-### STM32CubeMX
-
-
-
-
-
-### Others
-
-```
-cmake make git arm-none-eabi-gdb
-```
-
-
-
-
-
-### CMSIS-SVD (Optional)
+Deploy the environment
 
 ```bash
-cd lib
-git clone https://github.com/modm-ext/cmsis-svd-stm32-zip.git
+source setup.env
 ```
 
 
 
+Compile
+
+```bash
+sh rebuild.sh
+```
+
+
+
+The output files will be the following items:
+
+- `build/model1.elf` - Executable Linkable File
+- `build/model1.hex` - Hex file for USART download
+- `build/model1.bin`
 
 
 
 
-## Compile
+
+## Compilation
+
+Metope has a bash script for the convenience of compilation. Please take reference for `Compilation Configuration Zone` in `rebuild.sh`.
+
+<p align="center"> <img src="doc/asset/rdme_config.jpg" alt="rdme_clk_panel" ;" /> </p>
 
 
 
-### Firmware
+Here are some typical configurations. Copy the command and replace the one in `rebuild.sh` in the `Compilation Configuration Zone`
+
+
+
+### Firmware (Debug)
 
 ```bash
 cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F411CEU6 .. && make -j12
@@ -74,6 +91,24 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F411CEU6 .. && make -j12
 
 ```bash
 cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F405RGT6 .. && make -j12
+```
+
+> STM32F405RGT6
+
+
+
+### Firmware (Release)
+
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release -DCHIP=STM32F411CEU6 .. && make -j12
+```
+
+> STM32F411CEU6
+
+
+
+```
+cmake -DCMAKE_BUILD_TYPE=Release -DCHIP=STM32F405RGT6 .. && make -j12
 ```
 
 > STM32F405RGT6
@@ -102,6 +137,42 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F405RGT6 -DTEST_ONLY=1 .. && make -j1
 
 
 
+## Debug
+
+### Vscode
+
+Step 0: Always deploy the environment first.
+
+> ```bash
+> source setup.env
+> ```
+>
+> The `.vscode` will be updated here depending on your OS.
+
+
+
+Step 1: Install the Vscode extension `Cortex-Debug`
+
+
+
+Step 2: Install `J-Link` tools
+
+>```bash
+>brew install --cask segger-jlink
+>```
+
+
+
+Step 3: Select a specific debugging mode
+
+>- `JLink Download (STM32F411CE)` - Download the program to target. You need to compile the project first.
+>
+>- `JLink Attach (STM32F411CE)` - Attach to the program without downloading. Again you need to compile first.
+
+
+
+
+
 
 
 
@@ -109,8 +180,6 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F405RGT6 -DTEST_ONLY=1 .. && make -j1
 ## Utility
 
 - [**Online GDB**](https://www.onlinegdb.com/)
-
-
 
 
 
