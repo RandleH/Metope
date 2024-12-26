@@ -9,3 +9,7 @@
 	path = lib/arm-toolchain
 	url = https://github.com/RandleH/Arm-GNU-Tool-Chain.git
 	branch = master
+[submodule "lib/stm32-svd"]
+	path = lib/stm32-svd
+	url = https://github.com/modm-io/cmsis-svd-stm32.git
+	branch = main
