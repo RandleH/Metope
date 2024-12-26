@@ -137,6 +137,46 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F405RGT6 -DTEST_ONLY=1 .. && make -j1
 
 
 
+## Debug
+
+### Vscode
+
+Step 0: Always deploy the environment first.
+
+> ```bash
+> source setup.env
+> ```
+>
+> The `.vscode` will be updated here depending on your OS.
+
+
+
+Step 1: Install the Vscode extension `Cortex-Debug`
+
+
+
+Step 2: Install `J-Link` tools
+
+>```bash
+>brew install --cask segger-jlink
+>```
+
+
+
+Step 3: Select a specific debugging mode
+
+>- `JLink Download (STM32F411CE)` - Download the program to target. You need to compile the project first.
+>
+>- `JLink Attach (STM32F411CE)` - Attach to the program without downloading. Again you need to compile first.
+
+
+
+
+
+
+
+
+
 ## Utility
 
 - [**Online GDB**](https://www.onlinegdb.com/)
