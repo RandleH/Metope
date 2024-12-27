@@ -20,14 +20,9 @@
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-  #include "stm32f4xx_hal.h"
-  #include "stm32f4xx_hal_i2c.h"
-  #include "stm32f4xx_hal_dma.h"
-#endif
+#include "device.h"
 #include "global.h"
 #include "bsp_gyro.h"
-#include "cmn_device.h"
 #include "cmn_delay.h"
 
 /* ************************************************************************** */

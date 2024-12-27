@@ -17,14 +17,17 @@
  ******************************************************************************
 */
 
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include <stdbool.h>
+#include "device.h"
+#include "global.h"
 #include "cmn_type.h"
-#include "cmn_device.h"
 #include "cmn_interrupt.h"
 #include "cmn_utility.h"
 #include "cmn_callback.h"
 #include "bsp_led.h"
-#include "global.h"
 #include "FreeRTOS.h"
 #include "event_groups.h"
 #ifdef __cplusplus

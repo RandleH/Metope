@@ -1,9 +1,6 @@
 
 
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-  #include "stm32f4xx_hal.h"
-  #include "stm32f4xx_hal_spi.h"
-#endif
+#include "device.h"
 
 
 #ifndef CMN_CALLBACK_H
