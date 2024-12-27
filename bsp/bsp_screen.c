@@ -19,13 +19,12 @@
 
 
 
-
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include <stdbool.h>
+#include "device.h"
 #include "global.h"
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-  #include "stm32f4xx_hal.h"
-  #include "stm32f4xx_hal_tim.h"
-#endif
 #include "bsp_screen.h"
 #include "cmn_delay.h"
 

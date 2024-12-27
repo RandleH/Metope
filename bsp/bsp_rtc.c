@@ -22,16 +22,9 @@
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
-
 #include "bsp_rtc.h"
+#include "device.h"
 #include "global.h"
-
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-  #include "stm32f4xx_hal.h"
-  #include "stm32f4xx_hal_i2c.h"
-  #include "stm32f4xx_hal_dma.h"
-#endif
-
 
 
 

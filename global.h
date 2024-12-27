@@ -1,14 +1,29 @@
-
+/**
+ ******************************************************************************
+ * @file    global.h
+ * @author  RandleH
+ * @brief   Global Variable Declaration
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 RandleH.
+ * All rights reserved.
+ *
+ * This software component is licensed by RandleH under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+*/
 
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#include "device.h"
 #include "bsp_type.h"
 #include "cmn_type.h"
 #include "app_type.h"
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-  #include "stm32f4xx_hal.h"
-#endif
 #include "lvgl.h"
 #include "FreeRTOS.h"
 #include "task.h"
