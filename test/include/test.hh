@@ -388,8 +388,8 @@ public:
 class LocalProjectTest : public Test{
 public:
   using Test::Test;
-  void callback_if_passed(void) override{bsp_led__on();}
-  void callback_if_failed(void) override{bsp_led__off();}
+  void callback_if_passed(void) override{bsp_led_on();}
+  void callback_if_failed(void) override{bsp_led_off();}
 };
 
 

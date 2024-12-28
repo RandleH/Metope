@@ -91,7 +91,8 @@
         "cinttypes": "cpp",
         "lv_examples.h": "c",
         "cmn_math.h": "c",
-        "devctl.h": "c"
+        "devctl.h": "c",
+        "*.def": "c"
     },
     "git.ignoreLimitWarning": true
 }

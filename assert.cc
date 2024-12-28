@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    cmn_math.h
+ * @file    assert.cc
  * @author  RandleH
- * @brief   Common Program - Math
+ * @brief   Project Assertion
  ******************************************************************************
  * @attention
  *
@@ -17,25 +17,19 @@
  ******************************************************************************
 */
 
-#include <stdint.h>
+
+#include <errno.h>
 #include "device.h"
+#include "bsp_led.h"
 
-
-#ifndef CMN_MATH_H
-#define CMN_MATH_H
-
-
-
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-
-uint32_t cmn_math_gcd( uint32_t a, uint32_t b);
-uint32_t cmn_math_largest_pow10(uint32_t x);
-
-#ifdef __cplusplus
+#ifdef DEBUG
+void ASSERT( bool expr, const char *msg){
+  if(!expr){
+    bsp_led_on();
+    __BKPT(0);
+  }
 }
-#endif
+
+
 
 #endif

@@ -1,12 +1,12 @@
 /**
  ******************************************************************************
- * @file    cmn_math.h
+ * @file    bsp_uart.h
  * @author  RandleH
- * @brief   Common Program - Math
+ * @brief   Global Variable Declaration
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2022 RandleH.
+ * Copyright (c) 2024 RandleH.
  * All rights reserved.
  *
  * This software component is licensed by RandleH under BSD 3-Clause license,
@@ -17,25 +17,22 @@
  ******************************************************************************
 */
 
-#include <stdint.h>
-#include "device.h"
 
-
-#ifndef CMN_MATH_H
-#define CMN_MATH_H
-
-
+#ifndef BSP_UART_H
+#define BSP_UART_H
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 
-uint32_t cmn_math_gcd( uint32_t a, uint32_t b);
-uint32_t cmn_math_largest_pow10(uint32_t x);
+int bsp_uart_printf( const char *, ...);
+
 
 #ifdef __cplusplus
 }
 #endif
+
+
 
 #endif

@@ -31,8 +31,8 @@
 extern "C"{
 #endif
 
-void bsp_led__on( void);
-void bsp_led__off( void);
+void bsp_led_on( void);
+void bsp_led_off( void);
 void bsp_led_toggle( void);
 void bsp_led__switch( cmnBoolean_t status);
 

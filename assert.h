@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    cmn_math.h
+ * @file    assert.h
  * @author  RandleH
- * @brief   Common Program - Math
+ * @brief   Project Assertion
  ******************************************************************************
  * @attention
  *
@@ -17,25 +17,27 @@
  ******************************************************************************
 */
 
-#include <stdint.h>
-#include "device.h"
+#ifndef ASSERT_H
+#define ASSERT_H
 
 
-#ifndef CMN_MATH_H
-#define CMN_MATH_H
 
-
+#ifdef DEBUG
+void ASSERT( bool expr, const char *msg);
+#else
+#define ASSERT( expr, msg)
+#endif
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 
-uint32_t cmn_math_gcd( uint32_t a, uint32_t b);
-uint32_t cmn_math_largest_pow10(uint32_t x);
+
 
 #ifdef __cplusplus
 }
 #endif
+
 
 #endif

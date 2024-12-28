@@ -80,6 +80,55 @@ char *cmn_utility_strnrev(char *str, size_t len){
 }
 
 
+void cmn_utility_int2strhex( char *str, uint8_t maxlen, int32_t value){
+  
+}
+
+uint8_t cmn_utility_int2strdec( char *str, uint8_t maxlen, int32_t value){
+  if(value<0 && maxlen!=0){
+    str[0] = '-';
+    return cmn_utility_uint2strdec( ++str, maxlen-1, -value);
+  }else{
+    return cmn_utility_uint2strdec( str, maxlen, value);
+  }
+}
+
+void cmn_utility_uint2strhex( char *str, uint8_t maxlen, uint32_t value){
+
+}
+
+/**
+ * @brief Convert an unsigned integer to string with width option
+ * 
+ * @note Use starting_pow10 to adjust the width. `starting_pow10` := `10^(width-1)`
+ * @param [out] str            - String buffer
+ * @param [in]  maxlen         - The maximum lenth of this string buffer
+ * @param [in]  value          - Input
+ * @param [in]  starting_pow10 - The Starting pow 10 divisor for value
+ * @return Return num of characters that have been placed into the buffer
+ */
+uint8_t cmn_utility_uint2strdec_width( char *str, uint8_t maxlen, uint32_t value, uint32_t starting_pow10){
+  if(maxlen==0 || !str) return;
+  uint8_t   idx = 0;
+  uint32_t  a   = starting_pow10;
+  div_t     d   = {.rem = value};
+  char      c;
+  do{
+    d           = div( d.rem , a);
+    a          /= 10;
+    c           = '0'+d.quot;
+    str[idx++]  = c;
+  }while(idx < maxlen && d.rem!=0);
+
+  uint8_t len = CMN_MIN(idx, maxlen-1);
+  str[ len ] = '\0';
+  return len;
+}
+
+uint8_t cmn_utility_uint2strdec( char *str, uint8_t maxlen, uint32_t value){
+  return cmn_utility_uint2strdec_width( str, maxlen, value, cmn_math_largest_pow10(value));
+}
+
 /**
  * @brief   Calculate how much angle need to change given a microsecond increase
  * @note    The angle degreee was in scale of [0:3599]

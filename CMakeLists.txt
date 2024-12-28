@@ -66,7 +66,8 @@ set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Cross-compiling" FORCE)
 list(APPEND INC_DIR_LIST            "${PRJ_TOP}")
 list(APPEND SRC_LIST                "${PRJ_TOP}/main.cc" 
                                     "${PRJ_TOP}/init.c"
-                                    "${PRJ_TOP}/global.cc")
+                                    "${PRJ_TOP}/global.cc"
+                                    "${PRJ_TOP}/assert.cc")
 
 #########################################################################################################
 # Target Compile Option Flag
@@ -121,6 +122,7 @@ endif()
 
 
 
+
 #########################################################################################################
 # Add Modules
 #########################################################################################################
@@ -169,11 +171,6 @@ include( ${PRJ_TOP}/app/app.cmake)
 include( ${PRJ_TOP}/bsp/bsp.cmake)
 include( ${PRJ_TOP}/lib/lib.cmake)
 
-if( CMAKE_BUILD_TYPE STREQUAL "Debug")
-    include(${PRJ_TOP}/cmake/debug.cmake)
-else()
-    include(${PRJ_TOP}/cmake/released.cmake)
-endif()
 
 
 #########################################################################################################
