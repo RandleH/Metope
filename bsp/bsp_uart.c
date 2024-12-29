@@ -31,7 +31,7 @@
 /* ************************************************************************** */
 /*                               Private Macros                               */
 /* ************************************************************************** */
-#define BSP_UART_PRINTF_BUF_SIZE        64
+#define BSP_UART_PRINTF_BUF_SIZE         128
 
 #define FMT_STR_UNSET                    0
 #define FMT_STR_HEX                      1
