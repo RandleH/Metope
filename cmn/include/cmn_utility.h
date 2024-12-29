@@ -44,6 +44,7 @@ float cmn_utility_str2float(const char *str, cmnBoolean_t *isValid);
 
 uint8_t cmn_utility_uint2strdec_width( char *str, uint8_t maxlen, uint32_t value, uint8_t width);
 uint8_t cmn_utility_uint2strhex_width( char *str, uint8_t maxlen, uint32_t value, uint8_t width);
+uint8_t cmn_utility_int2strdec_width( char *str, uint8_t maxlen, int32_t value, uint8_t width);
 uint8_t cmn_utility_uint2strdec( char *str, uint8_t maxlen, uint32_t value);
 uint8_t cmn_utility_uint2strhex( char *str, uint8_t maxlen, uint32_t value);
 uint8_t cmn_utility_int2strdec( char *str, uint8_t maxlen, int32_t value);

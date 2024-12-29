@@ -24,6 +24,7 @@
 /*                                  Includes                                  */
 /* ************************************************************************** */
 #include "cmn_utility.h"
+#include "cmn_math.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -117,7 +118,6 @@ uint8_t cmn_utility_uint2strdec_width( char *str, uint8_t maxlen, uint32_t value
   if(maxlen==0 || !str) return 0;
   
   uint8_t wordlen = cmn_math_count_dec_digits(value);
-  uint8_t idx;
 
   if( width==0xFF ){
     width = wordlen;

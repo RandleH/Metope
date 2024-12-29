@@ -29,6 +29,7 @@ void ASSERT( bool expr, const char *msg, uint32_t line, const char *filename){
     bsp_uart_printf("Assert@%s:%u %s", filename, line, msg);
     bsp_led_on();
     __BKPT(0);
+    bsp_led_off();
   }
 }
 
