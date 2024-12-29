@@ -32,6 +32,10 @@
 extern "C"{
 #endif
 
+
+/* ************************************************************************** */
+/*                 Utility Functions: Convert string to number                */
+/* ************************************************************************** */
 int32_t cmn_utility_str2dec(const char *str, cmnBoolean_t *isValid){
   char  *eptr;
   int32_t ret = strtol(str, &eptr, 10);
@@ -64,6 +68,9 @@ float cmn_utility_str2float(const char *str, cmnBoolean_t *isValid){
 }
 
 
+/* ************************************************************************** */
+/*                   Utility Functions: String Manipulation                   */
+/* ************************************************************************** */
 char *cmn_utility_strrev(char *str){
   return cmn_utility_strnrev(str, strlen(str));
 }
@@ -80,54 +87,173 @@ char *cmn_utility_strnrev(char *str, size_t len){
 }
 
 
-void cmn_utility_int2strhex( char *str, uint8_t maxlen, int32_t value){
-  
+/* ************************************************************************** */
+/*                 Utility Functions: Convert number to string                */
+/* ************************************************************************** */
+/**
+ * @brief Insert `#` instead of digits indicating this number can NOT fit in the width
+ * @param [out] str     - String buffer
+ * @param [in]  maxlen  - The maximum lenth of this string buffer
+ * @param [in]  wordlen - The length of words
+ * @return Return how many `#` have been inserted
+ */
+static uint8_t cmn_utility_invalidify_str( char *str, uint8_t maxlen, uint8_t wordlen){
+  uint8_t idx = CMN_MIN( maxlen-1, wordlen);
+  memset( str, '#', idx);
+  str[idx] = '\0';
+  return idx;
 }
 
+/**
+ * @brief Convert an unsigned integer to string in Decimal with width option
+ * 
+ * @note Use starting_pow10 to adjust the width. `starting_pow10` := `10^(width-1)`
+ * @param [out] str    - String buffer
+ * @param [in]  maxlen - The maximum lenth of this string buffer
+ * @param [in]  value  - Input
+ * @param [in]  width  - The Starting pow 10 divisor for value
+ * @return Return num of characters that have been placed to the buffer
+ */
+uint8_t cmn_utility_uint2strdec_width( char *str, uint8_t maxlen, uint32_t value, uint8_t width){
+  if(maxlen==0 || !str) return 0;
+  
+  uint8_t wordlen = cmn_math_count_dec_digits(value);
+  uint8_t idx;
+
+  if( width==0xFF ){
+    width = wordlen;
+  }
+
+  if(likely( wordlen <= width && width <= maxlen-1 )){
+    /**
+     * @note
+     *  Insert the character through the LSB order
+     */
+    uint8_t idx = width;
+    div_t   tmp = {.quot = value};
+    str[idx] = '\0';
+
+    do{
+      tmp = div(tmp.quot, 10);
+      str[--idx] = '0'+tmp.rem;
+
+    }while(idx > 0);
+    return width;
+  }else{
+    /**
+     * @note
+     *  The number string can NOT fit in either the maximum length or the given width
+     */
+    return cmn_utility_invalidify_str( str, maxlen, wordlen);
+  }
+}
+
+/**
+ * @brief Convert an unsigned integer to string in Hexadecimal with width option
+ * 
+ * @note Use starting_pow16 to adjust the width. `starting_pow16` := `16^(width-1)`
+ * @param [out] str    - String buffer
+ * @param [in]  maxlen - The maximum lenth of this string buffer
+ * @param [in]  value  - Input
+ * @param [in]  width  - Word length for the number. Give `0xFF` will take whatever the string length the value will take.
+ * @return Return num of characters that have been placed to the buffer
+ */
+uint8_t cmn_utility_uint2strhex_width( char *str, uint8_t maxlen, uint32_t value, uint8_t width){
+  if(maxlen==0 || !str) 
+    return 0;
+  
+  uint8_t wordlen = value==0 ? 1 : (8-(__builtin_clz(value)>>2));
+
+  if( width==0xFF ){
+    width = wordlen;
+  }
+
+  if(likely( wordlen <= width && width <= maxlen-1 )){
+    /**
+     * @note
+     *  Insert the character through the LSB order
+     */
+    uint8_t idx = width;
+    str[idx] = '\0';
+    do{
+      char c_offset = (value & 0x0F);
+      str[--idx] = c_offset < 10 ? '0'+c_offset : 'A'+(c_offset-0x0A);
+      value >>= 4;
+    }while(idx > 0);
+    return width;
+  }else{
+    /**
+     * @note
+     *  The number string can NOT fit in either the maximum length or the given width
+     */
+    return cmn_utility_invalidify_str( str, maxlen, wordlen);
+  }
+}
+
+/**
+ * @brief Convert an unsigned integer to string in Decimal
+ * 
+ * @param [out] str            - String buffer
+ * @param [in]  maxlen         - The maximum lenth of this string buffer
+ * @param [in]  value          - Input
+ * @return Return num of characters that have been placed to the buffer
+ */
+uint8_t cmn_utility_uint2strdec( char *str, uint8_t maxlen, uint32_t value){
+  return cmn_utility_uint2strdec_width( str, maxlen, value, (uint8_t)-1);
+}
+
+/**
+ * @brief Convert an unsigned integer to string in Hexadecimal
+ * 
+ * @param [out] str    - String buffer
+ * @param [in]  maxlen - The maximum lenth of this string buffer
+ * @param [in]  value  - Input
+ * @return Return num of characters that have been placed to the buffer
+ */
+uint8_t cmn_utility_uint2strhex( char *str, uint8_t maxlen, uint32_t value){
+  return cmn_utility_uint2strhex_width( str, maxlen, value, (uint8_t)-1);
+}
+
+/**
+ * @brief Convert a signed integer to string in Decimal
+ * 
+ * @param [out] str    - String buffer
+ * @param [in]  maxlen - The maximum lenth of this string buffer
+ * @param [in]  value  - Input
+ * @return Return num of characters that have been placed to the buffer
+ */
 uint8_t cmn_utility_int2strdec( char *str, uint8_t maxlen, int32_t value){
   if(value<0 && maxlen!=0){
     str[0] = '-';
-    return cmn_utility_uint2strdec( ++str, maxlen-1, -value);
+    return 1 + cmn_utility_uint2strdec( ++str, maxlen-1, -value);
   }else{
     return cmn_utility_uint2strdec( str, maxlen, value);
   }
 }
 
-void cmn_utility_uint2strhex( char *str, uint8_t maxlen, uint32_t value){
-
-}
-
 /**
- * @brief Convert an unsigned integer to string with width option
+ * @brief Convert a signed integer to string in Hexadecimal
  * 
- * @note Use starting_pow10 to adjust the width. `starting_pow10` := `10^(width-1)`
- * @param [out] str            - String buffer
- * @param [in]  maxlen         - The maximum lenth of this string buffer
- * @param [in]  value          - Input
- * @param [in]  starting_pow10 - The Starting pow 10 divisor for value
- * @return Return num of characters that have been placed into the buffer
+ * @param [out] str    - String buffer
+ * @param [in]  maxlen - The maximum lenth of this string buffer
+ * @param [in]  value  - Input
+ * @return Return num of characters that have been placed to the buffer
  */
-uint8_t cmn_utility_uint2strdec_width( char *str, uint8_t maxlen, uint32_t value, uint32_t starting_pow10){
-  if(maxlen==0 || !str) return;
-  uint8_t   idx = 0;
-  uint32_t  a   = starting_pow10;
-  div_t     d   = {.rem = value};
-  char      c;
-  do{
-    d           = div( d.rem , a);
-    a          /= 10;
-    c           = '0'+d.quot;
-    str[idx++]  = c;
-  }while(idx < maxlen && d.rem!=0);
-
-  uint8_t len = CMN_MIN(idx, maxlen-1);
-  str[ len ] = '\0';
-  return len;
+uint8_t cmn_utility_int2strhex( char *str, uint8_t maxlen, int32_t value){
+  if(value<0 && maxlen!=0){
+    str[0] = '-';
+    return 1 + cmn_utility_uint2strhex( ++str, maxlen-1, -value);
+  }else{
+    return cmn_utility_uint2strhex( str, maxlen, value);
+  }
 }
 
-uint8_t cmn_utility_uint2strdec( char *str, uint8_t maxlen, uint32_t value){
-  return cmn_utility_uint2strdec_width( str, maxlen, value, cmn_math_largest_pow10(value));
-}
+
+
+
+/* ************************************************************************** */
+/*              Utility Functions: Clock Needle Angle Calculation             */
+/* ************************************************************************** */
 
 /**
  * @brief   Calculate how much angle need to change given a microsecond increase
@@ -182,6 +308,13 @@ void cmn_utility_angleset( uint16_t *hour_deg, uint16_t *minute_deg, uint16_t NU
 }
 
 
+
+
+
+
+/* ************************************************************************** */
+/*                    Utility Functions: Timing Calculation                   */
+/* ************************************************************************** */
 /**
  * @todo: Add CI for this function
  */

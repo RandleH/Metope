@@ -58,8 +58,10 @@ int bsp_uart_printf( const char *format, ...){
     else {
         ++format;
     }
+    char c = *format;
 
-    switch(*format) {
+bsp_uart_printf_SELECT_FLAG:
+    switch(c) {
       case 'u':{
         cmn_utility_uint2strdec( &buf[idx], sizeof(buf)-idx, va_arg(va, uint32_t));
         break;
@@ -69,10 +71,12 @@ int bsp_uart_printf( const char *format, ...){
         break;
       }
       case 'x':{
+        cmn_utility_uint2strhex( &buf[idx], sizeof(buf)-idx, va_arg(va, int32_t));
         break;
       }
       case '0':{
-        // break;
+        c = *++format;
+        goto bsp_uart_printf_SELECT_FLAG;
       }
       default:{
         const char *msg = "Unable to print the message";

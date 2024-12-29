@@ -75,38 +75,81 @@ uint32_t cmn_math_largest_pow2(uint32_t x){
 #endif
 }
 
+
+
+const uint32_t TABLE_POW10[] = {
+  1,           // 00000000000000000000000000000001
+  10,          // 00000000000000000000000000001010
+  100,         // 00000000000000000000000001100100
+  1000,        // 00000000000000000000001111101000
+  10000,       // 00000000000000000010011100010000
+  100000,      // 00000000000000011000011010100000
+  1000000,     // 00000000000011110100001001000000
+  10000000,    // 00000000100110001001011010000000
+  100000000,   // 00000101111101011110000100000000
+  1000000000,  // 00111011100110101100101000000000
+};
+
+/**
+ * @brief Return the pow of 10
+ * @note O(1)
+ * @param [in] x - Input
+ * @return Always return `1000000000` when x>9 cuz it's too big. 
+ */
+uint32_t cmn_math_pow10(uint8_t x){
+  if( x > 9 ){
+    x = 9; // Overflow
+  }
+  return TABLE_POW10[x];
+}
+
 /**
  * @brief Find the nearest pow of 10 value.
+ * 
  * @note For example: `12` => `10` | `1234` => `1000` | `0` => `0` | `1` => `1`
  * @param [in] x - Input value
  * @return Return an positive integer pow of 10, which means ( x%10==0 )
  */
 uint32_t cmn_math_largest_pow10(uint32_t x){
   if(x==0) return 0;
-  const uint32_t ans[] = {
-    1,           // 00000000000000000000000000000001
-    10,          // 00000000000000000000000000001010
-    100,         // 00000000000000000000000001100100
-    1000,        // 00000000000000000000001111101000
-    10000,       // 00000000000000000010011100010000
-    100000,      // 00000000000000011000011010100000
-    1000000,     // 00000000000011110100001001000000
-    10000000,    // 00000000100110001001011010000000
-    100000000,   // 00000101111101011110000100000000
-    1000000000,  // 00111011100110101100101000000000
-  };
-  int8_t l=0,r=sizeof(ans)/sizeof(*ans),m;
+  
+  int8_t l=0,r=sizeof(TABLE_POW10)/sizeof(*TABLE_POW10),m;
   while(r-l!=1){
     m=(l+r)>>1;
-    if(ans[m] < x){
+    if(TABLE_POW10[m] < x){
       l = m;
-    }else if(ans[m] > x){
+    }else if(TABLE_POW10[m] > x){
         r = m;
     }else{
-      return ans[m];
+      return TABLE_POW10[m];
     }
   }
-  return ans[l];
+  return TABLE_POW10[l];
+}
+
+
+/**
+ * @brief Count how many digits were valid in decimal.
+ * @param [in] x - Input
+ * @return Return how many digits were valid; `0` will have 1 valid digit.
+ */
+uint8_t cmn_math_count_dec_digits( uint32_t x){
+  if(x==0){
+    return 1;
+  }
+  
+  int8_t l=0,r=sizeof(TABLE_POW10)/sizeof(*TABLE_POW10),m;
+  while(r-l!=1){
+    m=(l+r)>>1;
+    if(TABLE_POW10[m] < x){
+      l = m;
+    }else if(TABLE_POW10[m] > x){
+        r = m;
+    }else{
+      return m+1;
+    }
+  }
+  return l+1;
 }
 
 
