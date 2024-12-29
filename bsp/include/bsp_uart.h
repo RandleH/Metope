@@ -26,7 +26,7 @@ extern "C"{
 #endif
 
 
-int bsp_uart_printf( const char *, ...);
+int bsp_uart_printf( const char *format, ...);
 
 
 #ifdef __cplusplus

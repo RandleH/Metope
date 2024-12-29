@@ -107,7 +107,6 @@ static uint8_t cmn_utility_invalidify_str( char *str, uint8_t maxlen, uint8_t wo
 /**
  * @brief Convert an unsigned integer to string in Decimal with width option
  * 
- * @note Use starting_pow10 to adjust the width. `starting_pow10` := `10^(width-1)`
  * @param [out] str    - String buffer
  * @param [in]  maxlen - The maximum lenth of this string buffer
  * @param [in]  value  - Input
@@ -149,9 +148,26 @@ uint8_t cmn_utility_uint2strdec_width( char *str, uint8_t maxlen, uint32_t value
 }
 
 /**
+ * @brief Convert a signed integer to string in Decimal with width option
+ * 
+ * @param [out] str    - String buffer
+ * @param [in]  maxlen - The maximum lenth of this string buffer
+ * @param [in]  value  - Input
+ * @param [in]  width  - The Starting pow 10 divisor for value
+ * @return Return num of characters that have been placed to the buffer
+ */
+uint8_t cmn_utility_int2strdec_width( char *str, uint8_t maxlen, int32_t value, uint8_t width){
+  if(value<0 && maxlen!=0){
+    str[0] = '-';
+    return 1 + cmn_utility_uint2strdec_width( ++str, maxlen-1, -value, width);
+  }else{
+    return cmn_utility_uint2strdec_width( str, maxlen, value, width);
+  }
+}
+
+/**
  * @brief Convert an unsigned integer to string in Hexadecimal with width option
  * 
- * @note Use starting_pow16 to adjust the width. `starting_pow16` := `16^(width-1)`
  * @param [out] str    - String buffer
  * @param [in]  maxlen - The maximum lenth of this string buffer
  * @param [in]  value  - Input
@@ -191,6 +207,24 @@ uint8_t cmn_utility_uint2strhex_width( char *str, uint8_t maxlen, uint32_t value
 }
 
 /**
+ * @brief Convert a signed integer to string in Decimal with width option
+ * 
+ * @param [out] str    - String buffer
+ * @param [in]  maxlen - The maximum lenth of this string buffer
+ * @param [in]  value  - Input
+ * @param [in]  width  - The Starting pow 10 divisor for value
+ * @return Return num of characters that have been placed to the buffer
+ */
+uint8_t cmn_utility_int2strhex_width( char *str, uint8_t maxlen, int32_t value, uint8_t width){
+  if(value<0 && maxlen!=0){
+    str[0] = '-';
+    return 1 + cmn_utility_uint2strhex_width( ++str, maxlen-1, -value, width);
+  }else{
+    return cmn_utility_uint2strhex_width( str, maxlen, value, width);
+  }
+}
+
+/**
  * @brief Convert an unsigned integer to string in Decimal
  * 
  * @param [out] str            - String buffer
@@ -223,12 +257,7 @@ uint8_t cmn_utility_uint2strhex( char *str, uint8_t maxlen, uint32_t value){
  * @return Return num of characters that have been placed to the buffer
  */
 uint8_t cmn_utility_int2strdec( char *str, uint8_t maxlen, int32_t value){
-  if(value<0 && maxlen!=0){
-    str[0] = '-';
-    return 1 + cmn_utility_uint2strdec( ++str, maxlen-1, -value);
-  }else{
-    return cmn_utility_uint2strdec( str, maxlen, value);
-  }
+  return cmn_utility_int2strdec_width( str, maxlen, value, (uint8_t)-1);
 }
 
 /**
@@ -240,15 +269,8 @@ uint8_t cmn_utility_int2strdec( char *str, uint8_t maxlen, int32_t value){
  * @return Return num of characters that have been placed to the buffer
  */
 uint8_t cmn_utility_int2strhex( char *str, uint8_t maxlen, int32_t value){
-  if(value<0 && maxlen!=0){
-    str[0] = '-';
-    return 1 + cmn_utility_uint2strhex( ++str, maxlen-1, -value);
-  }else{
-    return cmn_utility_uint2strhex( str, maxlen, value);
-  }
+  return cmn_utility_int2strhex_width( str, maxlen, value, (uint8_t)-1);
 }
-
-
 
 
 /* ************************************************************************** */

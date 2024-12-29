@@ -23,9 +23,9 @@
 
 
 #ifdef DEBUG
-void ASSERT( bool expr, const char *msg);
+void ASSERT( bool expr, const char *msg, uint32_t line, const char *filename);
 #else
-#define ASSERT( expr, msg)
+#define ASSERT( expr, msg, line, filename)
 #endif
 
 #ifdef __cplusplus

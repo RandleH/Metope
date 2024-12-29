@@ -89,10 +89,7 @@
         "stm32f4xx_hal_i2c.h": "c",
         "ranges": "cpp",
         "cinttypes": "cpp",
-        "lv_examples.h": "c",
-        "cmn_math.h": "c",
-        "devctl.h": "c",
-        "*.def": "c"
+        "lv_examples.h": "c"
     },
     "git.ignoreLimitWarning": true
 }

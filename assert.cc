@@ -21,10 +21,12 @@
 #include <errno.h>
 #include "device.h"
 #include "bsp_led.h"
+#include "bsp_uart.h"
 
 #ifdef DEBUG
-void ASSERT( bool expr, const char *msg){
+void ASSERT( bool expr, const char *msg, uint32_t line, const char *filename){
   if(!expr){
+    bsp_uart_printf("Assert@%s:%u %s", filename, line, msg);
     bsp_led_on();
     __BKPT(0);
   }
