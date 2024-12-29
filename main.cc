@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
   app_init();
   os_init();
 
-  ASSERT( false, "Test", __LINE__, "main.cc");
+  ASSERT( false, "Main Program Started");
 
   app_rtos_start();
   

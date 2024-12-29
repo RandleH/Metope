@@ -23,21 +23,24 @@
 
 
 #ifdef DEBUG
-void ASSERT( bool expr, const char *msg, uint32_t line, const char *filename);
-#else
-#define ASSERT( expr, msg, line, filename)
-#endif
-
 #ifdef __cplusplus
 extern "C"{
 #endif
-
-
-
-
+void assert( bool expr, const char *msg, uint32_t line, const char *filename);
 #ifdef __cplusplus
 }
 #endif
+#define ASSERT( expr, msg) assert( (expr), (msg), __LINE__, __FILE__)
+#else
+#define ASSERT( expr, msg)
+#endif
+
+
+
+
+
+
+
 
 
 #endif
