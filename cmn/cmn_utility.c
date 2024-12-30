@@ -366,9 +366,13 @@ void cmn_utility_timeinc( cmnDateTime_t *pTime, uint32_t ms){
         pTime->hour = tmp.rem;
 
         uint8_t max_day_this_month = ((pTime->month <=7) ? (30 + (pTime->month&0x01)) : (31 - (pTime->month&0x01)));
+
         /**
-         * @todo: %4
+         * @note: Special case for leap year
          */
+        if(unlikely(pTime->year%4==0 && pTime->month==2)){
+          max_day_this_month = 28;
+        }
         if(unlikely(pTime->day+tmp.quot >= max_day_this_month)){
           tmp = div(pTime->day+tmp.quot, max_day_this_month);
           pTime->day = tmp.rem;

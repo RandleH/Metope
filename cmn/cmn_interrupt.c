@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include "device.h"
 #include "global.h"
+#include "assert.h"
 #include "cmn_type.h"
 #include "cmn_interrupt.h"
 #include "cmn_utility.h"
@@ -457,14 +458,9 @@ void DEFAULT DMA1_Stream4_IRQHandler(void){
 
 #if (defined USE_REGISTER) && (USE_REGISTER==1)
   u32 tmp = DMA1->HISR;
-#ifdef DEBUG_VERSION
-  if( 0!=(tmp & (DMA_FLAG_TEIF0_4|DMA_FLAG_FEIF0_4|DMA_FLAG_DMEIF0_4)) ){
-    /**
-     * @todo: Change to the ASSERTION
-     */
-    while(1); // Transmission error
-  }
-#endif
+
+  ASSERT( 0==(tmp & (DMA_FLAG_TEIF0_4|DMA_FLAG_FEIF0_4|DMA_FLAG_DMEIF0_4)), "DMA1S4 Error");
+  
   if(0!=(tmp & (DMA_FLAG_HTIF0_4))){
     DMA1->HIFCR = DMA_FLAG_HTIF0_4 << (4-4);
     DMA1_Stream4->CR &= ~(DMA_IT_HT);

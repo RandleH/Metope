@@ -21,6 +21,7 @@
 /*                                  Includes                                  */
 /* ************************************************************************** */
 #include "global.h"
+#include "assert.h"
 #include "app_gui.h"
 #include "cmn_utility.h"
 #include "app_gui_asset"
@@ -260,7 +261,6 @@ static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
  * @brief UI Clock1 Inc Time (ms)
  * @param [inout] pClient - The UI Widget Structure Variable
  * @note Update needle angle
- * @todo: Add assertion for microseconds range
  */
 static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
   uint16_t hour_inc, minute_inc;
@@ -268,6 +268,8 @@ static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
 
   pClient->_degree_hour += hour_inc;
   pClient->_degree_minute += minute_inc;
+
+  ASSERT( pClient->_degree_minute/12 == pClient->_degree_hour, "Needle Pattern Mismatched");
   
   lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_transform_angle(pClient->pPinMinute, pClient->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -838,9 +840,7 @@ void app_gui_switch( AppGuiClockEnum_t x){
       break;
     }
     default:{
-      /**
-       * @todo: Add assertion
-       */
+      ASSERT( false, "Unknown clock theme");
       break;
     }
 #ifndef TEST_ONLY

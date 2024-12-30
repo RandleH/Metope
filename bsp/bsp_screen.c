@@ -26,6 +26,7 @@
 #include "device.h"
 #include "global.h"
 #include "bsp_screen.h"
+#include "bsp_timer.h"
 #include "cmn_delay.h"
 
 #define CMD    0
@@ -141,7 +142,7 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
       SET_BIT( SPI2->CR1, SPI_CR1_SPE);
     }
 
-#ifdef DEBUG_VERSION
+#ifdef DEBUG
     /* Enable Error Interrupt */
     SET_BIT(SPI2->CR2, SPI_IT_ERR);
 #endif
@@ -315,7 +316,10 @@ STATIC void bsp_screen_scan_mode( u8 mode){
 
 
 /**
- * @brief 
+ * @brief Bsp Screen Initialization
+ * @return `SUCCESS` | `ERROR`
+ * @attention
+ *  `bsp_timer_init()` must be called at first.
  */
 cmnBoolean_t bsp_screen_init( void){
   bsp_screen_set_bright(0);
@@ -415,36 +419,23 @@ cmnBoolean_t bsp_screen_init( void){
   bsp_screen_parse_code( init_code, sizeof(init_code)/sizeof(uint8_t));
 
   /**
-   * @todo: Fix cmn delay
+   * @attention
+   *  `bsp_timer_init()` must be called at first.
    */
-#if 0
-  cmn_timer_delay(120);
-#endif
-  {
-    volatile uint32_t cnt=120000;
-    while(--cnt);
-  }
+  cmnBoolean_t async_mode = false;
+  cmn_tim2_sleep( 120, async_mode);
 
   const u8 on_code[] = {
       CMD, 1, 0x29,\
   };
   bsp_screen_parse_code( on_code, sizeof(on_code)/sizeof(uint8_t));
 
-  /**
-   * @todo: Fix cmn delay
-   */
-#if 0
-  cmn_timer_delay(20);
-#endif
-  {
-    volatile uint32_t cnt=20000;
-    while(--cnt);
-  }
+  cmn_tim2_sleep( 20, async_mode);
   
   bsp_screen_scan_mode(0);
   PIN_CS(1);
 
-  return true;
+  return SUCCESS;
 }
 
 
