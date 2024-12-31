@@ -181,7 +181,7 @@ The angle of hour needle and minute needle has the following property.
 
 Let $\alpha$ be the hour needle angle and $\beta$ be the minute needle angle, where $\alpha,\beta \in [0:3599]$
 $$
-\frac{\beta}{12}= \Delta\alpha\\
+\frac{\beta}{12}= \Delta\alpha
 $$
 
 $$
@@ -192,11 +192,15 @@ $$
 
 
 $$
-t_{\Delta\alpha} = \Delta\alpha \cdot12000 + \xi_{\alpha} \\
+t_{\Delta\alpha} = \Delta\alpha \cdot12000 + \xi_{\alpha}
+$$
+$$
 t_{\beta} = \beta \cdot 1000 + \xi_{\beta}
 $$
+> where $\xi_{\alpha}$​ and $\xi_{\beta}$​ is the remainder of escaped time in microseconds.
 
-> where $\xi_{\alpha}$ and $\xi_{\beta}$ is the remainder of escaped time in microseconds.
+
+
 
 
 $$
@@ -207,9 +211,9 @@ $$
 
 
 
-Therefore `(2)` `(3)` `(4)` $\Rightarrow$ `(5)`
+Therefore `(2)` `(3)` `(4)` `(5)` $\Rightarrow$ `(6)`
 $$
-12000\cdot\left(\alpha \mod{\frac{3600}{12}} \right)+\xi_{\alpha} = \beta \cdot 1000 + \xi_{\beta}
+12000 \cdot ( \alpha \mod{\frac{3600}{12}} ) + \xi_{\alpha} = \beta \cdot 1000 + \xi_{\beta}
 $$
 
 
