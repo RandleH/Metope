@@ -186,20 +186,24 @@ $$
 \frac{\beta}{12}= \Delta\alpha
 $$
 
+> (1)
+
 $$
 \Delta\alpha=\alpha \mod{\frac{3600}{12}}
 $$
 
-
+> (2)
 
 
 $$
 t_{\Delta\alpha} = \Delta\alpha \cdot12000 + \xi_{\alpha}
 $$
+> (3)
+
 $$
 t_{\beta} = \beta \cdot 1000 + \xi_{\beta}
 $$
-> where $\xi_{\alpha}$​ and $\xi_{\beta}$​ is the remainder of escaped time in microseconds.
+> (4) where $\xi_{\alpha}$​ and $\xi_{\beta}$​ is the remainder of escaped time in microseconds.
 
 
 
@@ -209,7 +213,7 @@ $$
 t_{\Delta\alpha} = t_{\Delta\beta}
 $$
 
-> The escaped time should always the same.
+> (5) The escaped time should always the same.
 
 
 
@@ -217,8 +221,14 @@ Therefore `(2)` `(3)` `(4)` `(5)` $\Rightarrow$ `(6)`.
 
 
 $$
-12000 \cdot ( \alpha \mod{\frac{3600}{12}} ) + \xi_{\alpha} = \beta \cdot 1000 + \xi_{\beta}
+12000 \cdot \left( \alpha \mod{\frac{3600}{12}} \right) + \xi_{\alpha} = \beta \cdot 1000 + \xi_{\beta}
 $$
+
+> (6)
+
+
+
+
 
 
 
