@@ -28,6 +28,15 @@
 #include "bsp_rtc.h"
 
 /* ************************************************************************** */
+/*                               Private Macros                               */
+/* ************************************************************************** */
+#ifdef DEBUG
+  #define VOLATILE volatile
+#else
+  #define VOLATILE
+#endif
+
+/* ************************************************************************** */
 /*                     Static Clock UI Function - clock1                      */
 /* ************************************************************************** */
 #ifdef __cplusplus
@@ -277,9 +286,8 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
  * @note Update needle angle
  */
 static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
-  cmn_utility_angleset( &pClient->_degree_hour, &pClient->_degree_minute, NULL, &time);
-  pClient->_rem_hour = 0;
-  pClient->_rem_minute = 0;
+  cmn_utility_angleset( &pClient->_rem_hour, &pClient->_rem_minute, NULL, &pClient->_degree_hour, &pClient->_degree_minute, NULL, &time);
+  
   lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_transform_angle(pClient->pPinMinute, pClient->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
 }
@@ -311,9 +319,12 @@ static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
    *  - `H % (3600/12) == M / 12` | `H`:=889; `M`:=`3479` are satisfied with this formula. Therefore it is a valid angle pattern
    */
   {
-    uint16_t delta_minute = pClient->_degree_minute;
-    uint16_t delta_hour   = pClient->_degree_hour % (3600/12);
-    ASSERT( delta_minute/12 == delta_hour, "Needle Pattern Mismatched");
+    VOLATILE uint32_t minute_in_ms     = cmn_utility_mindeg2_ms(pClient->_degree_minute);
+    VOLATILE uint32_t delta_hour_in_ms = cmn_utility_hrdeg2_ms((pClient->_degree_hour%(3600/12)));
+
+    VOLATILE uint32_t minute_in_ms_total     = minute_in_ms + pClient->_rem_minute;
+    VOLATILE uint32_t delta_hour_in_ms_total = delta_hour_in_ms + pClient->_rem_hour;
+    ASSERT( minute_in_ms_total == delta_hour_in_ms_total, "Needle Pattern Mismatched");
   }
   
   lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);

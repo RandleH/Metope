@@ -313,11 +313,14 @@ void cmn_utility_angleinc(
 #else
   remainder_hour = div( remainder_hour.rem + ms, 12000);
   remainder_minute = div( remainder_minute.rem + ms, 1000);
-  *hour_inc = remainder_hour.quot;
+  *hour_inc   = remainder_hour.quot;
   *minute_inc = remainder_minute.quot;
-  if(NULL!=second_inc){
+  *hour_rem   = remainder_hour.rem;
+  *minute_rem = remainder_minute.rem;
+  if(NULL!=second_inc && NULL!=second_rem){
     remainder_second = div( remainder_second.rem + ms*3, 50);
     *second_inc = remainder_second.quot;
+    *second_rem = remainder_second.rem;
   }
 #endif
   return;
@@ -325,25 +328,42 @@ void cmn_utility_angleinc(
 
 
 /**
- * @brief   Calculate the absolute angle degree per clock unit
- * @note    The angle degreee was in scale of [0:3599]
+ * @brief Calculate the absolute angle degree per clock unit
+ * @note  The angle degreee was in scale of [0:3599]
+ * @note  The remaining of `minute` and `second` will ALWAYS set to zero as 
+ *        the given time stamp only have the accuracy of seconds.
+ *        The remaining of `hour` will be equal to `second % 12`.
+ * @note  You MUST perserve the remining value in order to produce the correct increasing
+ *        angle.
+ * @param [out] hour_rem    - Remaining angle for hour
+ * @param [out] minute_rem  - Remaining angle for minute
+ * @param [out] second_rem  - Remaining angle for second
  * @param [out] hour_inc    - Absolute angle for hour
  * @param [out] minute_inc  - Absolute angle for minute
  * @param [out] second_inc  - Absolute angle for second (optional)
  * @param [in]  pTime       - Current time
  */
-void cmn_utility_angleset( uint16_t *hour_deg, uint16_t *minute_deg, uint16_t NULLABLE *second_deg, const cmnDateTime_t *pTime){
+void cmn_utility_angleset( 
+                          uint16_t            *hour_rem  ,\
+                          uint16_t            *minute_rem,\
+                          uint16_t   NULLABLE *second_rem,\
+                          uint16_t            *hour_deg  ,\
+                          uint16_t            *minute_deg,\
+                          uint16_t   NULLABLE *second_deg,\
+                          const cmnDateTime_t *pTime
+                          ){
   uint8_t hour = pTime->hour>12 ? pTime->hour-12 : pTime->hour;
   
   *hour_deg   =        hour  *300 + pTime->minute*5 + pTime->second/12;
+  *hour_rem   = 4000*(pTime->second%12);
+
   *minute_deg = pTime->minute*60  + pTime->second;
-  if(NULL!=second_deg){
+  *minute_rem = 0;
+  if(NULL!=second_deg && NULL!=second_rem){
     *second_deg = pTime->second * 60;
+    *second_rem = 0;
   }
 }
-
-
-
 
 
 

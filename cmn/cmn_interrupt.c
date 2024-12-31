@@ -237,8 +237,9 @@ void DEFAULT NMI_Handler( void){
 }
 
 void DEFAULT HardFault_Handler( void){
-  while(1){
-
+  volatile uint8_t flag = true;
+  while(flag){
+    __NOP();
   }
 }
 

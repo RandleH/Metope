@@ -63,7 +63,47 @@ void cmn_utility_angleinc(
                           uint16_t NULLABLE *second_inc,\
                           uint32_t           ms\
                           );
-void cmn_utility_angleset( uint16_t *hour_deg, uint16_t *minute_deg, uint16_t NULLABLE *second_deg, const cmnDateTime_t *pTime);
+void cmn_utility_angleset( 
+                          uint16_t            *hour_rem  ,\
+                          uint16_t            *minute_rem,\
+                          uint16_t   NULLABLE *second_rem,\
+                          uint16_t            *hour_deg  ,\
+                          uint16_t            *minute_deg,\
+                          uint16_t   NULLABLE *second_deg,\
+                          const cmnDateTime_t *pTime
+                          );
+
+
+/**
+ * @brief Calculate the microseconds with respect to the second needle angle
+ * @param [in] deg - Input angle in the scale of `[0:3599]`
+ * @return Return microseconds
+ */
+static inline uint32_t cmn_utility_secdeg2_ms( uint16_t deg){
+#if 0
+  return deg * 60 * 1000 / 3600;
+#else
+  return deg * 50 / 3;
+#endif
+}
+
+static inline uint32_t cmn_utility_mindeg2_ms( uint16_t deg){
+#if 0
+  return deg * 60 * 1000 * 60 / 3600;
+#else
+  return deg * 1000;
+#endif
+}
+
+static inline uint32_t cmn_utility_hrdeg2_ms( uint16_t deg){
+#if 0
+  return deg * 60 * 1000 * 60 * 12 / 3600;
+#else
+  return deg * 12000;
+#endif
+}
+
+
 void cmn_utility_timeinc( cmnDateTime_t *pTime, uint32_t ms);
 
 cmnDateTime_t cmn_utility_set_time_from_iso( const char* __timestamp__);

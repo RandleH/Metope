@@ -35,6 +35,7 @@ message( STATUS "System Name              => ${CMAKE_HOST_SYSTEM_NAME}")
 message( STATUS "CMake System             => ${CMAKE_SYSTEM}")
 message( STATUS "CMake System Version     => ${CMAKE_SYSTEM_VERSION}")
 message( STATUS "CMake System Arch        => ${CMAKE_OSX_ARCHITECTURES}")
+message( STATUS "CMake Build Type         => ${CMAKE_BUILD_TYPE}")
 message( STATUS "APPLE | WIN32 | UNIX     => ${APPLE} | ${WIN32} | ${UNIX}") # True if running on Mac OSX. | True on windows systems, including win64. | True for UNIX and UNIX like operating systems.
 message( STATUS "Apple Silicon            => ${CMAKE_APPLE_SILICON_PROCESSOR}")
 message( STATUS "Host Unix                => ${CMAKE_HOST_UNIX}")  # True for UNIX and UNIX like operating systems.
@@ -57,6 +58,25 @@ set(CMAKE_C_EXTENSIONS                  ON)
 set(CMAKE_CXX_STANDARD                  17)
 set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Cross-compiling" FORCE)
 
+
+# Default C compiler flags
+set(CMAKE_C_FLAGS_DEBUG_INIT "-g3 -Og -Wall -pedantic -DDEBUG")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_RELEASE_INIT "-O3 -Wall")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE_INIT}" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_MINSIZEREL_INIT "-Os -Wall")
+set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "-O2 -g -Wall")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING "" FORCE)
+# Default C++ compiler flags
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g3 -Og -Wall -pedantic -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O3 -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT "-Os -Wall")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT}" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-O2 -g -Wall")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING "" FORCE)
 
 
 #########################################################################################################
