@@ -148,8 +148,11 @@ int bsp_uart_printf( const char *format, ...){
   buf[idx++] = '\0';
 
 #if 1
-  HAL_StatusTypeDef hstatus = HAL_UART_Transmit( metope.dev.pHuart2, buf, idx, HAL_MAX_DELAY);
-
+  HAL_StatusTypeDef hstatus;
+  hstatus  = HAL_UART_Transmit( metope.dev.pHuart2, buf, idx, HAL_MAX_DELAY);
+  buf[0] = '\n';
+  buf[1] = '\0';
+  hstatus |= HAL_UART_Transmit( metope.dev.pHuart2, buf, 2, HAL_MAX_DELAY);
   return hstatus==HAL_OK?SUCCESS : ERROR;
 #else
   // printf("%s", buf);

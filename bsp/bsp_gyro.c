@@ -22,6 +22,7 @@
 /* ************************************************************************** */
 #include "device.h"
 #include "global.h"
+#include "assert.h"
 #include "bsp_gyro.h"
 #include "cmn_delay.h"
 
@@ -184,6 +185,8 @@
 /* Temperature sensor resolution */
 #define TEMPERATURE_SENSOR_RESOLUTION           (1<<8)  // Telperature sensor resolution (ADC)
 
+
+#define QMI8658_TIMEOUT_DELAY                   (200)  // ms
 
 #ifdef __cplusplus
 extern "C"{
@@ -843,8 +846,9 @@ operates at 300 kHz.
  * @addtogroup MachineDependent
  */
 STATIC cmnBoolean_t bsp_qmi8658_i2c_polling_send( u8 reg, const u8 *buf, u8 len){
-  
-  if(HAL_OK!=HAL_I2C_Mem_Write( &hi2c1, QMI8658_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, (u8*)buf, len, HAL_MAX_DELAY)){
+  HAL_StatusTypeDef ret = HAL_I2C_Mem_Write( &hi2c1, QMI8658_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, (u8*)buf, len, QMI8658_TIMEOUT_DELAY);
+  ASSERT( ret!=HAL_OK, "QMI8658 TX error");
+  if(HAL_OK!=ret){
     return ERROR;
   }
   return SUCCESS;
@@ -859,11 +863,11 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_polling_send( u8 reg, const u8 *buf, u8 len)
  * @addtogroup MachineDependent
  */
 STATIC cmnBoolean_t bsp_qmi8658_i2c_polling_recv( u8 reg, u8 *buf, u8 len){
-  HAL_StatusTypeDef ret = HAL_I2C_Mem_Read( &hi2c1, QMI8658_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, buf, len, HAL_MAX_DELAY);
+  HAL_StatusTypeDef ret = HAL_I2C_Mem_Read( &hi2c1, QMI8658_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, buf, len, QMI8658_TIMEOUT_DELAY);
+  ASSERT( ret!=HAL_OK, "QMI8658 RX error");
   if(HAL_OK!=ret){
     return ERROR;
   }
-
   return SUCCESS;
 }
 

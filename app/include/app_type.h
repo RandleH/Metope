@@ -51,6 +51,8 @@ typedef struct{
 
   uint16_t _degree_hour;
   uint16_t _degree_minute;
+  uint16_t _rem_hour;
+  uint16_t _rem_minute;
 
   void     *p_anything;
 } tAppGuiClockParam;

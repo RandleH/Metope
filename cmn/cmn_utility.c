@@ -280,15 +280,26 @@ uint8_t cmn_utility_int2strhex( char *str, uint8_t maxlen, int32_t value){
 /**
  * @brief   Calculate how much angle need to change given a microsecond increase
  * @note    The angle degreee was in scale of [0:3599]
- * @param [out] hour_inc    - Increased angle for hour
- * @param [out] minute_inc  - Increased angle for minute
- * @param [out] second_inc  - Increased angle for second (optional)
- * @param [in]  ms          - The increased microseconds
+ * @param [inout] hour_rem    - Remaining angle for hour
+ * @param [inout] minute_rem  - Remaining angle for minute
+ * @param [inout] second_rem  - Remaining angle for second
+ * @param [out]   hour_inc    - Increased angle for hour
+ * @param [out]   minute_inc  - Increased angle for minute
+ * @param [out]   second_inc  - Increased angle for second (optional)
+ * @param [in]    ms          - The increased microseconds
  */
-void cmn_utility_angleinc( uint16_t *hour_inc, uint16_t *minute_inc, uint16_t NULLABLE *second_inc, uint32_t ms){
-  static div_t remainder_hour = {0};
-  static div_t remainder_minute = {0};
-  static div_t remainder_second = {0};
+void cmn_utility_angleinc( 
+                          uint16_t          *hour_rem  ,\
+                          uint16_t          *minute_rem,\
+                          uint16_t NULLABLE *second_rem,\
+                          uint16_t          *hour_inc  ,\
+                          uint16_t          *minute_inc,\
+                          uint16_t NULLABLE *second_inc,\
+                          uint32_t           ms\
+                          ){
+  div_t remainder_hour   = {.rem = *hour_rem};
+  div_t remainder_minute = {.rem = *minute_rem};
+  div_t remainder_second = {.rem = second_rem==NULL ? 0: *second_rem};
 
 #if 0
   remainder_hour = div( remainder_hour.rem + ms*3600, 43200000);
@@ -322,8 +333,10 @@ void cmn_utility_angleinc( uint16_t *hour_inc, uint16_t *minute_inc, uint16_t NU
  * @param [in]  pTime       - Current time
  */
 void cmn_utility_angleset( uint16_t *hour_deg, uint16_t *minute_deg, uint16_t NULLABLE *second_deg, const cmnDateTime_t *pTime){
-  *hour_deg   = pTime->hour*300 + pTime->minute*5 + pTime->second/12;
-  *minute_deg = pTime->minute*60 + pTime->second;
+  uint8_t hour = pTime->hour>12 ? pTime->hour-12 : pTime->hour;
+  
+  *hour_deg   =        hour  *300 + pTime->minute*5 + pTime->second/12;
+  *minute_deg = pTime->minute*60  + pTime->second;
   if(NULL!=second_deg){
     *second_deg = pTime->second * 60;
   }
