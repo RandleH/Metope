@@ -195,15 +195,18 @@ $$
 > (2)
 
 
+
+Note  $\xi_{\alpha}$ and $\xi_{\beta}$ be the remainder of escaped time in microseconds. Then
+
 $$
 t_{\Delta\alpha} = \Delta\alpha \cdot12000 + \xi_{\alpha}
 $$
-> (3)
+> (3) where $t_{\Delta\alpha}$ is represented in microseconds
 
 $$
 t_{\beta} = \beta \cdot 1000 + \xi_{\beta}
 $$
-> (4) where $\xi_{\alpha}$​ and $\xi_{\beta}$​ is the remainder of escaped time in microseconds.
+> (4) where $t_{\Delta\beta}$ is represented in microseconds. 
 
 
 
