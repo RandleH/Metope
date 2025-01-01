@@ -18,12 +18,13 @@
 */
 
 
-
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-  #include "stm32f4xx_hal.h"
-#endif
-#include "bsp_timer.h"
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include "global.h"
+#include "device.h"
+#include "assert.h"
+#include "bsp_timer.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -31,10 +32,12 @@ extern "C"{
 
 
 /**
- * @brief
- * @todo: Add assertion for default
+ * @brief Timer Register Initialization
+ * @param [in] TIMx      - Timer Base Address
+ * @param [in] Prescaler - Timer Prescaler
+ * @addtogroup MachineDependent
  */
-void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
+static void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
   TIMx->ARR = 10U;
   TIMx->PSC = psc;
 
@@ -63,6 +66,10 @@ void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
       metope.dev.status.tim9 = 0;
       break;
     }
+    default:{
+      ASSERT( false, "Unknown timer base");
+      break;
+    }
   }
 
   CLEAR_BIT( TIMx->CR1, TIM_CR1_CEN);  // Disable timer
@@ -70,6 +77,7 @@ void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
 
 
 /**
+ * @brief Timer Initialization
  * @addtogroup MachineDependent
  */
 void bsp_timer_init( void){
@@ -98,10 +106,10 @@ void bsp_timer_init( void){
 
 
 /**
- * @addtogroup MachineDependent
  * @brief Enable the Timer(TIM2) Counting
  * @note Timer frequency: f_TIM2 = 2.048kHz
- * @param [in] us - Milliseconds | MaxDelay = 32000ms
+ * @param [in] ms - Milliseconds | MaxDelay = 32000ms
+ * @addtogroup MachineDependent
  */
 void bsp_tim2_delay(u16 ms){
   TIM2->ARR = ms * 2048 / 1000;
@@ -112,10 +120,10 @@ void bsp_tim2_delay(u16 ms){
 
 
 /**
- * @addtogroup MachineDependent
  * @brief Enable the Timer(TIM9) Counting
  * @note Timer frequency: f_TIM9 = 1MHz
  * @param [in] us - Microseconds | MaxDelay = 65535us
+ * @addtogroup MachineDependent
  */
 void bsp_tim9_delay(u16 us){
   TIM9->ARR = us;

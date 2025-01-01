@@ -1,12 +1,12 @@
 /**
  ******************************************************************************
- * @file    bsp_led.h
+ * @file    bsp_uart.h
  * @author  RandleH
- * @brief   Board Support Package Delivery - LED
+ * @brief   Global Variable Declaration
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2022 RandleH.
+ * Copyright (c) 2024 RandleH.
  * All rights reserved.
  *
  * This software component is licensed by RandleH under BSD 3-Clause license,
@@ -18,31 +18,21 @@
 */
 
 
-
-
-
-#include "cmn_type.h"
-
-
-#ifndef BSP_LED_H
-#define BSP_LED_H
+#ifndef BSP_UART_H
+#define BSP_UART_H
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-void bsp_led_on( void);
-void bsp_led_off( void);
-void bsp_led_toggle( void);
-void bsp_led__switch( cmnBoolean_t status);
+
+int bsp_uart_printf( const char *format, ...);
+
 
 #ifdef __cplusplus
 }
 #endif
 
 
+
 #endif
-
-
-
-

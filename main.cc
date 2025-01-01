@@ -23,6 +23,7 @@
 /* ************************************************************************** */
 #include "init.h"
 #include "global.h"
+#include "assert.h"
 #include "cmn_type.h"
 #include "bsp_led.h"
 #include "app_rtos.h"
@@ -53,6 +54,8 @@ int main(int argc, char *argv[]){
   bsp_init();
   app_init();
   os_init();
+
+  ASSERT( false, "Main Program Started");
 
   app_rtos_start();
   

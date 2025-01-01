@@ -36,7 +36,7 @@
 /**
  * @addtogroup MachineDependent
  */
-void inline bsp_led__on( void){
+void inline bsp_led_on( void){
   PIN_LED(0);
 }
 
@@ -44,7 +44,7 @@ void inline bsp_led__on( void){
 /**
  * @addtogroup MachineDependent
  */
-void inline bsp_led__off( void){
+void inline bsp_led_off( void){
   PIN_LED(1);
 }
 

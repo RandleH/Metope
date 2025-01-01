@@ -75,9 +75,6 @@ typedef struct{
     TIM_HandleTypeDef  * const pHtim3;
     I2C_HandleTypeDef  * const pHi2c1;
     
-    /**
-     * @todo Rename tim3 -> tim9
-     */
     union{
       struct{
         u16 spi2  : 1; /*!< Display Screen */

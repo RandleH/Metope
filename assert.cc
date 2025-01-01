@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    bsp_led.h
+ * @file    assert.cc
  * @author  RandleH
- * @brief   Board Support Package Delivery - LED
+ * @brief   Project Assertion
  ******************************************************************************
  * @attention
  *
@@ -18,31 +18,20 @@
 */
 
 
+#include <errno.h>
+#include "device.h"
+#include "bsp_led.h"
+#include "bsp_uart.h"
 
-
-
-#include "cmn_type.h"
-
-
-#ifndef BSP_LED_H
-#define BSP_LED_H
+#ifdef DEBUG
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-void bsp_led_on( void);
-void bsp_led_off( void);
-void bsp_led_toggle( void);
-void bsp_led__switch( cmnBoolean_t status);
 
 #ifdef __cplusplus
 }
 #endif
 
-
 #endif
-
-
-
-
