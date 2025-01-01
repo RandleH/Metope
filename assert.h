@@ -17,6 +17,11 @@
  ******************************************************************************
 */
 
+
+
+#include "bsp_uart.h"
+#include "bsp_led.h"
+
 #ifndef ASSERT_H
 #define ASSERT_H
 
@@ -26,11 +31,22 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-void assert( bool expr, const char *msg, uint32_t line, const char *filename);
+
 #ifdef __cplusplus
 }
 #endif
-#define ASSERT( expr, msg) assert( (expr), (msg), __LINE__, __FILE__)
+
+
+#define ASSERT( expr, msg, ...)                               \
+  do{                                                         \
+    if(!expr){                                                \
+      bsp_uart_printf("Assertion@%s:%u", __FILE__, __LINE__); \
+      bsp_uart_printf( msg,  ##__VA_ARGS__);                  \
+      bsp_led_on();                                           \
+      __BKPT(0);                                              \
+      bsp_led_off();                                          \
+    }                                                         \
+  }while(0)
 #else
 #define ASSERT( expr, msg)
 #endif

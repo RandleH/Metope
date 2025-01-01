@@ -33,12 +33,6 @@
 /* ************************************************************************** */
 #define BSP_UART_PRINTF_BUF_SIZE         128
 
-#define FMT_STR_UNSET                    0
-#define FMT_STR_HEX                      1
-#define FMT_STR_DEC_SIGNED               2
-#define FMT_STR_DEC_UNSIGNED             3
-#define FMT_STR_STR                      4
-
 
 #ifdef __cplusplus
 extern "C"{
@@ -54,109 +48,32 @@ extern "C"{
  * @return `SUCCESS` | `ERROR` - Something wrong with prarmeters
  */
 int bsp_uart_printf( const char *format, ...){
+  char    buf[BSP_UART_PRINTF_BUF_SIZE] = {0};
   va_list va;
   va_start(va, format);
-    
-  char    buf[BSP_UART_PRINTF_BUF_SIZE] = {0};
-  uint8_t idx     = 0;
-
-  while(*format && idx<sizeof(buf)) {
-    if(*format != '%') {
-        buf[idx++] = *format++;
-        continue;
-    }
-    else {
-        ++format;
-    }
-    char c = *format++;
-
-    uint8_t flag  = FMT_STR_UNSET;
-    uint8_t width = 0xFF;
-
-    while(flag==FMT_STR_UNSET){
-      switch(c) {
-        case 'u':
-        case 'U':{
-          if(width==0xFF){
-            idx += cmn_utility_uint2strdec( &buf[idx], sizeof(buf)-idx, va_arg(va, uint32_t));
-          }else{
-            idx += cmn_utility_uint2strdec_width( &buf[idx], sizeof(buf)-idx, va_arg(va, uint32_t), width);
-          }
-          flag = FMT_STR_DEC_UNSIGNED;
-          break;
-        }
-        case 'd':
-        case 'D':{
-          if(width==0xFF){
-            idx += cmn_utility_int2strdec( &buf[idx], sizeof(buf)-idx, va_arg(va, int32_t));
-          }else{
-            idx += cmn_utility_int2strdec_width( &buf[idx], sizeof(buf)-idx, va_arg(va, int32_t), width);
-          }
-          flag = FMT_STR_DEC_SIGNED;
-          break;
-        }
-        case 'x':
-        case 'X':{
-          if(width==0xFF){
-            idx += cmn_utility_uint2strhex( &buf[idx], sizeof(buf)-idx, va_arg(va, uint32_t));
-          }else{
-            idx += cmn_utility_uint2strhex_width( &buf[idx], sizeof(buf)-idx, va_arg(va, uint32_t), width);
-          }
-          flag = FMT_STR_HEX;
-          break;
-        }
-        case 's':
-        case 'S':{
-          const char *str = va_arg(va, char*);
-          size_t      len = strlen(str);
-          if( len > sizeof(buf)-idx -1 ){
-            memset(&buf[idx], '#', sizeof(buf)-idx-1);
-            idx = sizeof(buf)-1;
-          }else{
-            strncpy(&buf[idx], str, sizeof(buf)-idx);
-            idx += len;
-          }
-          flag = FMT_STR_STR;
-          break;
-        }
-        case '0':{
-          c = *format++;
-          break;
-        }
-        case '1'...'9':{
-          width = c - '0';
-          c = *format++;
-          break;
-        }
-        default:{
-#if 1
-          const char *msg = "Unable to print the message => ";
-          HAL_UART_Transmit( metope.dev.pHuart2, msg, strlen(msg), HAL_MAX_DELAY);
-          HAL_UART_Transmit( metope.dev.pHuart2, format, strlen(format), HAL_MAX_DELAY);
-#else
-          printf("Unable to print the message => %s\n", format);
-#endif
-          return ERROR;
-        }
-      }
-    }
-
-  }
-
+  int num_c_inserted = cmn_utility_vsnprintf( buf, sizeof(buf)/sizeof(*buf), format, va);
   va_end(va);
-  idx = CMN_MIN( idx, sizeof(buf)-1);
-  buf[idx++] = '\0';
+
+  if(num_c_inserted==0){
+    const char *msg = "Unable to print the message => ";
+    HAL_UART_Transmit( metope.dev.pHuart2, msg, strlen(msg), HAL_MAX_DELAY);
+    HAL_UART_Transmit( metope.dev.pHuart2, format, strlen(format), HAL_MAX_DELAY);
+    return ERROR;
+  }
 
 #if 1
   HAL_StatusTypeDef hstatus;
-  hstatus  = HAL_UART_Transmit( metope.dev.pHuart2, buf, idx, HAL_MAX_DELAY);
+  hstatus  = HAL_UART_Transmit( metope.dev.pHuart2, buf, num_c_inserted, HAL_MAX_DELAY);
   buf[0] = '\n';
   buf[1] = '\0';
   hstatus |= HAL_UART_Transmit( metope.dev.pHuart2, buf, 2, HAL_MAX_DELAY);
-  return hstatus==HAL_OK?SUCCESS : ERROR;
+  return hstatus==HAL_OK ? SUCCESS : ERROR;
 #else
-  // printf("%s", buf);
+#ifdef __cplusplus
   std::cout << buf << std::endl;
+#else
+  printf("%s\n", buf);
+#endif
   return SUCCESS;
 #endif
 

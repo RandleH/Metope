@@ -50,6 +50,8 @@ uint8_t cmn_utility_uint2strhex( char *str, uint8_t maxlen, uint32_t value);
 uint8_t cmn_utility_int2strdec( char *str, uint8_t maxlen, int32_t value);
 uint8_t cmn_utility_int2strhex( char *str, uint8_t maxlen, int32_t value);
 
+int cmn_utility_snprintf(char * restrict str, size_t size, const char * restrict format, ...);
+int cmn_utility_vsnprintf(char * restrict str, size_t size, const char * restrict format, va_list va);
 
 char *cmn_utility_strrev(char *str);
 char *cmn_utility_strnrev(char *str, size_t len);
