@@ -82,8 +82,11 @@
   #define GYRO_SDA_GPIO_Port    GPIOB
 
   #define CMN_CLZ_U32(u32_x)    __CLZ(u32_x)
+#elif (defined SYS_TARGET_NATIVE)
+
 #else
   #error "Unknown Device Header"
 #endif
 
 #endif
+/* ********************************** EOF *********************************** */

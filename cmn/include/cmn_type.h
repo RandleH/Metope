@@ -18,8 +18,23 @@
 */
 
 
+/**
+ * @ref https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html
+ */
+#if defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+#elif defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#elif defined(__ICC_ARM__)
+  #pragma diag_suppress=203
+#elif defined(_MSC_VER)
+
+#endif
+
+
 #include <stdint.h>
-#include "device.h"
 
 #ifndef CMN_TYPE_H
 #define CMN_TYPE_H
@@ -120,3 +135,16 @@ typedef union cmnDateTime_t{
 #endif  // extern C
 #endif  // CMN_TEST_H
 
+
+/**
+ * @ref https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html
+ */
+#if defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic pop
+#elif defined(__clang__)
+  #pragma clang diagnostic pop
+#elif defined(__ICC_ARM__)
+  
+#elif defined(_MSC_VER)
+
+#endif

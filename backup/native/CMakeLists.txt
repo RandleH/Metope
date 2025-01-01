@@ -51,7 +51,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS       ON)
 # Project Setup
 project( model1 C CXX ASM)
 
-set(CMAKE_C_STANDARD                    99)
+set(CMAKE_C_STANDARD                    11)
 set(CMAKE_C_STANDARD_REQUIRED           ON)
 set(CMAKE_C_EXTENSIONS                  ON)
 set(CMAKE_CXX_STANDARD                  17)
@@ -168,11 +168,11 @@ if( USE_REGISTER AND USE_REGISTER EQUAL 1)
 endif()
 
 
-# include( ${PRJ_TOP}/cmn/cmn.cmake)
+include( ${PRJ_TOP}/cmn/cmn.cmake)
 # include( ${PRJ_TOP}/app/app.cmake)
 # include( ${PRJ_TOP}/bsp/bsp.cmake)
 # include( ${PRJ_TOP}/lib/lib.cmake)
-# include( ${PRJ_TOP}/top/top.cmake)
+include( ${PRJ_TOP}/top/top.cmake)
 
 
 #########################################################################################################

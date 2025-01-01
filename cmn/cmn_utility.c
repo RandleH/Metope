@@ -18,6 +18,19 @@
 */
 
 
+/**
+ * @ref https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html
+ */
+#if defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wgnu-case-range"
+#elif defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wgnu-case-range"
+#elif defined(__ICC_ARM__)
+  #pragma diag_suppress=203
+#elif defined(_MSC_VER)
+#endif
 
 
 /* ************************************************************************** */
@@ -641,3 +654,15 @@ cmnDateTime_t cmn_utility_set_time_from_iso( const char* __timestamp__){
 }
 #endif
 
+/**
+ * @ref https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html
+ */
+#if defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic pop
+#elif defined(__clang__)
+  #pragma clang diagnostic pop
+#elif defined(__ICC_ARM__)
+  
+#elif defined(_MSC_VER)
+
+#endif

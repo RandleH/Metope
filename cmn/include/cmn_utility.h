@@ -21,6 +21,8 @@
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
+#include <stddef.h>
+#include <stdarg.h>
 #include "cmn_type.h"
 
 
@@ -50,8 +52,8 @@ uint8_t cmn_utility_uint2strhex( char *str, uint8_t maxlen, uint32_t value);
 uint8_t cmn_utility_int2strdec( char *str, uint8_t maxlen, int32_t value);
 uint8_t cmn_utility_int2strhex( char *str, uint8_t maxlen, int32_t value);
 
-int cmn_utility_snprintf(char * restrict str, size_t size, const char * restrict format, ...);
-int cmn_utility_vsnprintf(char * restrict str, size_t size, const char * restrict format, va_list va);
+int cmn_utility_snprintf(char * str, size_t size, const char * format, ...);
+int cmn_utility_vsnprintf(char * str, size_t size, const char * format, va_list va);
 
 char *cmn_utility_strrev(char *str);
 char *cmn_utility_strnrev(char *str, size_t len);
@@ -115,3 +117,4 @@ cmnDateTime_t cmn_utility_set_time_from_iso( const char* __timestamp__);
 #endif
 
 #endif
+/* ********************************** EOF *********************************** */
