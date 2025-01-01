@@ -84,10 +84,7 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACH
 #########################################################################################################
 
 list(APPEND INC_DIR_LIST            "${PRJ_TOP}")
-list(APPEND SRC_LIST                "${PRJ_TOP}/main.cc" 
-                                    "${PRJ_TOP}/init.c"
-                                    "${PRJ_TOP}/global.cc"
-                                    "${PRJ_TOP}/assert.cc")
+list(APPEND SRC_LIST                "${PRJ_TOP}/main.cc")
 
 #########################################################################################################
 # Target Compile Option Flag
@@ -190,7 +187,7 @@ include( ${PRJ_TOP}/cmn/cmn.cmake)
 include( ${PRJ_TOP}/app/app.cmake)
 include( ${PRJ_TOP}/bsp/bsp.cmake)
 include( ${PRJ_TOP}/lib/lib.cmake)
-
+include( ${PRJ_TOP}/top/top.cmake)
 
 
 #########################################################################################################
