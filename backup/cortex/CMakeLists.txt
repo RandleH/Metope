@@ -45,6 +45,7 @@ message( STATUS "Host Apple               => ${CMAKE_HOST_APPLE}") # True for Ap
 
 
 # Tool Chain Setup
+set(CMAKE_TOOLCHAIN_FILE                ${CMAKE_SOURCE_DIR}/cmake/arm-gcc-toolchain.cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS       ON)
 
 
@@ -55,7 +56,7 @@ set(CMAKE_C_STANDARD                    99)
 set(CMAKE_C_STANDARD_REQUIRED           ON)
 set(CMAKE_C_EXTENSIONS                  ON)
 set(CMAKE_CXX_STANDARD                  17)
-
+set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Cross-compiling" FORCE)
 
 
 # Default C compiler flags
@@ -88,13 +89,30 @@ list(APPEND SRC_LIST                "${PRJ_TOP}/main.cc")
 #########################################################################################################
 # Target Compile Option Flag
 #########################################################################################################
+set( CXX_FLAG                       "-fdata-sections"
+                                    "-ffunction-sections"
+                                    "-Wall"
+                                    "-Wno-pedantic"
+                                    "-fstack-usage")
 
+set( CPU_FLAG                       "-mthumb"
+                                    "-mfloat-abi=hard"
+                                    "-mfpu=fpv4-sp-d16")
 
 
 #########################################################################################################
 # Target Linking Option Flag
 #########################################################################################################
+set( LINK_FLAG                      "-specs=nosys.specs"
+                                    "-lc"
+                                    "-lm"
+                                    "-lnosys"
+                                    "-Wl,-Map=${PROJECT_NAME}.map,--cref"
+                                    "-Wl,--gc-sections,--print-memory-usage,--print-output-format")
 
+if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6") OR (CHIP STREQUAL "STM32F405RGT6"))
+    list(APPEND CPU_FLAG  "-mcpu=cortex-m4")
+endif()
 
 if((NOT IMU) OR (IMU STREQUAL "QMI8658A") )
     list(APPEND DEF_LIST "-DQMI8658A=1")
@@ -132,8 +150,11 @@ if( DEFINED $ENV{METOPE_CHIP})
     message( FATAL_ERROR "METOPE_CHIP was NOT defined. Have you sourced the setup.env?")
 endif()
 
-if($ENV{METOPE_CHIP} STREQUAL "NATIVE")
-    list(APPEND DEF_LIST "-DSYS_TARGET_NATIVE")
+
+if ($ENV{METOPE_CHIP} STREQUAL "STM32F405RGT6")
+    list(APPEND DEF_LIST "-DSYS_TARGET_STM32F405RGT6")
+elseif ($ENV{METOPE_CHIP} STREQUAL "STM32F411CEU6")
+    list(APPEND DEF_LIST "-DSYS_TARGET_STM32F411CEU6")
 else()
     message( FATAL_ERROR "Unknown chip: $ENV{METOPE_CHIP}")
 endif()
@@ -171,7 +192,7 @@ endif()
 include( ${PRJ_TOP}/cmn/cmn.cmake)
 include( ${PRJ_TOP}/app/app.cmake)
 include( ${PRJ_TOP}/bsp/bsp.cmake)
-# include( ${PRJ_TOP}/lib/lib.cmake)
+include( ${PRJ_TOP}/lib/lib.cmake)
 include( ${PRJ_TOP}/top/top.cmake)
 
 
@@ -184,9 +205,9 @@ include_directories( BEFORE ${INC_DIR_LIST})
 
 add_executable( ${PROJECT_NAME}.elf  ${SRC_LIST})
 
-# target_compile_options ( ${PROJECT_NAME}.elf  PUBLIC      ${CMAKE_CXX_FLAGS} ${CPU_FLAG} ${CXX_FLAG})
-# target_link_options    ( ${PROJECT_NAME}.elf  PUBLIC      ${LINK_FLAG} ${CPU_FLAG} )
-# target_link_libraries( ${PROJECT_NAME}.elf PUBLIC  ${TARGET_LIST})
+target_compile_options ( ${PROJECT_NAME}.elf  PUBLIC      ${CMAKE_CXX_FLAGS} ${CPU_FLAG} ${CXX_FLAG})
+target_link_options    ( ${PROJECT_NAME}.elf  PUBLIC      ${LINK_FLAG} ${CPU_FLAG} )
+target_link_libraries( ${PROJECT_NAME}.elf PUBLIC  ${TARGET_LIST})
 
 message("================================================================================")
 message( "Executable target property: ${PROJECT_NAME}.elf")
@@ -198,3 +219,11 @@ message("=======================================================================
 #########################################################################################################
 set(HEX_FILE ${CMAKE_SOURCE_DIR}/build/${PROJECT_NAME}.hex)
 set(BIN_FILE ${CMAKE_SOURCE_DIR}/build/${PROJECT_NAME}.bin)
+add_custom_command(     TARGET  ${PROJECT_NAME}.elf POST_BUILD
+                        COMMAND ${CMAKE_OBJCOPY} -Oihex   $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+                        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+                        COMMENT "Building ${HEX_FILE} \nBuilding ${BIN_FILE}"
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/arm-none-eabi/bin/nm"      "--print-size" "--size-sort" "${PROJECT_NAME}.elf" ">" "${PRJ_TOP}/build/${PROJECT_NAME}.nm"
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/arm-none-eabi/bin/objdump" "-d" "${PROJECT_NAME}.elf"  ">" "${PRJ_TOP}/build/${PROJECT_NAME}.dis" 
+                        COMMAND "${ARM_TOOLCHAIN_DIR}/bin/arm-none-eabi-size"    "${PRJ_TOP}/build/model1.elf"
+                    )

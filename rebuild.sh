@@ -42,7 +42,3 @@ make -j32
 ################################################################
 # Backup Auto-Generated Files
 ################################################################
-rm -rf ${DIR_CWD}/backup/STM32F405RGT6
-rm -rf ${DIR_CWD}/backup/STM32F411CEU6
-cp -rf ${DIR_CWD}/STM32CubeMX/STM32F405RGT6 ${DIR_CWD}/backup/STM32F405RGT6
-cp -rf ${DIR_CWD}/STM32CubeMX/STM32F411CEU6 ${DIR_CWD}/backup/STM32F411CEU6
