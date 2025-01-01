@@ -29,14 +29,6 @@
 extern "C"{
 #endif
 
-void assert( bool expr, const char *msg, uint32_t line, const char *filename, ...){
-  if(!expr){
-    bsp_uart_printf("Assertion@%s:%u %s", filename, line, msg);
-    bsp_led_on();
-    __BKPT(0);
-    bsp_led_off();
-  }
-}
 
 #ifdef __cplusplus
 }
