@@ -168,11 +168,11 @@ if( USE_REGISTER AND USE_REGISTER EQUAL 1)
 endif()
 
 
-include( ${PRJ_TOP}/cmn/cmn.cmake)
-include( ${PRJ_TOP}/app/app.cmake)
-include( ${PRJ_TOP}/bsp/bsp.cmake)
+# include( ${PRJ_TOP}/cmn/cmn.cmake)
+# include( ${PRJ_TOP}/app/app.cmake)
+# include( ${PRJ_TOP}/bsp/bsp.cmake)
 # include( ${PRJ_TOP}/lib/lib.cmake)
-include( ${PRJ_TOP}/top/top.cmake)
+# include( ${PRJ_TOP}/top/top.cmake)
 
 
 #########################################################################################################

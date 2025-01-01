@@ -82,7 +82,6 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACH
 #########################################################################################################
 # Target Definition
 #########################################################################################################
-
 list(APPEND INC_DIR_LIST            "${PRJ_TOP}")
 list(APPEND SRC_LIST                "${PRJ_TOP}/main.cc")
 
@@ -97,7 +96,8 @@ set( CXX_FLAG                       "-fdata-sections"
 
 set( CPU_FLAG                       "-mthumb"
                                     "-mfloat-abi=hard"
-                                    "-mfpu=fpv4-sp-d16")
+                                    "-mfpu=fpv4-sp-d16"
+                                    "-mcpu=cortex-m4")
 
 
 #########################################################################################################
@@ -110,9 +110,6 @@ set( LINK_FLAG                      "-specs=nosys.specs"
                                     "-Wl,-Map=${PROJECT_NAME}.map,--cref"
                                     "-Wl,--gc-sections,--print-memory-usage,--print-output-format")
 
-if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6") OR (CHIP STREQUAL "STM32F405RGT6"))
-    list(APPEND CPU_FLAG  "-mcpu=cortex-m4")
-endif()
 
 if((NOT IMU) OR (IMU STREQUAL "QMI8658A") )
     list(APPEND DEF_LIST "-DQMI8658A=1")
