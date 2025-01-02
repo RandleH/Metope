@@ -11,14 +11,14 @@ int main(int argc, char *argv[]){
   uint16_t second_deg;
 
   printf("2025/01/01 13:24:37\n");
-  
+
   cmnDateTime_t time = {
     .year   = 1,
     .month  = 1,
     .day    = 1,
-    .hour   = 13,
-    .minute = 24,
-    .second = 37
+    .hour   = 14,
+    .minute = 21,
+    .second = 9
   };
   cmn_utility_angleset( &hour_rem, &minute_rem, &second_rem, &hour_deg, &minute_deg, &second_deg, &time);
 

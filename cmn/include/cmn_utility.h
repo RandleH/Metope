@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    cmn_utility.h
  * @author  RandleH
- * @brief   Common Program - Utility Macros
+ * @brief   Common Program - Utility
  ******************************************************************************
  * @attention
  *
