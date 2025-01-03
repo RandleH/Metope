@@ -92,6 +92,7 @@ set( CXX_FLAG                       "-fdata-sections"
                                     "-ffunction-sections"
                                     "-Wall"
                                     "-Wno-pedantic"
+                                    "-Wno-gnu-zero-variadic-macro-arguments"
                                     "-fstack-usage")
 
 set( CPU_FLAG                       "-mthumb"

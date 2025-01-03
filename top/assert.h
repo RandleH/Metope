@@ -39,9 +39,9 @@ extern "C"{
 
 #define ASSERT( expr, msg, ...)                               \
   do{                                                         \
-    if(!(expr)){                                                \
+    if(!(expr)){                                              \
       bsp_uart_printf("Assertion@%s:%u", __FILE__, __LINE__); \
-      bsp_uart_printf( (msg),  ##__VA_ARGS__);                  \
+      bsp_uart_printf( (msg),  ##__VA_ARGS__);                \
       bsp_led_on();                                           \
       __BKPT(0);                                              \
       bsp_led_off();                                          \

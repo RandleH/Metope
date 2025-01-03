@@ -104,8 +104,16 @@ elseif(IMU STREQUAL "MPU6050")
     list(APPEND DEF_LIST "-DMPU6050=1")
 endif()
 
-add_compile_options( ${CPU_FLAG})
-add_link_options( ${CPU_FLAG})
+set( COMPILE_OPT_FLAG               "-Wno-gnu-zero-variadic-macro-arguments"
+                                    "-Wno-gnu-anonymous-struct"
+                                    "-Wno-gnu-case-range"
+                                    )
+
+set( LINK_FLAG                      ""
+                                    )
+
+add_compile_options( ${COMPILE_OPT_FLAG})
+add_link_options( ${LINK_FLAG})
 
 
 #########################################################################################################

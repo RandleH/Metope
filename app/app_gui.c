@@ -325,7 +325,7 @@ static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
 
     VOLATILE uint32_t minute_in_ms_total     = minute_in_ms + pClient->_rem_minute;
     VOLATILE uint32_t delta_hour_in_ms_total = delta_hour_in_ms + pClient->_rem_hour;
-    TRACE_DEBUG("ms=%u H_rem=%u M_rem=%u H_deg=%u M_deg=%u h'_ms=%u m_ms=%u H'_ms=%u M_ms=%u\n", \
+    TRACE_DEBUG("ms=%u H_rem=%u M_rem=%u H_deg=%u M_deg=%u h'_ms=%u m_ms=%u H'_ms=%u M_ms=%u", \
       ms,
       pClient->_rem_hour,\
       pClient->_rem_minute,\

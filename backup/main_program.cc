@@ -24,6 +24,7 @@
 #include "init.h"
 #include "global.h"
 #include "assert.h"
+#include "trace.h"
 #include "cmn_type.h"
 #include "bsp_led.h"
 #include "app_rtos.h"
@@ -54,6 +55,8 @@ int main(int argc, char *argv[]){
   bsp_init();
   app_init();
   os_init();
+
+  TRACE_DEBUG("Initialization Completed");
 
   app_rtos_start();
   
