@@ -125,7 +125,7 @@ void os_init(void){
 
   metope.app.rtos.task.screen_refresh._handle = xTaskCreateStatic(\
     bsp_screen_main,\
-    "0",\
+    "bsp_screen_main",\
     sizeof(metope.app.rtos.task.screen_refresh._stack) / sizeof(metope.app.rtos.task.screen_refresh._stack[0]),\
     &metope.bsp.screen,\
     kAppPriority_VERY_IMPORTANT,\
@@ -135,7 +135,7 @@ void os_init(void){
   
   metope.app.rtos.task.clock_ui._handle = xTaskCreateStatic(\
     app_clock_gui_main,\
-    "0",\
+    "app_clock_gui_main",\
     sizeof(metope.app.rtos.task.clock_ui._stack) / sizeof(metope.app.rtos.task.clock_ui._stack[0]),\
     &metope.app.clock ,\
     kAppPriority_VERY_IMPORTANT,\
@@ -145,7 +145,7 @@ void os_init(void){
   
   metope.app.rtos.task.screen_onoff._handle = xTaskCreateStatic(\
     bsp_screen_onoff,\
-    "0",\
+    "bsp_screen_onoff",\
     sizeof(metope.app.rtos.task.screen_onoff._stack) / sizeof(metope.app.rtos.task.screen_onoff._stack[0]),\
     NULL ,\
     kAppPriority_VERY_IMPORTANT,\
