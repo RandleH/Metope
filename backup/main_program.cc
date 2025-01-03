@@ -55,8 +55,6 @@ int main(int argc, char *argv[]){
   app_init();
   os_init();
 
-  ASSERT( false, "Main Program Started");
-
   app_rtos_start();
   
   while(1){

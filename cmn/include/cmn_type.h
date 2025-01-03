@@ -23,11 +23,11 @@
  */
 #if defined(__GNUC__) || defined(__GNUG__)
   #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+  // #pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
 #elif defined(__clang__)
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
-#elif defined(__ICC_ARM__)
+#elif defined(__ICCARM__)
   #pragma diag_suppress=203
 #elif defined(_MSC_VER)
 
@@ -35,6 +35,7 @@
 
 
 #include <stdint.h>
+#include "device.h"
 
 #ifndef CMN_TYPE_H
 #define CMN_TYPE_H
@@ -97,7 +98,7 @@ typedef volatile u16 vu16;
 typedef volatile u32 vu32;
 typedef volatile u64 vu64;
 
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if defined (SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
 typedef IRQn_Type cmnIRQn_t;
 #endif
 

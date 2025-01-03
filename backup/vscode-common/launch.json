@@ -15,7 +15,6 @@
             "svdFile": "${workspaceFolder}/lib/stm32-svd/stm32f4/STM32F411.svd",
             "interface": "swd",
             "servertype": "jlink",
-            "preLaunchTask": "fstbuild_stm32f411ceu6",
             "swoConfig": {
                 "enabled": true,
                 "cpuFrequency": 96000000,

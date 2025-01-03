@@ -22,6 +22,7 @@
 /* ************************************************************************** */
 #include "global.h"
 #include "assert.h"
+#include "trace.h"
 #include "app_gui.h"
 #include "cmn_utility.h"
 #include "app_gui_asset"
@@ -324,6 +325,17 @@ static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
 
     VOLATILE uint32_t minute_in_ms_total     = minute_in_ms + pClient->_rem_minute;
     VOLATILE uint32_t delta_hour_in_ms_total = delta_hour_in_ms + pClient->_rem_hour;
+    TRACE_DEBUG("ms=%u H_rem=%u M_rem=%u H_deg=%u M_deg=%u h'_ms=%u m_ms=%u H'_ms=%u M_ms=%u\n", \
+      ms,
+      pClient->_rem_hour,\
+      pClient->_rem_minute,\
+      pClient->_degree_hour,\
+      pClient->_degree_minute,\
+      delta_hour_in_ms,\
+      minute_in_ms,\
+      delta_hour_in_ms_total,\
+      minute_in_ms_total
+    );
     ASSERT( minute_in_ms_total == delta_hour_in_ms_total, "Needle Pattern Mismatched");
   }
   
@@ -927,6 +939,7 @@ void app_gui_switch( AppGuiClockEnum_t x){
 /**
  * @brief Module the clock parameters in case of overflow
  * @param [inout] pClient - The UI Widget Structure Variable
+ * @bug NOT threadsafe !!!
  */
 void app_gui_update_modulo(tAppGuiClockParam *pClient) RTOSIDLE{
   pClient->_degree_hour   %= 3600;
@@ -961,7 +974,7 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
     TickType_t tmp = xTaskGetTickCount();
     TickType_t ms_delta = tmp - old_tick;
     old_tick = tmp;
-    cmn_utility_timeinc( &parsed_param->time, ms_delta);
+    cmn_utility_timeinc( &parsed_param->time, ms_delta); /** @bug */
     
 
     EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC, pdTRUE, pdFALSE, 64);
@@ -981,7 +994,6 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
        *  View Part:
        *    1) Update the increased ms.
        */
-      
       parsed_param->gui.inc_time( &parsed_param->gui.param, ms_delta);
     }
     portTICK_TYPE_EXIT_CRITICAL();

@@ -23,7 +23,7 @@
  */
 #if defined(__GNUC__) || defined(__GNUG__)
   #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wgnu-case-range"
+  // #pragma GCC diagnostic ignored "-Wgnu-case-range"
 #elif defined(__clang__)
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wgnu-case-range"
