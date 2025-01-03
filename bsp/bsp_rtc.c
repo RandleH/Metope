@@ -214,6 +214,11 @@ cmnDateTime_t bsp_rtc_get_time__debug( u8 *raw_7){
   return result;
 }
 
+/**
+ * @brief Get time immediately
+ * @example 2025/01/01 22:21:17 => `time = {.word=1163592769}`
+ * @return Return Time Info aligned with `cmnDataTime_t`
+ */
 cmnDateTime_t bsp_rtc_get_time( void){
   u8 raw_7[7];
   return bsp_rtc_get_time__debug(raw_7);
