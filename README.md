@@ -253,3 +253,5 @@ $$
 - [**Datasheet - W25Q32**](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/5059/W25Q32JV_RevI_5-4-21.pdf)
 
 - [**Datasheet - LSF0204x**](https://www.ti.com/lit/ds/symlink/lsf0204d.pdf?ts=1733701959935)
+
+- [**IAR Compiler Guide**](https://wwwfiles.iar.com/AVR/webic/doc/EWAVR_CompilerGuide.pdf)

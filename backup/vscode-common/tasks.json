@@ -1,0 +1,51 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "envFile": "${workspaceFolder}/setup.env",
+    "tasks": [
+        {
+            "label": "env_stm32f411ceu6",
+            "type": "shell",
+            "command": "source",
+            "args": ["${workspaceFolder}/setup.env", "STM32F405RGT6"]
+        },
+        {
+            "label": "env_stm32f405rgt6",
+            "type": "shell",
+            "command": "source",
+            "args": ["${workspaceFolder}/setup.env", "STM32F405RGT6"]
+        },
+        {
+            "label": "env_native",
+            "type": "shell",
+            "command": "source",
+            "args": ["${workspaceFolder}/setup.env", "native"]
+        },
+        {
+            "label": "fstbuild_stm32f411ceu6",
+            "type": "shell",
+            "command": "sh",
+            "args": ["${workspaceFolder}/fstbuild.sh"],
+            "dependsOn": ["env_native"],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "fstbuild_stm32f405rgt6",
+            "type": "shell",
+            "command": "sh",
+            "args": ["${workspaceFolder}/fstbuild.sh"],
+            "dependsOn": ["env_stm32f405rgt6"],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "fstbuild_native",
+            "type": "shell",
+            "command": "sh",
+            "args": ["${workspaceFolder}/fstbuild.sh", "-l"],
+            "dependsOn": ["env_native"],
+            "dependsOrder": "sequence",
+            "terminal.integrated.automationShell" : true
+        }
+    ]
+}

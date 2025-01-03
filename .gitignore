@@ -4,14 +4,22 @@
 **/.DS_Store
 
 
+
+################################################################################################
+# Generated Files
+################################################################################################
+/CMakeLists.txt
+/main.cc
+STM32CubeMX/
+
 ################################################################################################
 # Vscode
 ################################################################################################
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/c_cpp_properties.json
+.vscode/
+# !.vscode/settings.json
+# !.vscode/tasks.json
+# !.vscode/launch.json
+# !.vscode/c_cpp_properties.json
 # !.vscode/extensions.json
 # !.vscode/*.code-snippets
 

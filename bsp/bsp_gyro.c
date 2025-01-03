@@ -548,9 +548,12 @@ void bsp_qmi8658_reset( void){
  * @return `SUCCESS` | `ERROR`
  */
 cmnBoolean_t bsp_qmi8658_init(void){
-  bsp_qmi8658_switch(ON);
-  bsp_qmi8658_reset();
   cmnBoolean_t async_mode = metope.app.rtos.status.running==true;
+  bsp_qmi8658_switch(OFF);
+  cmn_tim2_sleep(2000, async_mode);
+  bsp_qmi8658_switch(ON);
+  cmn_tim2_sleep(2000, async_mode);
+  bsp_qmi8658_reset();
   cmn_tim2_sleep(2000, async_mode);
   
   /**

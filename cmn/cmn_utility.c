@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    cmn_utility.c
  * @author  RandleH
- * @brief   Common Program - Utility Macros
+ * @brief   Common Program - Utility
  ******************************************************************************
  * @attention
  *
@@ -18,6 +18,19 @@
 */
 
 
+/**
+ * @ref https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html
+ */
+#if defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic push
+  // #pragma GCC diagnostic ignored "-Wgnu-case-range"
+#elif defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wgnu-case-range"
+#elif defined(__ICC_ARM__)
+  #pragma diag_suppress=203
+#elif defined(_MSC_VER)
+#endif
 
 
 /* ************************************************************************** */
@@ -411,9 +424,9 @@ int cmn_utility_vsnprintf(char * restrict buf, size_t size, const char * restric
 /**
  * @brief   Calculate how much angle need to change given a microsecond increase
  * @note    The angle degreee was in scale of [0:3599]
- * @param [inout] hour_rem    - Remaining angle for hour
- * @param [inout] minute_rem  - Remaining angle for minute
- * @param [inout] second_rem  - Remaining angle for second
+ * @param [inout] hour_rem    - Remaining value for hour (which is measured in microseconds)
+ * @param [inout] minute_rem  - Remaining value for minute
+ * @param [inout] second_rem  - Remaining value for second
  * @param [out]   hour_inc    - Increased angle for hour
  * @param [out]   minute_inc  - Increased angle for minute
  * @param [out]   second_inc  - Increased angle for second (optional)
@@ -466,9 +479,9 @@ void cmn_utility_angleinc(
  *        The remaining of `hour` will be equal to `second % 12`.
  * @note  You MUST perserve the remining value in order to produce the correct increasing
  *        angle.
- * @param [out] hour_rem    - Remaining angle for hour
- * @param [out] minute_rem  - Remaining angle for minute
- * @param [out] second_rem  - Remaining angle for second
+ * @param [out] hour_rem    - Remaining value for hour (which is measured in microseconds)
+ * @param [out] minute_rem  - Remaining value for minute
+ * @param [out] second_rem  - Remaining value for second
  * @param [out] hour_inc    - Absolute angle for hour
  * @param [out] minute_inc  - Absolute angle for minute
  * @param [out] second_inc  - Absolute angle for second (optional)
@@ -486,7 +499,7 @@ void cmn_utility_angleset(
   uint8_t hour = pTime->hour>12 ? pTime->hour-12 : pTime->hour;
   
   *hour_deg   =        hour  *300 + pTime->minute*5 + pTime->second/12;
-  *hour_rem   = 4000*(pTime->second%12);
+  *hour_rem   = 1000*(pTime->second%12);
 
   *minute_deg = pTime->minute*60  + pTime->second;
   *minute_rem = 0;
@@ -641,3 +654,16 @@ cmnDateTime_t cmn_utility_set_time_from_iso( const char* __timestamp__){
 }
 #endif
 
+/**
+ * @ref https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html
+ */
+#if defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic pop
+#elif defined(__clang__)
+  #pragma clang diagnostic pop
+#elif defined(__ICC_ARM__)
+  
+#elif defined(_MSC_VER)
+
+#endif
+/* ********************************** EOF *********************************** */

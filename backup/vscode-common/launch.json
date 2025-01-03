@@ -15,7 +15,6 @@
             "svdFile": "${workspaceFolder}/lib/stm32-svd/stm32f4/STM32F411.svd",
             "interface": "swd",
             "servertype": "jlink",
-            "preLaunchTask": "env",
             "swoConfig": {
                 "enabled": true,
                 "cpuFrequency": 96000000,
@@ -71,6 +70,7 @@
             "svdFile": "${workspaceFolder}/lib/stm32-svd/stm32f4/STM32F405.svd",
             "interface": "swd",
             "servertype": "jlink",
+            "preLaunchTask": "fstbuild_stm32f405rgt6",
             "swoConfig": {
                 "enabled": true,
                 "cpuFrequency": 168000000,
@@ -128,6 +128,7 @@
             "interface": "swd",
             "servertype": "stlink",
             "showDevDebugOutput":"raw",
+            "preLaunchTask": "fstbuild_stm32f411ceu6",
             "swoConfig": {
                 "enabled": false,
                 "cpuFrequency": 96000000,
@@ -183,6 +184,7 @@
             "svdFile": "${workspaceFolder}/lib/stm32-svd/stm32f4/STM32F405.svd",
             "interface": "swd",
             "servertype": "stutil",
+            "preLaunchTask": "fstbuild_stm32f405rgt6",
             "swoConfig": {
                 "enabled": true,
                 "cpuFrequency": 168000000,
@@ -226,6 +228,18 @@
                     }
                 ]
             }
+        },
+        {
+            "name": "Native",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/model1.elf",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "MIMode": "lldb",
+            "console": "externalTerminal"
         }
     ]
 }

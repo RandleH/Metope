@@ -18,6 +18,22 @@
 */
 
 
+/**
+ * @ref https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html
+ */
+#if defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic push
+  // #pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+#elif defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#elif defined(__ICCARM__)
+  #pragma diag_suppress=203
+#elif defined(_MSC_VER)
+
+#endif
+
+
 #include <stdint.h>
 #include "device.h"
 
@@ -82,7 +98,7 @@ typedef volatile u16 vu16;
 typedef volatile u32 vu32;
 typedef volatile u64 vu64;
 
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if defined (SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
 typedef IRQn_Type cmnIRQn_t;
 #endif
 
@@ -120,3 +136,16 @@ typedef union cmnDateTime_t{
 #endif  // extern C
 #endif  // CMN_TEST_H
 
+
+/**
+ * @ref https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html
+ */
+#if defined(__GNUC__) || defined(__GNUG__)
+  #pragma GCC diagnostic pop
+#elif defined(__clang__)
+  #pragma clang diagnostic pop
+#elif defined(__ICC_ARM__)
+  
+#elif defined(_MSC_VER)
+
+#endif
