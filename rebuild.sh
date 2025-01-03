@@ -16,7 +16,7 @@ cd ./build
 ################################################################
 # Compilation Configuration Zone
 ################################################################
-cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_REGISTER=1 ..
+cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_REGISTER=1 -DLOG_LEVEL=2 ..
 # cmake -DCMAKE_BUILD_TYPE=Release -DCHIP=STM32F411CEU6 -DUSE_REGISTER=1 ..
 
 # cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F411CEU6 ..

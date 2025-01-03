@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "cmn_utility.h"
 
+#include "trace.h"
+
 int main(int argc, char *argv[]){
   uint16_t hour_rem;  
   uint16_t minute_rem;
@@ -10,7 +12,15 @@ int main(int argc, char *argv[]){
   uint16_t minute_deg;
   uint16_t second_deg;
 
-  printf("2025/01/01 21:48:9\n");
+  
+
+  TRACE_INFO("2025/01/01 21:48:9\n");
+
+
+  TRACE_DEBUG("Message Level: %s\n", "Debug");
+  TRACE_INFO("Message Level: %s\n", "Info");
+  TRACE_WARNING("Message Level: %s\n", "Warning");
+  TRACE_ERROR("Message Level: %s\n", "Error");
 
   cmnDateTime_t time = {
     .year   = 1,
