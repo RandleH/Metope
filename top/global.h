@@ -43,7 +43,7 @@ typedef struct stBspScreen{
 
 
 typedef struct stAppClock{
-  cmnDateTime_t time;
+  // cmnDateTime_t time;
   TaskHandle_t  _handle;
   
   AppGuiClockEnum_t style;
@@ -52,6 +52,7 @@ typedef struct stAppClock{
     void (*init)(tAppGuiClockParam *);
     void (*set_time)(tAppGuiClockParam *, cmnDateTime_t);
     void (*inc_time)(tAppGuiClockParam *, uint32_t);
+    void (*idle)(tAppGuiClockParam *);
     void (*deinit)(tAppGuiClockParam *);
   } gui;
 } tAppClock;

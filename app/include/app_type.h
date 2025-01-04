@@ -21,7 +21,8 @@
 /*                                  Includes                                  */
 /* ************************************************************************** */
 #include "lvgl.h"
-
+#include "FreeRTOS.h"
+#include "semphr.h"
 
 /* ************************************************************************** */
 /*                              Headfile Guards                               */
@@ -49,12 +50,12 @@ typedef struct{
   lv_obj_t *pPinHour;
   lv_obj_t *pPinMinute;
 
-  uint16_t _degree_hour;
-  uint16_t _degree_minute;
-  uint16_t _rem_hour;
-  uint16_t _rem_minute;
+  cmnDateTime_t time;
 
-  void     *p_anything;
+  struct{
+    SemaphoreHandle_t  _semphr;
+    void              *p_anything;
+  }customized;
 } tAppGuiClockParam;
 
 
@@ -64,8 +65,8 @@ typedef struct{
 typedef enum{
   kAppGuiClock_None   = 255,
   kAppGuiClock_Clock1 = 0,
-  kAppGuiClock_NANA = 1,
-  kAppGuiClock_LVVVW = 2
+  kAppGuiClock_NANA   = 1,
+  kAppGuiClock_LVVVW  = 2
 } AppGuiClockEnum_t;
 
 

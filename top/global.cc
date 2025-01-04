@@ -57,16 +57,6 @@ tMainSystemStatus  metope = {
     },
     .rtos = {.status = {0}},
     .clock = {
-      .time = {
-        {
-          .year   = 0,
-          .month  = 11,
-          .day    = 22,
-          .hour   = 19,
-          .minute = 26,
-          .second = 0
-        }
-      },
       ._handle = NULL,
       .style   = kAppGuiClock_NANA,
       .gui     = {0},
