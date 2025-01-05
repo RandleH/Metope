@@ -53,6 +53,7 @@ typedef struct tAnalogClockInternalParam{
   uint16_t _degree_minute;
   uint16_t _rem_hour;
   uint16_t _rem_minute;
+  uint32_t _rem_microsecond;
 } tAnalogClockInternalParam;
 
 static void analogclk_set_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, cmnDateTime_t time);
@@ -68,7 +69,8 @@ static void analogclk_inc_time(tAppGuiClockParam *pClient, tAnalogClockInternalP
 static void analogclk_set_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, cmnDateTime_t time){
   cmn_utility_angleset( &params->_rem_hour, &params->_rem_minute, NULL, &params->_degree_hour, &params->_degree_minute, NULL, &time);
 
-  pClient->time = time;
+  pClient->time            = time;
+  params->_rem_microsecond = 0;
   
   lv_obj_set_style_transform_angle(pClient->pPinHour, params->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_transform_angle(pClient->pPinMinute, params->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -85,7 +87,7 @@ static void analogclk_set_time(tAppGuiClockParam *pClient, tAnalogClockInternalP
 static void analogclk_inc_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, uint32_t ms){
   uint16_t hour_inc, minute_inc;
   cmn_utility_angleinc( &params->_rem_hour, &params->_rem_minute, NULL, &hour_inc, &minute_inc, NULL, ms);
-
+  
   params->_degree_hour += hour_inc;
   params->_degree_minute += minute_inc;
 
@@ -109,21 +111,30 @@ static void analogclk_inc_time(tAppGuiClockParam *pClient, tAnalogClockInternalP
 
     VOLATILE uint32_t minute_in_ms_total     = minute_in_ms + params->_rem_minute;
     VOLATILE uint32_t delta_hour_in_ms_total = delta_hour_in_ms + params->_rem_hour;
-    TRACE_DEBUG("ms=%u H_rem=%u M_rem=%u H_deg=%u M_deg=%u h'_ms=%u m_ms=%u H'_ms=%u M_ms=%u", \
-      ms,
-      params->_rem_hour,\
-      params->_rem_minute,\
-      params->_degree_hour,\
-      params->_degree_minute,\
-      delta_hour_in_ms,\
-      minute_in_ms,\
-      delta_hour_in_ms_total,\
-      minute_in_ms_total
+    TRACE_DUMMY("ms=%u H_rem=%u M_rem=%u H_deg=%u M_deg=%u h'_ms=%u m_ms=%u H'_ms=%u M_ms=%u",\
+      ms,                                                                                     \
+      params->_rem_hour,                                                                      \
+      params->_rem_minute,                                                                    \
+      params->_degree_hour,                                                                   \
+      params->_degree_minute,                                                                 \
+      delta_hour_in_ms,                                                                       \
+      minute_in_ms,                                                                           \
+      delta_hour_in_ms_total,                                                                 \
+      minute_in_ms_total                                                                      \
     );
-    ASSERT( minute_in_ms_total == delta_hour_in_ms_total, "Needle Pattern Mismatched");
+    ASSERT(                                                  \
+      (minute_in_ms_total == delta_hour_in_ms_total)         \
+      ||                                                     \
+      (minute_in_ms_total%3600000 == delta_hour_in_ms_total),\
+      "Needle Pattern Mismatched"                            \
+    );
   }
 
-  cmn_utility_timeinc( &pClient->time, ms);
+  cmn_utility_timeinc( &params->_rem_microsecond, &pClient->time, ms);
+  {
+    cmnDateTime_t time = pClient->time;
+    TRACE_DUMMY("After %u ms, time => %u/%u/%u %u:%u:%u rem_ms=%u", ms, time.year+2024, time.month, time.day, time.hour, time.minute, time.second, params->_rem_microsecond);
+  }
   
   lv_obj_set_style_transform_angle(pClient->pPinHour, params->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_transform_angle(pClient->pPinMinute, params->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);

@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
   app_init();
   os_init();
 
-  TRACE_DEBUG("Initialization Completed");
+  TRACE_INFO("Initialization Completed");
 
   app_rtos_start();
   

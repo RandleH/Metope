@@ -521,17 +521,16 @@ void cmn_utility_angleset(
  * @brief   Update the time given a increased microsecond
  * @warning Always pass the same time pointer to this function.Becasuse this function will
  *          record the remaining ms from the last call.
+ * @param [inout] ms_rem  - Remaining value for microseconds
  * @param [inout] pTime - Time object to update
  * @param [in]    ms    - The increased microseconds
  */
-void cmn_utility_timeinc( cmnDateTime_t *pTime, uint32_t ms){
-  static div_t local = {0};
+void cmn_utility_timeinc( uint32_t *ms_rem, cmnDateTime_t *pTime, uint32_t ms){
+  /* Extract seconds and microseconds */
+  div_t tmp = div( *ms_rem + ms, 1000);
 
-  local = div( local.rem+ms,1000);
-
-  div_t tmp;
-  if(unlikely(pTime->second+local.quot >= 60)){
-    tmp = div(pTime->second+local.quot, 60);
+  if(unlikely(pTime->second+tmp.quot >= 60)){
+    tmp = div(pTime->second+tmp.quot, 60);
     pTime->second = tmp.rem;
 
     if(unlikely(pTime->minute+tmp.quot >= 60)){
@@ -574,7 +573,11 @@ void cmn_utility_timeinc( cmnDateTime_t *pTime, uint32_t ms){
     else{
       pTime->minute += tmp.quot;
     }
+  }else{
+    pTime->second += tmp.quot;
   }
+
+  *ms_rem = tmp.rem;
 }
 
 /**

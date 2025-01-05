@@ -23,6 +23,7 @@
 /* ************************************************************************** */
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include "cmn_type.h"
 
 
@@ -58,25 +59,28 @@ int cmn_utility_vsnprintf(char * str, size_t size, const char * format, va_list 
 char *cmn_utility_strrev(char *str);
 char *cmn_utility_strnrev(char *str, size_t len);
 
-void cmn_utility_angleinc( 
+void cmn_utility_angleinc(                              \
                           uint16_t          *hour_rem  ,\
                           uint16_t          *minute_rem,\
                           uint16_t NULLABLE *second_rem,\
                           uint16_t          *hour_inc  ,\
                           uint16_t          *minute_inc,\
                           uint16_t NULLABLE *second_inc,\
-                          uint32_t           ms\
+                          uint32_t           ms         \
                           );
-void cmn_utility_angleset( 
+void cmn_utility_angleset(                                \
                           uint16_t            *hour_rem  ,\
                           uint16_t            *minute_rem,\
                           uint16_t   NULLABLE *second_rem,\
                           uint16_t            *hour_deg  ,\
                           uint16_t            *minute_deg,\
                           uint16_t   NULLABLE *second_deg,\
-                          const cmnDateTime_t *pTime
+                          const cmnDateTime_t *pTime      \
                           );
 
+void cmn_utility_timeinc( uint32_t      *ms_rem,\
+                          cmnDateTime_t *pTime, 
+                          uint32_t       ms);
 
 /**
  * @brief Calculate the microseconds with respect to the second needle angle
@@ -107,8 +111,6 @@ static inline uint32_t cmn_utility_hrdeg2_ms( uint16_t deg){
 #endif
 }
 
-
-void cmn_utility_timeinc( cmnDateTime_t *pTime, uint32_t ms);
 
 cmnDateTime_t cmn_utility_set_time_from_iso( const char* __timestamp__);
 
