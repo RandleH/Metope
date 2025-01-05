@@ -45,7 +45,7 @@ void app_rtos_stop( void){
 #define app_rtos_idle_callback vApplicationIdleHook
 
 void app_rtos_idle_callback( void ) {
-  app_gui_update_modulo( &metope.app.clock.gui.param);
+  app_clock_gui_idle(&metope.app.clock);
 }
 
 

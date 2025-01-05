@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2022 RandleH.
+ * Copyright (c) 2024 RandleH.
  * All rights reserved.
  *
  * This software component is licensed by RandleH under BSD 3-Clause license,
@@ -22,17 +22,18 @@
 
 
 
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if defined (SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
   #include "bsp_uart.h"
   #define TRACE_PRINTF( fmt, ...) bsp_uart_printf( fmt, ##__VA_ARGS__)
-#elif (defined SYS_TARGET_NATIVE)
+#elif defined (SYS_TARGET_NATIVE)
   #include <stdio.h>
   #define TRACE_PRINTF( fmt, ...) printf( fmt, ##__VA_ARGS__)
 #else
   
-#endif
+#endif // SYS_TARGET
 
 
+#define TRACE_UNUSED __attribute__((__unused__))
 
 
 
@@ -57,13 +58,13 @@
   #define TRACE_DEBUG( fmt, ...) TRACE_PRINTF( "%s" fmt FMT_RESET, FMT_DEBUG_STR, ##__VA_ARGS__)
 #else
   #define TRACE_DEBUG( fmt, ...)
-#endif
+#endif // LOG_LEVEL
 
 #if defined(LOG_LEVEL) && (LOG_LEVEL>=1)
   #define TRACE_INFO( fmt, ...) TRACE_PRINTF( "%s" fmt, FMT_INFO_STR, ##__VA_ARGS__)
 #else
   #define TRACE_INFO( fmt, ...)
-#endif
+#endif // LOG_LEVEL
 
 #if defined(LOG_LEVEL) && (LOG_LEVEL>=0)
   #define TRACE_WARNING( fmt, ...) TRACE_PRINTF( "%s" fmt FMT_RESET, FMT_WARN_STR, ##__VA_ARGS__)
@@ -71,10 +72,18 @@
 #else
   #define TRACE_WARNING( fmt, ...)
   #define TRACE_ERROR( fmt, ...)
-#endif
+#endif // LOG_LEVEL
 
-#endif
 
+static inline int trace_dummy_printf( const char *fmt, ...){
+  // Dummy Trace Macro. Never print anything.
+  (void)fmt;
+  return 0;
+}
+
+#define TRACE_DUMMY( fmt, ...) trace_dummy_printf(fmt, ##__VA_ARGS__) 
+
+#endif // TRACE_H
 
 
 /* ********************************** EOF *********************************** */

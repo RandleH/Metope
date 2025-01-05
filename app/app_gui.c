@@ -38,11 +38,140 @@
 #endif
 
 /* ************************************************************************** */
+/*                Abstract [Analog Clock] UI Common Parameters                */
+/* ************************************************************************** */
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+/**
+ * @note
+ *  Abstract UI Internal Cache for Analog Clock Style
+ */
+typedef struct tAnalogClockInternalParam{
+  uint16_t _degree_hour;
+  uint16_t _degree_minute;
+  uint16_t _rem_hour;
+  uint16_t _rem_minute;
+  uint32_t _rem_microsecond;
+} tAnalogClockInternalParam;
+
+static void analogclk_set_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, cmnDateTime_t time);
+static void analogclk_inc_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, uint32_t ms);
+
+/**
+ * @brief Analog Clock Set Time Function
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @param [inout] params  - The Abstract Analog Clock Parameters
+ * @param [in]    time    - Absolute Real Time "YYYY/MM/DD HH:MM:SS"
+ * @note Update needle angle
+ */
+static void analogclk_set_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, cmnDateTime_t time){
+  cmn_utility_angleset( &params->_rem_hour, &params->_rem_minute, NULL, &params->_degree_hour, &params->_degree_minute, NULL, &time);
+
+  pClient->time            = time;
+  params->_rem_microsecond = 0;
+  
+  lv_obj_set_style_transform_angle(pClient->pPinHour, params->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_angle(pClient->pPinMinute, params->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
+}
+
+/**
+ * @brief Analog Clock Inc Time Function
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @param [inout] params  - The Abstract Analog Clock Parameters
+ * @param [in]    ms      - Escaped Microseconds
+ * @note Update needle angle
+ * @addtogroup NotThreadSafe
+ */
+static void analogclk_inc_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, uint32_t ms){
+  uint16_t hour_inc, minute_inc;
+  cmn_utility_angleinc( &params->_rem_hour, &params->_rem_minute, NULL, &hour_inc, &minute_inc, NULL, ms);
+  
+  params->_degree_hour += hour_inc;
+  params->_degree_minute += minute_inc;
+
+  /**
+   * @note
+   *  The angle which the minute hand has swept is always 12 times of the hour hand interval.
+   * @note
+   *  `H % (3600/12) == M / 12`
+   * @example
+   *  Time: 2024/12/30 14:57:59
+   *  - The minute hand swept angle is `3479` in the scale of `3600`
+   *  - The hour hand swept angle is `889`.
+   *  - The hour hand interval angle is equal to the current hour hand angle minus the hour hand angle at 2 o'clock
+   *  - - which is `889` - `300*2` = `289`
+   *  - - The formula can be simplified to `H % (3600/12)` where `H` is `889` in this case.
+   *  - `H % (3600/12) == M / 12` | `H`:=889; `M`:=`3479` are satisfied with this formula. Therefore it is a valid angle pattern
+   */
+  {
+    VOLATILE uint32_t minute_in_ms     = cmn_utility_mindeg2_ms(params->_degree_minute);
+    VOLATILE uint32_t delta_hour_in_ms = cmn_utility_hrdeg2_ms((params->_degree_hour%(3600/12)));
+
+    VOLATILE uint32_t minute_in_ms_total     = minute_in_ms + params->_rem_minute;
+    VOLATILE uint32_t delta_hour_in_ms_total = delta_hour_in_ms + params->_rem_hour;
+    TRACE_DUMMY("ms=%u H_rem=%u M_rem=%u H_deg=%u M_deg=%u h'_ms=%u m_ms=%u H'_ms=%u M_ms=%u",\
+      ms,                                                                                     \
+      params->_rem_hour,                                                                      \
+      params->_rem_minute,                                                                    \
+      params->_degree_hour,                                                                   \
+      params->_degree_minute,                                                                 \
+      delta_hour_in_ms,                                                                       \
+      minute_in_ms,                                                                           \
+      delta_hour_in_ms_total,                                                                 \
+      minute_in_ms_total                                                                      \
+    );
+    ASSERT(                                                  \
+      (minute_in_ms_total == delta_hour_in_ms_total)         \
+      ||                                                     \
+      (minute_in_ms_total%3600000 == delta_hour_in_ms_total),\
+      "Needle Pattern Mismatched"                            \
+    );
+  }
+
+  cmn_utility_timeinc( &params->_rem_microsecond, &pClient->time, ms);
+  {
+    cmnDateTime_t time = pClient->time;
+    TRACE_DUMMY("After %u ms, time => %u/%u/%u %u:%u:%u rem_ms=%u", ms, time.year+2024, time.month, time.day, time.hour, time.minute, time.second, params->_rem_microsecond);
+  }
+  
+  lv_obj_set_style_transform_angle(pClient->pPinHour, params->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
+  lv_obj_set_style_transform_angle(pClient->pPinMinute, params->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
+}
+
+/**
+ * @addtogroup NotThreadSafe
+ */
+static void analogclk_idle(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params){
+  if(params->_degree_hour > 3600){
+    params->_degree_hour %= 3600;
+  }
+  if(params->_degree_minute > 3600){
+    params->_degree_minute %= 3600;
+  }
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+/* ************************************************************************** */
 /*                     Static Clock UI Function - clock1                      */
 /* ************************************************************************** */
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+static void ui_clock1_init    (tAppGuiClockParam *pClient);
+static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time);
+static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms);
+static void ui_clock1_idle    (tAppGuiClockParam *pClient);
+static void ui_clock1_deinit  (tAppGuiClockParam *pClient);
+
+typedef struct{
+  tAnalogClockInternalParam analog_clk;
+}tClock1InternalParam;
 
 /**
  * @brief UI Clock1 Initialization
@@ -287,10 +416,8 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
  * @note Update needle angle
  */
 static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
-  cmn_utility_angleset( &pClient->_rem_hour, &pClient->_rem_minute, NULL, &pClient->_degree_hour, &pClient->_degree_minute, NULL, &time);
-  
-  lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
-  lv_obj_set_style_transform_angle(pClient->pPinMinute, pClient->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
+  tClock1InternalParam *pClientPrivateParams = (tClock1InternalParam *)pClient->customized.p_anything;
+  analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
 }
 
 /**
@@ -299,48 +426,17 @@ static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
  * @note Update needle angle
  */
 static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
-  uint16_t hour_inc, minute_inc;
-  cmn_utility_angleinc( &pClient->_rem_hour, &pClient->_rem_minute, NULL, &hour_inc, &minute_inc, NULL, ms);
+  tClock1InternalParam *pClientPrivateParams = (tClock1InternalParam *)pClient->customized.p_anything;
+  analogclk_inc_time( pClient, &pClientPrivateParams->analog_clk, ms);
+}
 
-  pClient->_degree_hour += hour_inc;
-  pClient->_degree_minute += minute_inc;
+static void ui_clock1_idle(tAppGuiClockParam *pClient){
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
-  /**
-   * @note
-   *  The angle which the minute hand has swept is always 12 times of the hour hand interval.
-   * @note
-   *  `H % (3600/12) == M / 12`
-   * @example
-   *  Time: 2024/12/30 14:57:59
-   *  - The minute hand swept angle is `3479` in the scale of `3600`
-   *  - The hour hand swept angle is `889`.
-   *  - The hour hand interval angle is equal to the current hour hand angle minus the hour hand angle at 2 o'clock
-   *  - - which is `889` - `300*2` = `289`
-   *  - - The formula can be simplified to `H % (3600/12)` where `H` is `889` in this case.
-   *  - `H % (3600/12) == M / 12` | `H`:=889; `M`:=`3479` are satisfied with this formula. Therefore it is a valid angle pattern
-   */
-  {
-    VOLATILE uint32_t minute_in_ms     = cmn_utility_mindeg2_ms(pClient->_degree_minute);
-    VOLATILE uint32_t delta_hour_in_ms = cmn_utility_hrdeg2_ms((pClient->_degree_hour%(3600/12)));
-
-    VOLATILE uint32_t minute_in_ms_total     = minute_in_ms + pClient->_rem_minute;
-    VOLATILE uint32_t delta_hour_in_ms_total = delta_hour_in_ms + pClient->_rem_hour;
-    TRACE_DEBUG("ms=%u H_rem=%u M_rem=%u H_deg=%u M_deg=%u h'_ms=%u m_ms=%u H'_ms=%u M_ms=%u", \
-      ms,
-      pClient->_rem_hour,\
-      pClient->_rem_minute,\
-      pClient->_degree_hour,\
-      pClient->_degree_minute,\
-      delta_hour_in_ms,\
-      minute_in_ms,\
-      delta_hour_in_ms_total,\
-      minute_in_ms_total
-    );
-    ASSERT( minute_in_ms_total == delta_hour_in_ms_total, "Needle Pattern Mismatched");
-  }
-  
-  lv_obj_set_style_transform_angle(pClient->pPinHour, pClient->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);
-  lv_obj_set_style_transform_angle(pClient->pPinMinute, pClient->_degree_minute, LV_PART_MAIN| LV_STATE_DEFAULT);
+  tClock1InternalParam *pClientPrivateParams = (tClock1InternalParam *)pClient->customized.p_anything;
+  analogclk_idle(pClient, &pClientPrivateParams->analog_clk);
+  xSemaphoreGive(pClient->customized._semphr);
 }
 
 /**
@@ -350,6 +446,23 @@ static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
  */
 static void ui_clock1_deinit(tAppGuiClockParam *pClient){
   lv_obj_del(pClient->pScreen);
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  if(NULL!=pClient->customized.p_anything){
+    vPortFree(pClient->customized.p_anything);
+    pClient->customized.p_anything = NULL;
+  }
+  xSemaphoreGive(pClient->customized._semphr);
+  /**
+   * @warning
+   *  Directly delete the mutex may cause concurrency bugs.
+   * @note
+   *  FreeRTOS does not delete a semaphore that has tasks blocked on it 
+   *  (tasks that are in the Blocked state waiting for the semaphore to 
+   *  become available).
+   */
+  vSemaphoreDelete(pClient->customized._semphr);
   memset(pClient, 0, sizeof(tAppGuiClockParam));
 }
 
@@ -366,18 +479,33 @@ static void ui_clock1_deinit(tAppGuiClockParam *pClient){
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+static void ui_clocknana_init    (tAppGuiClockParam *pClient);
+static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time);
+static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms);
+static void ui_clocknana_idle    (tAppGuiClockParam *pClient);
+static void ui_clocknana_deinit  (tAppGuiClockParam *pClient);
+
 typedef struct{
-  lv_obj_t      *ui_nanaeyeclosed;
-  lv_obj_t      *ui_nanaeyeopen;
-  cmnDateTime_t  time;
+  lv_obj_t                  *ui_nanaeyeclosed;
+  lv_obj_t                  *ui_nanaeyeopen;
+  tAnalogClockInternalParam  analog_clk;
 }tClockNanaInternalParam;
 
 static void ui_clocknana_init(tAppGuiClockParam *pClient){
-  pClient->pScreen = lv_scr_act();
-  lv_obj_t *ui_NANA = pClient->pScreen;
-  lv_obj_clear_flag( ui_NANA, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-  lv_obj_set_style_bg_color(ui_NANA, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-  lv_obj_set_style_bg_opa(ui_NANA, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+  pClient->customized._semphr = xSemaphoreCreateMutex();
+  ASSERT(pClient->customized._semphr, "Mutex was NOT created");
+  
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  lv_obj_t *ui_NANA = lv_scr_act();
+  {
+    lv_obj_clear_flag( ui_NANA, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_bg_color(ui_NANA, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_NANA, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+  }
+  pClient->pScreen = ui_NANA;
 
   {
     lv_obj_t *ui_MainPanel2 = lv_obj_create(ui_NANA);
@@ -483,97 +611,131 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
     lv_obj_set_style_border_opa(ui_InnerLoop2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
   }
   
-  tClockNanaInternalParam *p_internal_param = pvPortMalloc(sizeof(tClockNanaInternalParam));
-  p_internal_param->ui_nanaeyeclosed = lv_img_create(ui_NANA);
-  lv_img_set_src(p_internal_param->ui_nanaeyeclosed, &ui_img_eyes_close_240_png);
-  lv_obj_set_width( p_internal_param->ui_nanaeyeclosed, LV_SIZE_CONTENT);  /// 187
-  lv_obj_set_height( p_internal_param->ui_nanaeyeclosed, LV_SIZE_CONTENT);   /// 58
-  lv_obj_set_x( p_internal_param->ui_nanaeyeclosed, 8 );
-  lv_obj_set_y( p_internal_param->ui_nanaeyeclosed, -5 );
-  lv_obj_set_align( p_internal_param->ui_nanaeyeclosed, LV_ALIGN_CENTER );
-  lv_obj_add_flag( p_internal_param->ui_nanaeyeclosed, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-  lv_obj_clear_flag( p_internal_param->ui_nanaeyeclosed, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+  tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pvPortMalloc(sizeof(tClockNanaInternalParam));
+  {
+    lv_obj_t* ui_nanaeyeclosed = lv_img_create(ui_NANA);
+    lv_img_set_src( ui_nanaeyeclosed, &ui_img_eyes_close_240_png);
+    lv_obj_set_width( ui_nanaeyeclosed, LV_SIZE_CONTENT);  /// 187
+    lv_obj_set_height( ui_nanaeyeclosed, LV_SIZE_CONTENT);   /// 58
+    lv_obj_set_x( ui_nanaeyeclosed, 8 );
+    lv_obj_set_y( ui_nanaeyeclosed, -5 );
+    lv_obj_set_align( ui_nanaeyeclosed, LV_ALIGN_CENTER );
+    lv_obj_add_flag( ui_nanaeyeclosed, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
+    lv_obj_clear_flag( ui_nanaeyeclosed, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    pClientPrivateParams->ui_nanaeyeclosed = ui_nanaeyeclosed;
+  }
   
-  p_internal_param->ui_nanaeyeopen = lv_img_create(ui_NANA);
-  lv_img_set_src(p_internal_param->ui_nanaeyeopen, &ui_img_eyes_open_240_png);
-  lv_obj_set_width( p_internal_param->ui_nanaeyeopen, LV_SIZE_CONTENT);  /// 187
-  lv_obj_set_height( p_internal_param->ui_nanaeyeopen, LV_SIZE_CONTENT);   /// 60
-  lv_obj_set_x( p_internal_param->ui_nanaeyeopen, 6 );
-  lv_obj_set_y( p_internal_param->ui_nanaeyeopen, -7 );
-  lv_obj_set_align( p_internal_param->ui_nanaeyeopen, LV_ALIGN_CENTER );
-  lv_obj_add_flag( p_internal_param->ui_nanaeyeopen, LV_OBJ_FLAG_ADV_HITTEST | LV_OBJ_FLAG_HIDDEN );   /// Flags
-  lv_obj_clear_flag( p_internal_param->ui_nanaeyeopen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+  {
+    lv_obj_t* ui_nanaeyeopen = lv_img_create(ui_NANA);
+    lv_img_set_src( ui_nanaeyeopen, &ui_img_eyes_open_240_png);
+    lv_obj_set_width( ui_nanaeyeopen, LV_SIZE_CONTENT);  /// 187
+    lv_obj_set_height( ui_nanaeyeopen, LV_SIZE_CONTENT);   /// 60
+    lv_obj_set_x( ui_nanaeyeopen, 6 );
+    lv_obj_set_y( ui_nanaeyeopen, -7 );
+    lv_obj_set_align( ui_nanaeyeopen, LV_ALIGN_CENTER );
+    lv_obj_add_flag( ui_nanaeyeopen, LV_OBJ_FLAG_ADV_HITTEST | LV_OBJ_FLAG_HIDDEN );   /// Flags
+    lv_obj_clear_flag( ui_nanaeyeopen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    pClientPrivateParams->ui_nanaeyeopen = ui_nanaeyeopen;
+  }
+  pClient->customized.p_anything = pClientPrivateParams;
+  
 
-  pClient->p_anything = p_internal_param;
+  {
+    lv_obj_t *ui_pinMinute = lv_img_create(ui_NANA);
+    lv_img_set_src(ui_pinMinute, &ui_img_pin_minute_classic);
+    lv_obj_set_width( ui_pinMinute, 16);
+    lv_obj_set_height( ui_pinMinute, 96);
+    lv_obj_set_x( ui_pinMinute, 0 );
+    lv_obj_set_y( ui_pinMinute, -112 );
+    lv_obj_set_align( ui_pinMinute, LV_ALIGN_BOTTOM_MID );
+    lv_obj_add_flag( ui_pinMinute, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
+    lv_obj_clear_flag( ui_pinMinute, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_transform_angle(ui_pinMinute, 900, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_pinMinute, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_pinMinute, 88, LV_PART_MAIN| LV_STATE_DEFAULT);
+    pClient->pPinMinute = ui_pinMinute;
+  }
 
-  lv_obj_t *ui_pinMinute = lv_img_create(ui_NANA);
-  lv_img_set_src(ui_pinMinute, &ui_img_pin_minute_classic);
-  lv_obj_set_width( ui_pinMinute, 16);
-  lv_obj_set_height( ui_pinMinute, 96);
-  lv_obj_set_x( ui_pinMinute, 0 );
-  lv_obj_set_y( ui_pinMinute, -112 );
-  lv_obj_set_align( ui_pinMinute, LV_ALIGN_BOTTOM_MID );
-  lv_obj_add_flag( ui_pinMinute, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-  lv_obj_clear_flag( ui_pinMinute, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-  lv_obj_set_style_transform_angle(ui_pinMinute, 900, LV_PART_MAIN| LV_STATE_DEFAULT);
-  lv_obj_set_style_transform_pivot_x(ui_pinMinute, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-  lv_obj_set_style_transform_pivot_y(ui_pinMinute, 88, LV_PART_MAIN| LV_STATE_DEFAULT);
-  pClient->pPinMinute = ui_pinMinute;
+  {
+    lv_obj_t *ui_pinHour = lv_img_create(ui_NANA);
+    lv_img_set_src(ui_pinHour, &ui_img_pin_hour_classic);
+    lv_obj_set_width( ui_pinHour, 16);
+    lv_obj_set_height( ui_pinHour, 63);
+    lv_obj_set_x( ui_pinHour, 0 );
+    lv_obj_set_y( ui_pinHour, -112 );
+    lv_obj_set_align( ui_pinHour, LV_ALIGN_BOTTOM_MID );
+    lv_obj_add_flag( ui_pinHour, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
+    lv_obj_clear_flag( ui_pinHour, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_transform_angle(ui_pinHour, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_pinHour, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_pinHour, 55, LV_PART_MAIN| LV_STATE_DEFAULT);
+    pClient->pPinHour = ui_pinHour;
+  }
 
-  lv_obj_t *ui_pinHour = lv_img_create(ui_NANA);
-  lv_img_set_src(ui_pinHour, &ui_img_pin_hour_classic);
-  lv_obj_set_width( ui_pinHour, 16);
-  lv_obj_set_height( ui_pinHour, 63);
-  lv_obj_set_x( ui_pinHour, 0 );
-  lv_obj_set_y( ui_pinHour, -112 );
-  lv_obj_set_align( ui_pinHour, LV_ALIGN_BOTTOM_MID );
-  lv_obj_add_flag( ui_pinHour, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-  lv_obj_clear_flag( ui_pinHour, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-  lv_obj_set_style_transform_angle(ui_pinHour, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-  lv_obj_set_style_transform_pivot_x(ui_pinHour, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-  lv_obj_set_style_transform_pivot_y(ui_pinHour, 55, LV_PART_MAIN| LV_STATE_DEFAULT);
-  pClient->pPinHour = ui_pinHour;
-
+  ret = xSemaphoreGive(pClient->customized._semphr);
+  ASSERT(ret==pdTRUE, "Data was NOT released");
 }
 
 /**
  * @brief UI Clock1 Set Day Night
  * @param [inout] pClient - The UI Widget Structure Variable
  * @note Update NaNa's eyes
+ * @addtogroup NotThreadSafe
  */
 static void ui_clocknana_daynight(tAppGuiClockParam *pClient){
-  lv_obj_t *ui_nanaeyeopen   = ((tClockNanaInternalParam*)pClient->p_anything)->ui_nanaeyeopen;
-  lv_obj_t *ui_nanaeyeclosed = ((tClockNanaInternalParam*)pClient->p_anything)->ui_nanaeyeclosed;
+  tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
+  lv_obj_t *ui_nanaeyeopen   = pClientPrivateParams->ui_nanaeyeopen;
+  lv_obj_t *ui_nanaeyeclosed = pClientPrivateParams->ui_nanaeyeclosed;
 
-  if(((tClockNanaInternalParam*)(pClient->p_anything))->time.hour >= 18){
+  if(pClient->time.hour >= 18){
     if(!lv_obj_has_flag(ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN) || lv_obj_has_flag(ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN)){ 
       /* Close Eyes */
       lv_obj_add_flag( ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN );
       lv_obj_clear_flag( ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN);
     }
-  }else if(((tClockNanaInternalParam*)(pClient->p_anything))->time.hour >= 8){
+  }else if(pClient->time.hour >= 8){
     if(lv_obj_has_flag(ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN) || !lv_obj_has_flag(ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN)){
       /* Open Eyes */
       lv_obj_add_flag( ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_clear_flag( ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN );
+      lv_obj_clear_flag( ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN);
     }
   }
 }
 
+
 static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
-  ((tClockNanaInternalParam*)(pClient->p_anything))->time = time;
-  ui_clock1_set_time(pClient, time);
+  tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
   ui_clocknana_daynight(pClient);
+  
+  xSemaphoreGive(pClient->customized._semphr);
 }
 
 static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
-  ui_clock1_inc_time(pClient, ms);
-  cmn_utility_timeinc( &(((tClockNanaInternalParam*)(pClient->p_anything))->time), ms);
+  tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+  
+  analogclk_inc_time( pClient, &pClientPrivateParams->analog_clk, ms);
   ui_clocknana_daynight(pClient);
+
+  xSemaphoreGive(pClient->customized._semphr);
+}
+
+static void ui_clocknana_idle(tAppGuiClockParam *pClient){
+  tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  analogclk_idle( pClient, &pClientPrivateParams->analog_clk);
+  
+  xSemaphoreGive(pClient->customized._semphr);
 }
 
 static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
-  vPortFree(pClient->p_anything);
   ui_clock1_deinit(pClient);
 }
 
@@ -591,14 +753,26 @@ static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
 extern "C"{
 #endif
 
+static void ui_clocklvvvw_init    (tAppGuiClockParam *pClient);
+static void ui_clocklvvvw_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time);
+static void ui_clocklvvvw_inc_time(tAppGuiClockParam *pClient, uint32_t ms);
+static void ui_clocklvvvw_idle    (tAppGuiClockParam *pClient);
+static void ui_clocklvvvw_deinit  (tAppGuiClockParam *pClient);
+
 typedef struct stClockLvvvwInternalParam{
-  lv_color_t ruby_color;
-  lv_obj_t * ui_ruby;
+  lv_color_t                 ruby_color;
+  lv_obj_t                  *ui_ruby;
+  tAnalogClockInternalParam  analog_clk;
 } tClockLvvvwInternalParam;
 
 static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
   pClient->pScreen = lv_scr_act();
-  pClient->p_anything = pvPortMalloc(sizeof(tClockLvvvwInternalParam));
+  pClient->customized._semphr = xSemaphoreCreateMutex();
+  ASSERT(pClient->customized._semphr, "Mutex was NOT created");
+  
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+  tClockLvvvwInternalParam *pClientPrivateParams = (tClockLvvvwInternalParam *)pvPortMalloc(sizeof(tClockLvvvwInternalParam));
 
   lv_obj_clear_flag( pClient->pScreen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
   lv_obj_set_style_bg_color(pClient->pScreen, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -715,8 +889,8 @@ static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
     lv_obj_set_align( ui_ruby, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_ruby, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_ruby, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
-    ((tClockLvvvwInternalParam*)(pClient->p_anything))->ruby_color = lv_color_hex(0xFF0000);
-    lv_obj_set_style_bg_color(ui_ruby, ((tClockLvvvwInternalParam*)(pClient->p_anything))->ruby_color, LV_PART_MAIN | LV_STATE_DEFAULT );
+    pClientPrivateParams->ruby_color = lv_color_hex(0xFF0000);
+    lv_obj_set_style_bg_color(ui_ruby, pClientPrivateParams->ruby_color, LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(ui_ruby, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_ruby, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -729,7 +903,7 @@ static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
     lv_obj_set_style_shadow_ofs_x(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_ofs_y(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 #endif
-    ((tClockLvvvwInternalParam*)(pClient->p_anything))->ui_ruby = ui_ruby;
+    pClientPrivateParams->ui_ruby = ui_ruby;
   }
   
   {/* Digits Icons: 3,9 */
@@ -836,31 +1010,56 @@ static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
     lv_obj_set_style_transform_pivot_y(ui_pinMinute, 88, LV_PART_MAIN| LV_STATE_DEFAULT);
     pClient->pPinMinute = ui_pinMinute;
   }
+
+  pClient->customized.p_anything = pClientPrivateParams;
+  ret = xSemaphoreGive(pClient->customized._semphr);
+  ASSERT(ret==pdTRUE, "Data was NOT released");
 }
 
 static void ui_clocklvvvw_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
-  ui_clock1_set_time(pClient, time);
+  tClockLvvvwInternalParam *pClientPrivateParams = (tClockLvvvwInternalParam *)pClient->customized.p_anything;
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
 
   /**
    * @todo: Screen shows a glich when moving to init()
    */
 #if 1
-  lv_obj_t *ui_ruby = ((tClockLvvvwInternalParam*)(pClient->p_anything))->ui_ruby;
-  lv_obj_set_style_shadow_color(ui_ruby, ((tClockLvvvwInternalParam*)(pClient->p_anything))->ruby_color, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_t *ui_ruby = pClientPrivateParams->ui_ruby;
+  lv_obj_set_style_shadow_color(ui_ruby, pClientPrivateParams->ruby_color, LV_PART_MAIN | LV_STATE_DEFAULT );
   lv_obj_set_style_shadow_opa(ui_ruby, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_shadow_width(ui_ruby, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_shadow_spread(ui_ruby, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_shadow_ofs_x(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
   lv_obj_set_style_shadow_ofs_y(ui_ruby, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 #endif
+
+  xSemaphoreGive(pClient->customized._semphr);
 }
 
 static void ui_clocklvvvw_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
-  ui_clock1_inc_time(pClient, ms);
+  tClockLvvvwInternalParam *pClientPrivateParams = (tClockLvvvwInternalParam *)pClient->customized.p_anything;
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  analogclk_inc_time( pClient, &pClientPrivateParams->analog_clk, ms);
+  
+  xSemaphoreGive(pClient->customized._semphr);
+}
+
+static void ui_clocklvvvw_idle(tAppGuiClockParam *pClient){
+  tClockLvvvwInternalParam *pClientPrivateParams = (tClockLvvvwInternalParam *)pClient->customized.p_anything;
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  analogclk_idle( pClient, &pClientPrivateParams->analog_clk);
+  
+  xSemaphoreGive(pClient->customized._semphr);
 }
 
 static void ui_clocklvvvw_deinit(tAppGuiClockParam *pClient){
-  vPortFree(pClient->p_anything);
   ui_clock1_deinit(pClient);
 }
 
@@ -897,6 +1096,7 @@ void app_gui_switch( AppGuiClockEnum_t x){
       metope.app.clock.gui.init     = NULL;
       metope.app.clock.gui.set_time = NULL;
       metope.app.clock.gui.inc_time = NULL;
+      metope.app.clock.gui.idle     = NULL;
       metope.app.clock.gui.deinit   = NULL;
       break;
     }
@@ -904,6 +1104,7 @@ void app_gui_switch( AppGuiClockEnum_t x){
       metope.app.clock.gui.init     = ui_clock1_init;
       metope.app.clock.gui.set_time = ui_clock1_set_time;
       metope.app.clock.gui.inc_time = ui_clock1_inc_time;
+      metope.app.clock.gui.idle     = ui_clock1_idle;
       metope.app.clock.gui.deinit   = ui_clock1_deinit;
       break;
     }
@@ -919,6 +1120,7 @@ void app_gui_switch( AppGuiClockEnum_t x){
       metope.app.clock.gui.init     = ui_clocknana_init;
       metope.app.clock.gui.set_time = ui_clocknana_set_time;
       metope.app.clock.gui.inc_time = ui_clocknana_inc_time;
+      metope.app.clock.gui.idle     = ui_clocknana_idle;
       metope.app.clock.gui.deinit   = ui_clocknana_deinit;
       break;
     }
@@ -926,6 +1128,7 @@ void app_gui_switch( AppGuiClockEnum_t x){
       metope.app.clock.gui.init     = ui_clocklvvvw_init;
       metope.app.clock.gui.set_time = ui_clocklvvvw_set_time;
       metope.app.clock.gui.inc_time = ui_clocklvvvw_inc_time;
+      metope.app.clock.gui.idle     = ui_clocklvvvw_idle;
       metope.app.clock.gui.deinit   = ui_clocklvvvw_deinit;
       break;
     }
@@ -936,20 +1139,10 @@ void app_gui_switch( AppGuiClockEnum_t x){
   metope.app.clock.gui.init( &metope.app.clock.gui.param );
 }
 
-/**
- * @brief Module the clock parameters in case of overflow
- * @param [inout] pClient - The UI Widget Structure Variable
- * @bug NOT threadsafe !!!
- */
-void app_gui_update_modulo(tAppGuiClockParam *pClient) RTOSIDLE{
-  pClient->_degree_hour   %= 3600;
-  pClient->_degree_minute %= 3600;
-}
-
 
 
 /**
- * @param [in] param  - will cast to `tAppClock`
+ * @param [in] param  - will cast to `tAppClock*`
  */
 void app_clock_gui_main(void *param) RTOSTHREAD{
   tAppClock *parsed_param = (tAppClock *)param;
@@ -957,8 +1150,7 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
   portTICK_TYPE_ENTER_CRITICAL();
   app_gui_switch(parsed_param->style);
   portTICK_TYPE_EXIT_CRITICAL();
-  parsed_param->time = bsp_rtc_get_time();
-  parsed_param->gui.set_time( &parsed_param->gui.param, parsed_param->time);
+  parsed_param->gui.set_time( &parsed_param->gui.param, bsp_rtc_get_time());
   
   /**
    * @todo: Need to update the time from RTC
@@ -974,15 +1166,11 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
     TickType_t tmp = xTaskGetTickCount();
     TickType_t ms_delta = tmp - old_tick;
     old_tick = tmp;
-    cmn_utility_timeinc( &parsed_param->time, ms_delta); /** @bug */
-    
 
     EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC, pdTRUE, pdFALSE, 64);
 
-    portTICK_TYPE_ENTER_CRITICAL();
     if(uxBits & CMN_EVENT_UPDATE_RTC){
-      parsed_param->time = bsp_rtc_get_time();
-      parsed_param->gui.set_time( &parsed_param->gui.param, parsed_param->time);
+      parsed_param->gui.set_time( &parsed_param->gui.param, bsp_rtc_get_time());
       /**
        * @bug 
        *  LVGL can not finish a correct partial refreash after a big needle angle change
@@ -996,10 +1184,17 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
        */
       parsed_param->gui.inc_time( &parsed_param->gui.param, ms_delta);
     }
-    portTICK_TYPE_EXIT_CRITICAL();
   }
 }
 
+
+/**
+ * @param [in] param  - will cast to `tAppClock*`
+ */
+void app_clock_gui_idle(void *param) RTOSIDLE{
+  tAppClock *parsed_param = (tAppClock *)param;
+  parsed_param->gui.idle(&parsed_param->gui.param);
+}
 
 #ifdef __cplusplus
 }
