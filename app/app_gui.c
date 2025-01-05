@@ -36,6 +36,28 @@
 #else
   #define VOLATILE
 #endif
+#define MAX_CLOCK_DIFF_SEC      (3)
+
+
+
+/**
+ * @brief Private time check
+ * @note If time is expired, a set time operation will be triggered
+ * @param [in] rtc_time - Real Time Clock Time
+ * @param [in] clk_time - UI Clock to be checked
+ * @return Return `true` if time is expired
+ */
+static cmnBoolean_t is_time_expired(cmnDateTime_t rtc_time, cmnDateTime_t clk_time){
+  int8_t diff = (signed)(rtc_time.second - clk_time.second);
+  if( CMN_ABS(diff) > 3 ){
+    return true;
+  }
+
+  clk_time.second = rtc_time.second;
+
+  return (rtc_time.word!=clk_time.word);
+}
+
 
 /* ************************************************************************** */
 /*                Abstract [Analog Clock] UI Common Parameters                */
@@ -731,6 +753,13 @@ static void ui_clocknana_idle(tAppGuiClockParam *pClient){
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
   analogclk_idle( pClient, &pClientPrivateParams->analog_clk);
+  
+  if(is_time_expired( bsp_rtc_get_time(), pClient->time)){
+    /**
+     * @todo: Check the return type
+     */
+    xEventGroupSetBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
+  }
   
   xSemaphoreGive(pClient->customized._semphr);
 }

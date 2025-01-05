@@ -37,6 +37,8 @@
 #define CMN_MIN( a, b)    ((a)>(b) ? (b) : (a))
 #define CMN_MAX( a, b)    ((a)<(b) ? (b) : (a))
 
+#define CMN_ABS(x)        ((x) < 0) ? (-(x)) : (x)
+
 #ifdef __cplusplus
 extern "C"{
 #endif
