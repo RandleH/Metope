@@ -41,11 +41,15 @@ git clone https://github.com/RandleH/Metope.git
 
 
 
+This chapter only provides one of the recommended way to set up the project. For more details, please visit [here]().
+
 Deploy the environment
 
 ```bash
 source setup.env
 ```
+
+> Target: `STM32F411CEU6`
 
 
 
@@ -54,6 +58,8 @@ Compile
 ```bash
 sh rebuild.sh
 ```
+
+
 
 
 
@@ -79,61 +85,101 @@ Here are some typical configurations. Copy the command and replace the one in `r
 
 
 
+### C Make Flag Table
+
+| Keyword \ Allowed Value | 0                 | 1                       | 2    | Debug | Release |
+| ----------------------- | ----------------- | ----------------------- | ---- | ----- | ------- |
+| CMAKE_BUILD_TYPE        |                   |                         |      | $√$   | $√$     |
+| USE_REGISTER            | $√$               | $√$                     |      |       |         |
+| LOG_LEVEL               | $\bold√$          | $√$                     | $√$  |       |         |
+| QMI8658A                |                   | $\color{green}(\bold√)$ |      |       |         |
+| QMI8658C                |                   | $\color{green}(√)$      |      |       |         |
+| MPU6050                 |                   | $\color{green}(√)$      |      |       |         |
+| TEST_ONLY               |                   | $\color{cyan}(√)$       |      |       |         |
+| INCLUDE_TB_OS           | $\color{cyan}[√]$ | $\color{cyan}[√]$       |      |       |         |
+| INCLUDE_TB_BSP          | $\color{cyan}[√]$ | $\color{cyan}[√]$       |      |       |         |
+| INCLUDE_TB_CMN          | $\color{cyan}[√]$ | $\color{cyan}[√]$       |      |       |         |
+
+
+
+### Environment Setup
+
+#### STM32F411CEU6
+
+>```bash
+>source setup.env
+>```
+>
+>Or 
+>
+>```bash
+>source setup.env STM32F411CEU6
+>```
+
+
+
+#### STM32F405RGT6
+
+```bash
+source setup.env STM32F405RGT6
+```
+
+
+
+#### Native
+
+```bash
+source setup.env native
+```
+
+This native mode will use your local compiler to partially build the project. This is for the purpose of experiment to test non-machine dependent code.
+
+Note that the main entrance of native program is different than others.
+
+- Native Program: `${PRJ_TOP}/backup/main_native.cc`
+- Target Program: `${PRJ_TOP}/backup/main_program.cc`
+
+
+
+
+
 ### Firmware (Debug)
 
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F411CEU6 .. && make -j12
+mkdir build
+cd ./build
+cmake -DCMAKE_BUILD_TYPE=<value> [-DUSE_REGISTER=<value>] [-DLOG_LEVEL=<value>] .. && make -j12
 ```
 
->STM32F411CEU6
-
-
-
-```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F405RGT6 .. && make -j12
-```
-
-> STM32F405RGT6
+> Example:
+>
+> ```
+> cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_REGISTER=1 -DLOG_LEVEL=2 .. && make -j12
+> ```
+>
+> ```
+> cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_REGISTER=1 -DLOG_LEVEL=0 .. && make -j12
+> ```
 
 
 
 ### Firmware (Release)
 
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Release -DCHIP=STM32F411CEU6 .. && make -j12
+mkdir build
+cd ./build
+cmake -DCMAKE_BUILD_TYPE=Release .. && make -j12
 ```
 
-> STM32F411CEU6
 
 
-
-```
-cmake -DCMAKE_BUILD_TYPE=Release -DCHIP=STM32F405RGT6 .. && make -j12
-```
-
-> STM32F405RGT6
-
-
-
-
-
-### Test Bench
+### Test Bench (CI)
 
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F411CEU6 -DTEST_ONLY=1 .. && make -j12
+mkdir build
+cd ./build
+cmake -DCMAKE_BUILD_TYPE=Debug -DTEST_ONLY=1 -DINCLUDE_TB_BSP=1 -DINCLUDE_TB_CMN=1 .. && make -j12
 ```
-
-> STM32F411CEU6
-
-
-
-```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -DCHIP=STM32F405RGT6 -DTEST_ONLY=1 .. && make -j12
-```
-
-> STM32F405RGT6
-
-
 
 
 
@@ -165,22 +211,27 @@ Step 2: Install `J-Link` tools
 
 Step 3: Select a specific debugging mode
 
->- `JLink Download (STM32F411CE)` - Download the program to target. You need to compile the project first.
+<img src="doc/asset/rdme_vscode_debug.png" alt="image-20250105135618261" style="zoom:50%;" />
+
+>- `JLink Download` - Download the program to target. You need to compile the project first.
 >
->- `JLink Attach (STM32F411CE)` - Attach to the program without downloading. Again you need to compile first.
+>- `JLink Attach` - Attach to the program without downloading. Again you need to compile first.
+>
+>- `STLink Download` - Same as the J-Link but use ST-Link Port
+>
+>- `STLink Attach` - Same as the J-Link but use ST-Link Port
+>
+>- `Native` - This will call native cppdbg. Make sure you have your local compiler installed
 
 
 
 
 
-## Clock
-
-
+## Analog Clock
 
 The angle of hour needle and minute needle has the following property.
 
 Let $\alpha$ be the hour needle angle and $\beta$ be the minute needle angle, where $\alpha,\beta \in [0:3599]$​.
-
 
 $$
 \frac{\beta}{12}= \Delta\alpha
@@ -230,6 +281,10 @@ $$
 > (6)
 
 
+
+
+
+Check more details on [desmos](https://www.desmos.com/calculator/9qkivl2gf6),. A live diagram explains a lot.
 
 
 
