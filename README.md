@@ -87,18 +87,18 @@ Here are some typical configurations. Copy the command and replace the one in `r
 
 ### C Make Flag Table
 
-| Keyword \ Allowed Value | 0                 | 1                         | 2    | Debug | Release |
-| ----------------------- | ----------------- | ------------------------- | ---- | ----- | ------- |
-| CMAKE_BUILD_TYPE        |                   |                           |      | $√$   | $√$     |
-| USE_REGISTER            | $√$               | $√$                       |      |       |         |
-| LOG_LEVEL               | $\bold{√}$        | $√$                       | $√$  |       |         |
-| QMI8658A                |                   | $\color{green}(\bold{√})$ |      |       |         |
-| QMI8658C                |                   | $\color{green}(√)$        |      |       |         |
-| MPU6050                 |                   | $\color{green}(√)$        |      |       |         |
-| TEST_ONLY               |                   | $\color{cyan}(√)$         |      |       |         |
-| INCLUDE_TB_OS           | $\color{cyan}[√]$ | $\color{cyan}[√]$         |      |       |         |
-| INCLUDE_TB_BSP          | $\color{cyan}[√]$ | $\color{cyan}[√]$         |      |       |         |
-| INCLUDE_TB_CMN          | $\color{cyan}[√]$ | $\color{cyan}[√]$         |      |       |         |
+| Keyword \ Allowed Value | 0                 | 1                      | 2    | Debug | Release |
+| ----------------------- | ----------------- | ---------------------- | ---- | ----- | ------- |
+| CMAKE_BUILD_TYPE        |                   |                        |      | $√$   | $√$     |
+| USE_REGISTER            | $√$               | $√$                    |      |       |         |
+| LOG_LEVEL               | **$√$**           | $√$                    | $√$  |       |         |
+| QMI8658A                |                   | **$\color{green}(√)$** |      |       |         |
+| QMI8658C                |                   | $\color{green}(√)$     |      |       |         |
+| MPU6050                 |                   | $\color{green}(√)$     |      |       |         |
+| TEST_ONLY               |                   | $\color{cyan}(√)$      |      |       |         |
+| INCLUDE_TB_OS           | $\color{cyan}[√]$ | $\color{cyan}[√]$      |      |       |         |
+| INCLUDE_TB_BSP          | $\color{cyan}[√]$ | $\color{cyan}[√]$      |      |       |         |
+| INCLUDE_TB_CMN          | $\color{cyan}[√]$ | $\color{cyan}[√]$      |      |       |         |
 
 
 
