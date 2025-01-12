@@ -23,6 +23,8 @@
 #include "global.h"
 #include "assert.h"
 #include "trace.h"
+#include "FreeRTOS.h"
+#include "timers.h"
 #include "app_gui.h"
 #include "cmn_utility.h"
 #include "app_gui_asset"
@@ -36,8 +38,9 @@
 #else
   #define VOLATILE
 #endif
-#define MAX_CLOCK_DIFF_SEC      (3)
-
+#define MAX_CLOCK_DIFF_SEC             (3)
+#define DEFAULT_IDLE_TASK_PERIOD       (3000) // ms
+#define DEFAULT_CLOCK_REFREASH_PERIOD  (64)   // ticks
 
 
 /**
@@ -46,10 +49,26 @@
  * @param [in] rtc_time - Real Time Clock Time
  * @param [in] clk_time - UI Clock to be checked
  * @return Return `true` if time is expired
+ * @addtogroup NotThreadSafe
  */
 static cmnBoolean_t is_time_expired(cmnDateTime_t rtc_time, cmnDateTime_t clk_time){
+
   int8_t diff = (signed)(rtc_time.second - clk_time.second);
   if( CMN_ABS(diff) > 3 ){
+    TRACE_DEBUG("RTC=%u/%u/%u %u:%u:%u CLK=%u/%u/%u %u:%u:%u",\
+      rtc_time.year+2024,                                     \
+      rtc_time.month,                                         \
+      rtc_time.day,                                           \
+      rtc_time.hour,                                          \
+      rtc_time.minute,                                        \
+      rtc_time.second,                                        \
+      clk_time.year+2024,                                     \
+      clk_time.month,                                         \
+      clk_time.day,                                           \
+      clk_time.hour,                                          \
+      clk_time.minute,                                        \
+      clk_time.second                                         \
+    );
     return true;
   }
 
@@ -57,6 +76,8 @@ static cmnBoolean_t is_time_expired(cmnDateTime_t rtc_time, cmnDateTime_t clk_ti
 
   return (rtc_time.word!=clk_time.word);
 }
+
+static void app_clock_idle_timer_callback(xTimerHandle xTimer);
 
 
 /* ************************************************************************** */
@@ -192,7 +213,7 @@ static void ui_clock1_idle    (tAppGuiClockParam *pClient);
 static void ui_clock1_deinit  (tAppGuiClockParam *pClient);
 
 typedef struct{
-  tAnalogClockInternalParam analog_clk;
+  tAnalogClockInternalParam  analog_clk;
 }tClock1InternalParam;
 
 /**
@@ -517,8 +538,8 @@ typedef struct{
 static void ui_clocknana_init(tAppGuiClockParam *pClient){
   pClient->customized._semphr = xSemaphoreCreateMutex();
   ASSERT(pClient->customized._semphr, "Mutex was NOT created");
-  
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
   lv_obj_t *ui_NANA = lv_scr_act();
@@ -660,7 +681,24 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
     pClientPrivateParams->ui_nanaeyeopen = ui_nanaeyeopen;
   }
   pClient->customized.p_anything = pClientPrivateParams;
-  
+
+
+  /**
+   * @note
+   *  Initialize the software timer for idle task
+   * @attention
+   *  FreeRTOS required the timer callback function has to be Non-NULL
+   */
+  {
+    pClient->_idle_task_timer = xTimerCreate( \
+      "gui_clk_nana_idle",
+      pdMS_TO_TICKS(DEFAULT_IDLE_TASK_PERIOD),
+      pdFALSE,
+      ui_clocknana_init,
+      app_clock_idle_timer_callback);
+    
+    ASSERT( pClient->_idle_task_timer, "Timer is NOT created");
+  }
 
   {
     lv_obj_t *ui_pinMinute = lv_img_create(ui_NANA);
@@ -694,12 +732,14 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
     pClient->pPinHour = ui_pinHour;
   }
 
+  xTimerStart(pClient->_idle_task_timer, 0);
+  //////////////////////// Safe Zone End ////////////////////////
   ret = xSemaphoreGive(pClient->customized._semphr);
   ASSERT(ret==pdTRUE, "Data was NOT released");
 }
 
 /**
- * @brief UI Clock1 Set Day Night
+ * @brief UI ClockNaNa Set Day Night
  * @param [inout] pClient - The UI Widget Structure Variable
  * @note Update NaNa's eyes
  * @addtogroup NotThreadSafe
@@ -724,48 +764,123 @@ static void ui_clocknana_daynight(tAppGuiClockParam *pClient){
   }
 }
 
-
+/**
+ * @brief UI ClockNaNa Set Time
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @param [in]    time    - RTC Time
+ * @addtogroup ThreadSafe
+ */
 static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
   tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
+  
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
   analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
   ui_clocknana_daynight(pClient);
-  
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
   xSemaphoreGive(pClient->customized._semphr);
 }
 
+/**
+ * @brief UI ClockNaNa Increase Time
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @param [in]    ms      - Escaped Microseconds
+ * @addtogroup ThreadSafe
+ */
 static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
   tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
   
   analogclk_inc_time( pClient, &pClientPrivateParams->analog_clk, ms);
   ui_clocknana_daynight(pClient);
-
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
   xSemaphoreGive(pClient->customized._semphr);
 }
 
+/**
+ * @brief UI ClockNaNa Idle Execution
+ * @note Mathmatical Modulo / Time Adjustment
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @addtogroup ThreadSafe
+ */
 static void ui_clocknana_idle(tAppGuiClockParam *pClient){
-  tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
+  tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
 
   analogclk_idle( pClient, &pClientPrivateParams->analog_clk);
+
+  /**
+   * @note: Store to the temperary variable to avoid dead lock
+   */
+  cmnDateTime_t clk_time = pClient->time;
+
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
+  xSemaphoreGive(pClient->customized._semphr);
   
-  if(is_time_expired( bsp_rtc_get_time(), pClient->time)){
+  vTaskSuspendAll();
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
+  cmnDateTime_t rtc_time = bsp_rtc_get_time();
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
+  xTaskResumeAll();
+
+  cmnBoolean_t is_rtc_being_updated = CMN_EVENT_UPDATE_RTC & xEventGroupGetBits(metope.app.rtos.event._handle);
+  if( !is_rtc_being_updated && is_time_expired( rtc_time, clk_time)){
     /**
      * @todo: Check the return type
      */
+    TRACE_WARNING("Time offset reaches the max allowed value.");
     xEventGroupSetBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
   }
-  
-  xSemaphoreGive(pClient->customized._semphr);
 }
 
+/**
+ * @brief UI ClockNaNa Deinitialization
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @addtogroup ThreadSafe
+ */
 static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
-  ui_clock1_deinit(pClient);
+  SemaphoreHandle_t _semphr = pClient->customized._semphr;
+  BaseType_t            ret = xSemaphoreTake( _semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
+  lv_obj_del(pClient->pScreen);
+  {
+    tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
+    memset(pClientPrivateParams, 0, sizeof(tClockNanaInternalParam));
+    vPortFree(pClientPrivateParams);
+    pClient->customized.p_anything = NULL;
+  }
+  
+  xTimerDelete(pClient->_idle_task_timer, 0);
+  memset(pClient, 0, sizeof(tAppGuiClockParam));
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
+  /**
+   * @warning
+   *  Directly delete the mutex may cause concurrency bugs.
+   * @note
+   *  FreeRTOS does not delete a semaphore that has tasks blocked on it 
+   *  (tasks that are in the Blocked state waiting for the semaphore to 
+   *  become available).
+   */
+  xSemaphoreGive(_semphr);
+  vSemaphoreDelete(_semphr);
 }
 
 #ifdef __cplusplus
@@ -1113,10 +1228,12 @@ extern "C"{
  * @warning
  *  This function assumes the `deinit()` is NULL when clock ui is deactivated, vice versa.
  */
-void app_gui_switch( AppGuiClockEnum_t x){
+void app_clock_gui_switch( AppGuiClockEnum_t x){
   if(NULL!=metope.app.clock.gui.deinit){
     metope.app.clock.gui.deinit( &metope.app.clock.gui.param );
   }
+  vTaskSuspendAll();
+  /////////////////////// Safe Zone Start ///////////////////////
   switch(x){
     case kAppGuiClock_None:{
       /**
@@ -1165,21 +1282,29 @@ void app_gui_switch( AppGuiClockEnum_t x){
 #endif
   }
 
+  //////////////////////// Safe Zone End ////////////////////////
+  xTaskResumeAll();
+
   metope.app.clock.gui.init( &metope.app.clock.gui.param );
 }
 
+
+static void app_clock_idle_timer_callback(xTimerHandle xTimer){
+  if(xTimer && !xTimerIsTimerActive(xTimer)){
+    metope.app.rtos.task.bitmap_idle.clock = 1;
+  }
+}
 
 
 /**
  * @param [in] param  - will cast to `tAppClock*`
  */
-void app_clock_gui_main(void *param) RTOSTHREAD{
+void app_clock_main(void *param) RTOSTHREAD{
   tAppClock *parsed_param = (tAppClock *)param;
 
-  portTICK_TYPE_ENTER_CRITICAL();
-  app_gui_switch(parsed_param->style);
-  portTICK_TYPE_EXIT_CRITICAL();
-  parsed_param->gui.set_time( &parsed_param->gui.param, bsp_rtc_get_time());
+  app_clock_gui_switch(parsed_param->style);
+  
+  xEventGroupSetBits(metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
   
   /**
    * @todo: Need to update the time from RTC
@@ -1196,15 +1321,19 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
     TickType_t ms_delta = tmp - old_tick;
     old_tick = tmp;
 
-    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC, pdTRUE, pdFALSE, 64);
+    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC, pdFALSE, pdFALSE, DEFAULT_CLOCK_REFREASH_PERIOD);
 
     if(uxBits & CMN_EVENT_UPDATE_RTC){
-      parsed_param->gui.set_time( &parsed_param->gui.param, bsp_rtc_get_time());
+      vTaskSuspendAll();
+      cmnDateTime_t rtc_time = bsp_rtc_get_time();
+      xTaskResumeAll();
+      parsed_param->gui.set_time( &parsed_param->gui.param, rtc_time);
       /**
        * @bug 
        *  LVGL can not finish a correct partial refreash after a big needle angle change
        */
       lv_obj_invalidate(parsed_param->gui.param.pScreen);
+      xEventGroupClearBits(metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
     }else{
       /**
        * @note
@@ -1220,10 +1349,14 @@ void app_clock_gui_main(void *param) RTOSTHREAD{
 /**
  * @param [in] param  - will cast to `tAppClock*`
  */
-void app_clock_gui_idle(void *param) RTOSIDLE{
+void app_clock_idle(void *param) RTOSIDLE{
   tAppClock *parsed_param = (tAppClock *)param;
-  parsed_param->gui.idle(&parsed_param->gui.param);
+  if(NULL!=parsed_param->gui.idle){
+    parsed_param->gui.idle(&parsed_param->gui.param);
+    xTimerReset(parsed_param->gui.param._idle_task_timer, 0);
+  }
 }
+
 
 #ifdef __cplusplus
 }

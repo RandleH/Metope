@@ -39,6 +39,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include "trace.h"
 #include "cmn_utility.h"
 #include "cmn_math.h"
 
@@ -529,9 +531,13 @@ void cmn_utility_timeinc( uint32_t *ms_rem, cmnDateTime_t *pTime, uint32_t ms){
   /* Extract seconds and microseconds */
   div_t tmp = div( *ms_rem + ms, 1000);
 
+  cmnBoolean_t trace_triggered = false;
+
   if(unlikely(pTime->second+tmp.quot >= 60)){
     tmp = div(pTime->second+tmp.quot, 60);
     pTime->second = tmp.rem;
+
+    trace_triggered = true;
 
     if(unlikely(pTime->minute+tmp.quot >= 60)){
       tmp = div(pTime->minute+tmp.quot, 60);
@@ -578,6 +584,18 @@ void cmn_utility_timeinc( uint32_t *ms_rem, cmnDateTime_t *pTime, uint32_t ms){
   }
 
   *ms_rem = tmp.rem;
+
+  if(trace_triggered){
+    cmnDateTime_t time = *pTime;
+    TRACE_DEBUG("Time increased to %u/%u/%u %u:%u:%u", time.year+2024, time.month, time.day, time.hour, time.minute, time.second);
+  }
+}
+
+int32_t cmn_utility_timediff( cmnDateTime_t timeA, cmnDateTime_t timeB){
+  int32_t sec = 0;
+
+ 
+  return sec;
 }
 
 /**

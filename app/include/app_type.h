@@ -23,6 +23,7 @@
 #include "lvgl.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "timers.h"
 
 /* ************************************************************************** */
 /*                              Headfile Guards                               */
@@ -34,8 +35,14 @@
 #define APP_CFG_TASK_CLOCK_UI_STACK_SIZE     (512U)
 #define APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE (256U)
 
-#define RTOSTHREAD
-#define RTOSIDLE
+
+#define APP_IDLE_CLOCK       (1<<0)
+#define APP_IDLE_BATTERY     
+#define APP_IDLE_SYSINFO     
+
+#define RTOSTHREAD      /*!< Running on a FreeRTOS Thread */
+#define RTOSIDLE        /*!< Running on a FreeRTOS Idle Thread */
+#define RTOSTIMER       /*!< Running on a FreeRTOS Timer Callback */
 
 typedef enum AppTaskPriority{
   kAppPriority_VERY_IMPORTANT = 50,
@@ -51,6 +58,8 @@ typedef struct{
   lv_obj_t *pPinMinute;
 
   cmnDateTime_t time;
+
+  TimerHandle_t _idle_task_timer;
 
   struct{
     SemaphoreHandle_t  _semphr;

@@ -76,7 +76,7 @@ public:
       .pPinMinute = NULL,
     };
     
-    app_gui_switch(kAppGuiClock_Clock1);
+    app_clock_gui_switch(kAppGuiClock_Clock1);
 
     bool          result   = false;
     cmnDateTime_t datetime = {0};
@@ -183,7 +183,7 @@ void add_app_test( void){
   tb_infra_os.insert(
     TestAppTaskFreeRTOS(),
     paramsTestAppTaskFreeRTOS::Input{{
-      {app_clock_gui_main, 512},
+      {app_clock_main, 512},
       {bsp_screen_main, 512},
       {TestAppTaskFreeRTOS::task2, 128},
       {bsp_screen_onoff, 128}
