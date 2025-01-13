@@ -43,9 +43,27 @@
 #define DEFAULT_CLOCK_REFREASH_PERIOD  (64)   // ticks
 
 
+
+/* ************************************************************************** */
+/*                                Private Tags                                */
+/* ************************************************************************** */
+#define APP_CLOCK_API
+#define APP_CLOCK_GLOBAL
+
+
+
+/* ************************************************************************** */
+/*                    Private Clock UI Function Prototype                     */
+/* ************************************************************************** */
+static void         app_clock_gui_switch         (AppGuiClockEnum_t x);
+static void         app_clock_idle_timer_callback(xTimerHandle xTimer);
+static xTimerHandle app_clock_idle_timer_regist  (void);
+static void         app_clock_idle_timer_unregist(xTimerHandle xTimer);
+
 /**
  * @brief Private time check
- * @note If time is expired, a set time operation will be triggered
+ * @note If time is expired, a set time operation will be triggered.
+ * @note Tolerance is aligned with `MAX_CLOCK_DIFF_SEC`
  * @param [in] rtc_time - Real Time Clock Time
  * @param [in] clk_time - UI Clock to be checked
  * @return Return `true` if time is expired
@@ -75,7 +93,7 @@ static cmnBoolean_t is_time_expired(cmnDateTime_t rtc_time, cmnDateTime_t clk_ti
   }
 }
 
-static void app_clock_idle_timer_callback(xTimerHandle xTimer);
+
 
 
 /* ************************************************************************** */
@@ -99,6 +117,7 @@ typedef struct tAnalogClockInternalParam{
 
 static void analogclk_set_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, cmnDateTime_t time);
 static void analogclk_inc_time(tAppGuiClockParam *pClient, tAnalogClockInternalParam *params, uint32_t ms);
+static void analogclk_idle    (tAppGuiClockParam *pClient, tAnalogClockInternalParam *params);
 
 /**
  * @brief Analog Clock Set Time Function
@@ -198,7 +217,7 @@ static void analogclk_idle(tAppGuiClockParam *pClient, tAnalogClockInternalParam
 #endif
 
 /* ************************************************************************** */
-/*                     Static Clock UI Function - clock1                      */
+/*                     Private Clock UI Function - clock1                     */
 /* ************************************************************************** */
 #ifdef __cplusplus
 extern "C"{
@@ -514,18 +533,12 @@ static void ui_clock1_deinit(tAppGuiClockParam *pClient){
 
 
 /* ************************************************************************** */
-/*                   Static Clock UI Function - clock_nana                    */
+/*                   Private Clock UI Function - clock_nana                   */
 /* ************************************************************************** */
 #ifndef TEST_ONLY
 #ifdef __cplusplus
 extern "C"{
 #endif
-
-static void ui_clocknana_init    (tAppGuiClockParam *pClient);
-static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time);
-static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms);
-static void ui_clocknana_idle    (tAppGuiClockParam *pClient);
-static void ui_clocknana_deinit  (tAppGuiClockParam *pClient);
 
 typedef struct{
   lv_obj_t                  *ui_nanaeyeclosed;
@@ -533,6 +546,18 @@ typedef struct{
   tAnalogClockInternalParam  analog_clk;
 }tClockNanaInternalParam;
 
+static void ui_clocknana_init    (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
+static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time) APP_CLOCK_API;
+static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms)        APP_CLOCK_API;
+static void ui_clocknana_daynight(tAppGuiClockParam *pClient);
+static void ui_clocknana_idle    (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
+static void ui_clocknana_deinit  (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
+
+/**
+ * @brief UI ClockNaNa Initialization
+ * @param [inout] pClient - The UI Widget Structure Variable
+ * @addtogroup ThreadSafe
+ */
 static void ui_clocknana_init(tAppGuiClockParam *pClient){
   pClient->customized._semphr = xSemaphoreCreateMutex();
   ASSERT(pClient->customized._semphr, "Mutex was NOT created");
@@ -682,24 +707,6 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
   }
   pClient->customized.p_anything = pClientPrivateParams;
 
-
-  /**
-   * @note
-   *  Initialize the software timer for idle task
-   * @attention
-   *  FreeRTOS required the timer callback function has to be Non-NULL
-   */
-  {
-    pClient->_idle_task_timer = xTimerCreate( \
-      "gui_clk_nana_idle",
-      pdMS_TO_TICKS(DEFAULT_IDLE_TASK_PERIOD),
-      pdFALSE,
-      ui_clocknana_init,
-      app_clock_idle_timer_callback);
-    
-    ASSERT( pClient->_idle_task_timer, "Timer is NOT created");
-  }
-
   {
     lv_obj_t *ui_pinMinute = lv_img_create(ui_NANA);
     lv_img_set_src(ui_pinMinute, &ui_img_pin_minute_classic);
@@ -732,6 +739,7 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
     pClient->pPinHour = ui_pinHour;
   }
 
+  pClient->_idle_task_timer = app_clock_idle_timer_regist();
   xTimerStart(pClient->_idle_task_timer, 0);
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
@@ -868,7 +876,8 @@ static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
     pClient->customized.p_anything = NULL;
   }
   
-  xTimerDelete(pClient->_idle_task_timer, 0);
+  app_clock_idle_timer_unregist(pClient->_idle_task_timer);
+
   memset(pClient, 0, sizeof(tAppGuiClockParam));
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
@@ -891,7 +900,7 @@ static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
 
 
 /* ************************************************************************** */
-/*                   Static Clock UI Function - clock_lvvvw                   */
+/*                  Private Clock UI Function - clock_lvvvw                   */
 /* ************************************************************************** */
 #ifndef TEST_ONLY
 #ifdef __cplusplus
@@ -1215,21 +1224,21 @@ static void ui_clocklvvvw_deinit(tAppGuiClockParam *pClient){
 
 
 
-/* ************************************************************************** */
-/*                          Public Clock UI Function                          */
-/* ************************************************************************** */
+
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-
+/* ************************************************************************** */
+/*                         Private Clock UI Function                          */
+/* ************************************************************************** */
 /**
  * @brief Switch the Clock GUI
  * @param [in] x  - The GUI Enumeration. `0` means deactivating the clock UI.
  * @warning
  *  This function assumes the `deinit()` is NULL when clock ui is deactivated, vice versa.
  */
-void app_clock_gui_switch( AppGuiClockEnum_t x){
+static void app_clock_gui_switch( AppGuiClockEnum_t x){
   if(NULL!=metope.app.clock.gui.deinit){
     metope.app.clock.gui.deinit( &metope.app.clock.gui.param );
   }
@@ -1289,18 +1298,66 @@ void app_clock_gui_switch( AppGuiClockEnum_t x){
   metope.app.clock.gui.init( &metope.app.clock.gui.param );
 }
 
-
+/**
+ * @brief Idle Timer Callback Function
+ * @note 
+ *  If an idle program was configured, the software timer for clock application will be activated
+ *  to periodically run idle programs without intervening the main thread.
+ * @note 
+ *  The period of the software timer is set by `DEFAULT_IDLE_TASK_PERIOD`. This function will ONLY
+ *  set the bit map to notify the idle program was ready to go.
+ *  The idle program should unset this bit once completed
+ * 
+ * @param [in] xTimer - FreeRTOS Software Timer Handle
+ * @addtogroup FreeRTOS
+ */
 static void app_clock_idle_timer_callback(xTimerHandle xTimer){
   if(xTimer && !xTimerIsTimerActive(xTimer)){
     metope.app.rtos.task.bitmap_idle.clock = 1;
   }
 }
 
+/**
+ * @brief Idle Timer Registration
+ * @note Initialize the software timer for idle task
+ * 
+ * @addtogroup FreeRTOS
+ */
+static xTimerHandle app_clock_idle_timer_regist(void){
+  xTimerHandle _idle_task_timer = xTimerCreate( \
+    "app_clock_idle_timer",
+    pdMS_TO_TICKS(DEFAULT_IDLE_TASK_PERIOD),
+    pdFALSE,
+    app_clock_idle_timer_regist,
+    app_clock_idle_timer_callback);
+  
+  ASSERT( _idle_task_timer, "Timer is NOT created");
+
+  return _idle_task_timer;
+}
 
 /**
- * @param [in] param  - will cast to `tAppClock*`
+ * @brief Idle Timer DeRegistration
+ * @note Delete the software timer for idle task
+ * @param [in] xTimer - FreeRTOS Software Timer Handle
+ * @addtogroup FreeRTOS
  */
-void app_clock_main(void *param) RTOSTHREAD{
+static void app_clock_idle_timer_unregist(xTimerHandle xTimer){
+  ASSERT(pdPASS==xTimerDelete(xTimer, 0), "Timer is NOT deleted");
+}
+
+
+
+
+
+/* ************************************************************************** */
+/*                          Public Clock UI Function                          */
+/* ************************************************************************** */
+/**
+ * @brief Clock Application Main Entrance
+ * @param [in] param - will cast to `tAppClock*`
+ */
+void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
   tAppClock *parsed_param = (tAppClock *)param;
 
   app_clock_gui_switch(parsed_param->style);
@@ -1348,9 +1405,16 @@ void app_clock_main(void *param) RTOSTHREAD{
 
 
 /**
- * @param [in] param  - will cast to `tAppClock*`
+ * @brief Clock Application Idle Program
+ * @note 
+ *  This function should be run when system is in idle. It is optional and 
+ *  depends on what style of this clock. Some types of the clock ui may NOT
+ *  need an idle program.
+ * @note 
+ *  Application can run correctly in a short time without idle program presence
+ * @param [in] param - will cast to `tAppClock*`
  */
-void app_clock_idle(void *param) RTOSIDLE{
+void app_clock_idle(void *param) RTOSIDLE APP_CLOCK_GLOBAL{
   tAppClock *parsed_param = (tAppClock *)param;
   if(NULL!=parsed_param->gui.idle){
     parsed_param->gui.idle(&parsed_param->gui.param);

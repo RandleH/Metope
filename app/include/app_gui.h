@@ -37,7 +37,6 @@
 extern "C"{
 #endif
 
-void app_clock_gui_switch( AppGuiClockEnum_t x);
 void app_clock_main(void *param) RTOSTHREAD;
 void app_clock_idle(void *param) RTOSIDLE;
 
