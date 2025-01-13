@@ -5,6 +5,34 @@
 #include "trace.h"
 
 int main(int argc, char *argv[]){
+
+  cmnDateTime_t timeA = {
+    .year   = 0,
+    .month  = 1,
+    .day    = 12,
+    .hour   = 17,
+    .minute = 59,
+    .second = 59
+  };
+  TRACE_INFO("TimeA: %u/%u/%u %u:%u:%u\n", timeA.year+2024, timeA.month, timeA.day, timeA.hour, timeA.minute, timeA.second);
+
+  cmnDateTime_t timeB = {
+    .year   = 0,
+    .month  = 1,
+    .day    = 12,
+    .hour   = 18,
+    .minute = 0,
+    .second = 0
+  };
+  TRACE_INFO("TimeB: %u/%u/%u %u:%u:%u\n", timeB.year+2024, timeB.month, timeB.day, timeB.hour, timeB.minute, timeB.second);
+
+
+  TRACE_INFO("TimeA - TimeB = %d\n", cmn_utility_timediff(timeA, timeB));
+
+  return 0;
+}
+
+int main1(int argc, char *argv[]){
   TRACE_INFO("2025/01/01 21:48:9\n");
 
   cmnDateTime_t time = {

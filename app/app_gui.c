@@ -52,9 +52,9 @@
  * @addtogroup NotThreadSafe
  */
 static cmnBoolean_t is_time_expired(cmnDateTime_t rtc_time, cmnDateTime_t clk_time){
+  int32_t diff = cmn_utility_timediff(rtc_time, clk_time);
 
-  int8_t diff = (signed)(rtc_time.second - clk_time.second);
-  if( CMN_ABS(diff) > 3 ){
+  if( CMN_ABS(diff) > MAX_CLOCK_DIFF_SEC ){
     TRACE_DEBUG("RTC=%u/%u/%u %u:%u:%u CLK=%u/%u/%u %u:%u:%u",\
       rtc_time.year+2024,                                     \
       rtc_time.month,                                         \
@@ -70,11 +70,9 @@ static cmnBoolean_t is_time_expired(cmnDateTime_t rtc_time, cmnDateTime_t clk_ti
       clk_time.second                                         \
     );
     return true;
+  }else{
+    return false;
   }
-
-  clk_time.second = rtc_time.second;
-
-  return (rtc_time.word!=clk_time.word);
 }
 
 static void app_clock_idle_timer_callback(xTimerHandle xTimer);
@@ -539,6 +537,8 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
   pClient->customized._semphr = xSemaphoreCreateMutex();
   ASSERT(pClient->customized._semphr, "Mutex was NOT created");
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  
+  ///////////////////////////////////////////////////////////////
   /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
@@ -734,6 +734,7 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
 
   xTimerStart(pClient->_idle_task_timer, 0);
   //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
   ret = xSemaphoreGive(pClient->customized._semphr);
   ASSERT(ret==pdTRUE, "Data was NOT released");
 }

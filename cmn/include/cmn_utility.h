@@ -80,6 +80,8 @@ void cmn_utility_angleset(                                \
                           const cmnDateTime_t *pTime      \
                           );
 
+int32_t cmn_utility_timediff( cmnDateTime_t timeA, cmnDateTime_t timeB);
+
 void cmn_utility_timeinc( uint32_t      *ms_rem,\
                           cmnDateTime_t *pTime, 
                           uint32_t       ms);

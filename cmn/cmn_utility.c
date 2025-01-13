@@ -591,10 +591,24 @@ void cmn_utility_timeinc( uint32_t *ms_rem, cmnDateTime_t *pTime, uint32_t ms){
   }
 }
 
+/**
+ * @brief Ans in seconds := TimeA - TimeB
+ * @param [in] timeA - Input Time A
+ * @param [in] timeB - Input Time B
+ * @return Return `INT32_MAX` if year and month are not equal!! Otherwise return difference gap in seconds
+ */
 int32_t cmn_utility_timediff( cmnDateTime_t timeA, cmnDateTime_t timeB){
   int32_t sec = 0;
 
- 
+  if(timeA.year != timeB.year || timeA.month != timeB.month){
+    return INT32_MAX;
+  }
+  
+  sec += ((signed)(timeA.day - timeB.day))*3600*12;
+  sec += ((signed)(timeA.hour - timeB.hour))*3600;
+  sec += ((signed)(timeA.minute - timeB.minute))*60;
+  sec += ((signed)(timeA.second - timeB.second));
+
   return sec;
 }
 
