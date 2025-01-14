@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    app_gui.c
+ * @file    app_clock.c
  * @author  RandleH
- * @brief   Application Program - GUI Program
+ * @brief   Application Program - Clock
  ******************************************************************************
  * @attention
  *
@@ -25,7 +25,7 @@
 #include "trace.h"
 #include "FreeRTOS.h"
 #include "timers.h"
-#include "app_gui.h"
+#include "app_clock.h"
 #include "cmn_utility.h"
 #include "app_gui_asset"
 #include "bsp_rtc.h"
@@ -1426,3 +1426,4 @@ void app_clock_idle(void *param) RTOSIDLE APP_CLOCK_GLOBAL{
 #ifdef __cplusplus
 }
 #endif
+/* ********************************** EOF *********************************** */

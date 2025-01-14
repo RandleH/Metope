@@ -23,7 +23,7 @@
 #include "global.h"
 #include "app_test.hh"
 #include "app_rtos.h"
-#include "app_gui.h"
+#include "app_clock.h"
 #include "app_lvgl.h"
 #include "test.hh"
 #include "cmn_type.h"

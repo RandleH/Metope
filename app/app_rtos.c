@@ -25,7 +25,7 @@
 #include "global.h"
 #include "trace.h"
 #include "app_rtos.h"
-#include "app_gui.h"
+#include "app_clock.h"
 #include "cmn_type.h"
 
 

@@ -112,7 +112,7 @@ void app_init(void){
 }
 
 
-#include "app_gui.h"
+#include "app_clock.h"
 void os_init(void){
   metope.app.rtos.event._handle = xEventGroupCreateStatic( &metope.app.rtos.event._eg_buffer);
 
