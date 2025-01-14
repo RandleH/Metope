@@ -126,6 +126,18 @@ typedef struct{
           StaticTask_t _tcb;
           StackType_t  _stack[APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE];
         }screen_onoff;
+
+        /**
+         * @author
+         *  
+         */
+        union{
+          struct{
+            uint8_t reserved : 7;
+            uint8_t clock    : 1;
+          };
+          uint8_t word;
+        }bitmap_idle;
       }task;
 
       struct{

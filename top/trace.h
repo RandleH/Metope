@@ -77,7 +77,6 @@
 
 static inline int trace_dummy_printf( const char *fmt, ...){
   // Dummy Trace Macro. Never print anything.
-  (void)fmt;
   return 0;
 }
 

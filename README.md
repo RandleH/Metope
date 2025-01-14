@@ -291,6 +291,101 @@ Check more details on [desmos](https://www.desmos.com/calculator/9qkivl2gf6),. A
 
 
 
+
+## Code Conduct
+
+I'd appreciate everybody's efforts to maintain a good, high quality coding environment. Good coding habit increased readability and minimized the bugs. In this project, there are a set of rules on code format.
+
+
+
+### Code Section
+
+```c
+/* ************************************************************************** */
+/*                                    XXXX                                    */
+/* ************************************************************************** */
+```
+
+
+
+### Function
+
+```c
+/**
+ * @brief Description
+ * @param [in]    arg1 - xxxx
+ * @param [inout] arg2 - xxxx
+ * @param [out]   arg3 - xxxx
+ * @return xxxx
+ */
+int foo( int arg1, int arg2, int arg3){
+  // body //
+}
+```
+
+> Each function must have `brief` | `param` (if exists) | `return` (if exists) in doxygen style.
+
+
+
+### Safe Zone Banner
+
+```c
+///////////////////////////////////////////////////////////////
+/////////////////////// Safe Zone Start ///////////////////////
+
+
+//////////////////////// Safe Zone End ////////////////////////
+///////////////////////////////////////////////////////////////
+```
+
+
+
+### File Header
+
+```c
+/**
+ ******************************************************************************
+ * @file    xxxx.c
+ * @author  RandleH
+ * @brief   xxxx
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 RandleH.
+ * All rights reserved.
+ *
+ * This software component is licensed by RandleH under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+*/
+```
+
+
+
+### C Compilation Indication
+
+```c++
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+```
+
+
+
+
+
+
+
+
+
+
 ## Utility
 
 - [**Online GDB**](https://www.onlinegdb.com/)

@@ -239,17 +239,6 @@ void bsp_rtc_set_time( const cmnDateTime_t t){
 }
 
 
-// void bsp_rtc_main( void* param) RTOSTHREAD {
-//   while(1){
-//     EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_SCREEN_NEED_ON, pdTRUE, pdFALSE, portMAX_DELAY);
-    
-//     /* Screen Activated by Users: Update RTC time NOW */
-//     if(uxBits & CMN_EVENT_SCREEN_NEED_ON){
-//        = bsp_rtc_get_time();
-//     }
-//   }
-// }
-
 #ifdef __cplusplus
 }
 #endif

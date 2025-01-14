@@ -37,6 +37,8 @@
 #define CMN_MIN( a, b)    ((a)>(b) ? (b) : (a))
 #define CMN_MAX( a, b)    ((a)<(b) ? (b) : (a))
 
+#define CMN_ABS(x)        ((x) < 0) ? (-(x)) : (x)
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -77,6 +79,8 @@ void cmn_utility_angleset(                                \
                           uint16_t   NULLABLE *second_deg,\
                           const cmnDateTime_t *pTime      \
                           );
+
+int32_t cmn_utility_timediff( cmnDateTime_t timeA, cmnDateTime_t timeB);
 
 void cmn_utility_timeinc( uint32_t      *ms_rem,\
                           cmnDateTime_t *pTime, 

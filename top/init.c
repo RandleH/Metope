@@ -134,8 +134,8 @@ void os_init(void){
   );
   
   metope.app.rtos.task.clock_ui._handle = xTaskCreateStatic(\
-    app_clock_gui_main,\
-    "app_clock_gui_main",\
+    app_clock_main,\
+    "app_clock_main",\
     sizeof(metope.app.rtos.task.clock_ui._stack) / sizeof(metope.app.rtos.task.clock_ui._stack[0]),\
     &metope.app.clock ,\
     kAppPriority_VERY_IMPORTANT,\
