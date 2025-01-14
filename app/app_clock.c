@@ -223,11 +223,11 @@ static void analogclk_idle(tAppGuiClockParam *pClient, tAnalogClockInternalParam
 extern "C"{
 #endif
 
-static void ui_clock1_init    (tAppGuiClockParam *pClient);
-static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time);
-static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms);
-static void ui_clock1_idle    (tAppGuiClockParam *pClient);
-static void ui_clock1_deinit  (tAppGuiClockParam *pClient);
+static void ui_clockmodern_init    (tAppGuiClockParam *pClient);
+static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time);
+static void ui_clockmodern_inc_time(tAppGuiClockParam *pClient, uint32_t ms);
+static void ui_clockmodern_idle    (tAppGuiClockParam *pClient);
+static void ui_clockmodern_deinit  (tAppGuiClockParam *pClient);
 
 typedef struct{
   tAnalogClockInternalParam  analog_clk;
@@ -238,7 +238,7 @@ typedef struct{
  * @param [out] pClient - The UI Widget Structure Variable
  * @note UI Clock1 has no special parameters. `pClient->p_anything` will set to `NULL`
  */
-static void ui_clock1_init(tAppGuiClockParam *pClient)
+static void ui_clockmodern_init(tAppGuiClockParam *pClient)
 {
   pClient->pScreen = lv_scr_act();
   lv_obj_clear_flag( pClient->pScreen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
@@ -475,7 +475,7 @@ static void ui_clock1_init(tAppGuiClockParam *pClient)
  * @param [inout] pClient - The UI Widget Structure Variable
  * @note Update needle angle
  */
-static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
+static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
   tClock1InternalParam *pClientPrivateParams = (tClock1InternalParam *)pClient->customized.p_anything;
   analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
 }
@@ -485,12 +485,12 @@ static void ui_clock1_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
  * @param [inout] pClient - The UI Widget Structure Variable
  * @note Update needle angle
  */
-static void ui_clock1_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
+static void ui_clockmodern_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
   tClock1InternalParam *pClientPrivateParams = (tClock1InternalParam *)pClient->customized.p_anything;
   analogclk_inc_time( pClient, &pClientPrivateParams->analog_clk, ms);
 }
 
-static void ui_clock1_idle(tAppGuiClockParam *pClient){
+static void ui_clockmodern_idle(tAppGuiClockParam *pClient){
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
@@ -504,7 +504,7 @@ static void ui_clock1_idle(tAppGuiClockParam *pClient){
  * @param [in] pClient - The UI Widget Structure Variable
  * @note Everything in `pClient` will set to `NULL` or `0`
  */
-static void ui_clock1_deinit(tAppGuiClockParam *pClient){
+static void ui_clockmodern_deinit(tAppGuiClockParam *pClient){
   lv_obj_del(pClient->pScreen);
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
@@ -1214,7 +1214,7 @@ static void ui_clocklvvvw_idle(tAppGuiClockParam *pClient){
 }
 
 static void ui_clocklvvvw_deinit(tAppGuiClockParam *pClient){
-  ui_clock1_deinit(pClient);
+  ui_clockmodern_deinit(pClient);
 }
 
 #ifdef __cplusplus
@@ -1257,11 +1257,11 @@ static void app_clock_gui_switch( AppGuiClockEnum_t x){
       break;
     }
     case kAppGuiClock_Clock1:{
-      metope.app.clock.gui.init     = ui_clock1_init;
-      metope.app.clock.gui.set_time = ui_clock1_set_time;
-      metope.app.clock.gui.inc_time = ui_clock1_inc_time;
-      metope.app.clock.gui.idle     = ui_clock1_idle;
-      metope.app.clock.gui.deinit   = ui_clock1_deinit;
+      metope.app.clock.gui.init     = ui_clockmodern_init;
+      metope.app.clock.gui.set_time = ui_clockmodern_set_time;
+      metope.app.clock.gui.inc_time = ui_clockmodern_inc_time;
+      metope.app.clock.gui.idle     = ui_clockmodern_idle;
+      metope.app.clock.gui.deinit   = ui_clockmodern_deinit;
       break;
     }
     default:{
