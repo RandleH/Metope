@@ -217,7 +217,7 @@ static void analogclk_idle(tAppGuiClockParam *pClient, tAnalogClockInternalParam
 #endif
 
 /* ************************************************************************** */
-/*                     Private Clock UI Function - clock1                     */
+/*                     Private Clock UI Function - Clock Modern                     */
 /* ************************************************************************** */
 #ifdef __cplusplus
 extern "C"{
@@ -231,15 +231,23 @@ static void ui_clockmodern_deinit  (tAppGuiClockParam *pClient);
 
 typedef struct{
   tAnalogClockInternalParam  analog_clk;
-}tClock1InternalParam;
+}tClockModernInternalParam;
 
 /**
- * @brief UI Clock1 Initialization
+ * @brief UI Clock Modern Initialization
  * @param [out] pClient - The UI Widget Structure Variable
- * @note UI Clock1 has no special parameters. `pClient->p_anything` will set to `NULL`
+ * @note UI Clock Modern has no special parameters. `pClient->p_anything` will set to `NULL`
  */
 static void ui_clockmodern_init(tAppGuiClockParam *pClient)
 {
+  pClient->customized._semphr = xSemaphoreCreateMutex();
+  ASSERT(pClient->customized._semphr, "Mutex was NOT created");
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
   pClient->pScreen = lv_scr_act();
   lv_obj_clear_flag( pClient->pScreen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
   lv_obj_set_style_bg_color(pClient->pScreen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -467,53 +475,112 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     lv_obj_set_style_border_color(ui_Knotch, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_Knotch, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
   }
+  
+  pClient->customized.p_anything = pvPortMalloc(sizeof(tClockModernInternalParam));
 
+  pClient->_idle_task_timer = app_clock_idle_timer_regist();
+  xTimerStart(pClient->_idle_task_timer, 0);
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
+  ret = xSemaphoreGive(pClient->customized._semphr);
+  ASSERT(ret==pdTRUE, "Data was NOT released");
 }
 
 /**
- * @brief UI Clock1 Set Time
+ * @brief UI Clock Modern Set Time
  * @param [inout] pClient - The UI Widget Structure Variable
  * @note Update needle angle
  */
 static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
-  tClock1InternalParam *pClientPrivateParams = (tClock1InternalParam *)pClient->customized.p_anything;
+  tClockModernInternalParam *pClientPrivateParams = (tClockModernInternalParam *)pClient->customized.p_anything;
+  
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
   analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
+  xSemaphoreGive(pClient->customized._semphr);
 }
 
 /**
- * @brief UI Clock1 Inc Time (ms)
+ * @brief UI Clock Modern Inc Time (ms)
  * @param [inout] pClient - The UI Widget Structure Variable
  * @note Update needle angle
  */
 static void ui_clockmodern_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
-  tClock1InternalParam *pClientPrivateParams = (tClock1InternalParam *)pClient->customized.p_anything;
+  tClockModernInternalParam *pClientPrivateParams = (tClockModernInternalParam *)pClient->customized.p_anything;
+  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
   analogclk_inc_time( pClient, &pClientPrivateParams->analog_clk, ms);
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
+  xSemaphoreGive(pClient->customized._semphr);
 }
 
 static void ui_clockmodern_idle(tAppGuiClockParam *pClient){
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
-
-  tClock1InternalParam *pClientPrivateParams = (tClock1InternalParam *)pClient->customized.p_anything;
+  tClockModernInternalParam *pClientPrivateParams = (tClockModernInternalParam *)pClient->customized.p_anything;
   analogclk_idle(pClient, &pClientPrivateParams->analog_clk);
+  
+  /**
+   * @note: Store to the temperary variable to avoid dead lock
+   */
+  cmnDateTime_t clk_time = pClient->time;
+
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
   xSemaphoreGive(pClient->customized._semphr);
+  
+  vTaskSuspendAll();
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
+  cmnDateTime_t rtc_time = bsp_rtc_get_time();
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
+  xTaskResumeAll();
+
+  cmnBoolean_t is_rtc_being_updated = CMN_EVENT_UPDATE_RTC & xEventGroupGetBits(metope.app.rtos.event._handle);
+  if( !is_rtc_being_updated && is_time_expired( rtc_time, clk_time)){
+    /**
+     * @todo: Check the return type
+     */
+    TRACE_WARNING("Time offset reaches the max allowed value.");
+    xEventGroupSetBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
+  }
 }
 
 /**
- * @brief UI Clock1 Deinitialization
+ * @brief UI Clock Modern Deinitialization
  * @param [in] pClient - The UI Widget Structure Variable
  * @note Everything in `pClient` will set to `NULL` or `0`
  */
 static void ui_clockmodern_deinit(tAppGuiClockParam *pClient){
-  lv_obj_del(pClient->pScreen);
-  BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
+  SemaphoreHandle_t _semphr = pClient->customized._semphr;
+  BaseType_t            ret = xSemaphoreTake( _semphr, portMAX_DELAY);
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
-  if(NULL!=pClient->customized.p_anything){
-    vPortFree(pClient->customized.p_anything);
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
+  lv_obj_del(pClient->pScreen);
+  {
+    tClockModernInternalParam *pClientPrivateParams = (tClockModernInternalParam *)pClient->customized.p_anything;
+    memset(pClientPrivateParams, 0, sizeof(tClockModernInternalParam));
+    vPortFree(pClientPrivateParams);
     pClient->customized.p_anything = NULL;
   }
-  xSemaphoreGive(pClient->customized._semphr);
+
+  app_clock_idle_timer_unregist(pClient->_idle_task_timer);
+
+  memset(pClient, 0, sizeof(tAppGuiClockParam));
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
   /**
    * @warning
    *  Directly delete the mutex may cause concurrency bugs.
@@ -522,8 +589,8 @@ static void ui_clockmodern_deinit(tAppGuiClockParam *pClient){
    *  (tasks that are in the Blocked state waiting for the semaphore to 
    *  become available).
    */
-  vSemaphoreDelete(pClient->customized._semphr);
-  memset(pClient, 0, sizeof(tAppGuiClockParam));
+  xSemaphoreGive(_semphr);
+  vSemaphoreDelete(_semphr);
 }
 
 
