@@ -76,7 +76,7 @@ public:
       .pPinMinute = NULL,
     };
     
-    app_clock_gui_switch(kAppGuiClock_Clock1);
+    app_clock_gui_switch(kAppGuiClock_ClockModern);
 
     bool          result   = false;
     cmnDateTime_t datetime = {0};

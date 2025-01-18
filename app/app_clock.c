@@ -1377,7 +1377,7 @@ static void app_clock_gui_switch( AppGuiClockEnum_t x){
       metope.app.clock.gui.deinit   = NULL;
       break;
     }
-    case kAppGuiClock_Clock1:{
+    case kAppGuiClock_ClockModern:{
       metope.app.clock.gui.init     = ui_clockmodern_init;
       metope.app.clock.gui.set_time = ui_clockmodern_set_time;
       metope.app.clock.gui.inc_time = ui_clockmodern_inc_time;

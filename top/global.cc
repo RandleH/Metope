@@ -58,7 +58,7 @@ tMainSystemStatus  metope = {
     .rtos = {.status = {0}},
     .clock = {
       ._handle = NULL,
-      .style   = kAppGuiClock_NANA,
+      .style   = kAppGuiClock_ClockModern,
       .gui     = {0},
     }
   },
