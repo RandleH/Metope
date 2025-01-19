@@ -2,7 +2,13 @@
 
 
 
-<p align="center"> <img src="doc/asset/rdme_clk_panel.png" alt="rdme_clk_panel" width="240" height="240;" />  <img src="doc/asset/rdme_pcb_2d.png" alt="rdme_pcb_2d" width="240" height="240;" /> </p>
+<p align="center"> 
+  <img src="doc/asset/rdme_clk_panel.png" alt="rdme_clk_panel" width="240" height="240;" />  
+  <img src="doc/asset/rdme_pcb_2d.png" alt="rdme_pcb_2d" width="240" height="240;" /> 
+  <img src="doc/asset/rdme_clk_modern.png" alt="rdme_clk_modern" width="240" height="240;" />  
+</p>
+
+
 
 
 
