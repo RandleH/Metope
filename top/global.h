@@ -105,6 +105,7 @@ typedef struct{
       lv_display_t *pDisplayHandle;
       lv_theme_t   *pLvglTheme;
 #endif
+      lv_obj_t          *default_scr;
     }lvgl;
 
     struct{

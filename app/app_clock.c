@@ -25,6 +25,7 @@
 #include "trace.h"
 #include "FreeRTOS.h"
 #include "timers.h"
+#include "app_lvgl.h"
 #include "app_clock.h"
 #include "cmn_utility.h"
 #include "app_gui_asset"
@@ -268,7 +269,8 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
   /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
-  pClient->pScreen = lv_scr_act();
+  // pClient->pScreen = lv_scr_act();
+  pClient->pScreen = lv_obj_create(NULL);
 
   lv_obj_clear_flag(pClient->pScreen, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
   lv_obj_set_style_bg_color(pClient->pScreen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -280,8 +282,8 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
    */
   {
     lv_obj_t *ui_ClockExteriorPanel = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( ui_ClockExteriorPanel, 241);
-    lv_obj_set_height( ui_ClockExteriorPanel, 241);
+    lv_obj_set_width( ui_ClockExteriorPanel, 240);
+    lv_obj_set_height( ui_ClockExteriorPanel, 240);
     lv_obj_set_align( ui_ClockExteriorPanel, LV_ALIGN_CENTER );
     lv_obj_clear_flag( ui_ClockExteriorPanel, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_obj_set_style_radius(ui_ClockExteriorPanel, 240, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -296,20 +298,20 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     /**
      * @note: Clock Panel Digits
      */
-    for( u8 i=0; i<6; ++i){
-      lv_obj_t *ui_PitDigits = lv_obj_create(pClient->pScreen);
-      if(i==0 || i==3){
-        lv_obj_set_width( ui_PitDigits, 4);
-      }else{
-        lv_obj_set_width( ui_PitDigits, 2);
-      }
-      lv_obj_set_height( ui_PitDigits, 240);
-      lv_obj_set_align( ui_PitDigits, LV_ALIGN_CENTER );
-      lv_obj_clear_flag( ui_PitDigits, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-      lv_obj_set_style_transform_angle( ui_PitDigits, i*300, LV_PART_MAIN| LV_STATE_DEFAULT);
-      lv_obj_set_style_transform_pivot_x( ui_PitDigits, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-      lv_obj_set_style_transform_pivot_y( ui_PitDigits, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
-    }
+    // for( u8 i=0; i<6; ++i){
+    //   lv_obj_t *ui_PitDigits = lv_obj_create(ui_ClockExteriorPanel);
+    //   if(i==0 || i==3){
+    //     lv_obj_set_width( ui_PitDigits, 4);
+    //   }else{
+    //     lv_obj_set_width( ui_PitDigits, 2);
+    //   }
+    //   lv_obj_set_height( ui_PitDigits, 240);
+    //   lv_obj_set_align( ui_PitDigits, LV_ALIGN_CENTER );
+    //   lv_obj_clear_flag( ui_PitDigits, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    //   lv_obj_set_style_transform_angle( ui_PitDigits, i*300, LV_PART_MAIN| LV_STATE_DEFAULT);
+    //   lv_obj_set_style_transform_pivot_x( ui_PitDigits, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    //   lv_obj_set_style_transform_pivot_y( ui_PitDigits, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+    // }
   }
 
   /**
@@ -598,6 +600,7 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
    * @note: Hour Hand Needle
    */
   {
+#if 0
     lv_obj_t *ui_PinHour = lv_img_create(pClient->pScreen);
     lv_img_set_src(ui_PinHour, &ui_img_pin_hour_type1);
     lv_obj_set_width( ui_PinHour, LV_SIZE_CONTENT);  /// 10
@@ -612,12 +615,34 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     lv_obj_set_style_img_recolor(ui_PinHour, lv_color_hex(0xE65D31), LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_img_recolor_opa(ui_PinHour, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     pClient->pPinHour = ui_PinHour;
+#else
+    const u8 ui_NeedleLen   = 64;
+    const u8 ui_NeedleWidth = 8;
+    lv_obj_t *ui_PinHour = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_PinHour, ui_NeedleWidth);
+    lv_obj_set_height( ui_PinHour, ui_NeedleLen);
+    lv_obj_set_x( ui_PinHour, 0 );
+    lv_obj_set_y( ui_PinHour, -(signed)(BSP_SCREEN_HEIGHT/2-ui_NeedleWidth/2));
+    lv_obj_set_align( ui_PinHour, LV_ALIGN_BOTTOM_MID );
+    lv_obj_clear_flag( ui_PinHour, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_bg_color(ui_PinHour, lv_color_hex(0xE65D31), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_PinHour, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_PinHour, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_PinHour, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_angle(ui_PinHour, 2700, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_PinHour, ui_NeedleWidth/2, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_PinHour, ui_NeedleLen-ui_NeedleWidth/2, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_PinHour, lv_color_hex(0x000000), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_PinHour, 0, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    pClient->pPinHour = ui_PinHour;
+#endif
   }
   
   /**
    * @note: Minute Hand Needle
    */
   {
+#if 0
     lv_obj_t *ui_PinMinute = lv_img_create(pClient->pScreen);
     lv_img_set_src(ui_PinMinute, &ui_img_pin_minute_type3);
     lv_obj_set_width( ui_PinMinute, LV_SIZE_CONTENT);  /// 10
@@ -632,6 +657,28 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     lv_obj_set_style_img_recolor(ui_PinMinute, lv_color_hex(0xCA8D7D), LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_img_recolor_opa(ui_PinMinute, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     pClient->pPinMinute = ui_PinMinute;
+#else
+    const u8 ui_NeedleLen   = 71;
+    const u8 ui_NeedleWidth = 8;
+    lv_obj_t *ui_PinMin = lv_obj_create(pClient->pScreen);
+    lv_obj_set_width( ui_PinMin, ui_NeedleWidth);
+    lv_obj_set_height( ui_PinMin, ui_NeedleLen);
+    lv_obj_set_x( ui_PinMin, 0 );
+    lv_obj_set_y( ui_PinMin, -(signed)(BSP_SCREEN_HEIGHT/2-ui_NeedleWidth/2));
+    lv_obj_set_align( ui_PinMin, LV_ALIGN_BOTTOM_MID );
+    lv_obj_clear_flag( ui_PinMin, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_bg_color(ui_PinMin, lv_color_hex(0xCA8D7D), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_PinMin, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_PinMin, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_color(ui_PinMin, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(ui_PinMin, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_angle(ui_PinMin, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_x(ui_PinMin, ui_NeedleWidth/2, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_transform_pivot_y(ui_PinMin, ui_NeedleLen - ui_NeedleWidth/2, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_PinMin, lv_color_hex(0xFFFFFF), LV_PART_SCROLLBAR | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(ui_PinMin, 255, LV_PART_SCROLLBAR| LV_STATE_DEFAULT);
+    pClient->pPinMinute = ui_PinMin;
+#endif
   }
 
   /**
@@ -775,6 +822,9 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
   pClient->customized.p_anything = pClientPrivateParams;
 
   pClient->_idle_task_timer = app_clock_idle_timer_regist();
+  lv_scr_load(pClient->pScreen);
+  // lv_disp_load_scr
+
   xTimerStart(pClient->_idle_task_timer, 0);
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
@@ -874,6 +924,7 @@ static void ui_clockmodern_deinit(tAppGuiClockParam *pClient){
 
   ///////////////////////////////////////////////////////////////
   /////////////////////// Safe Zone Start ///////////////////////
+  app_lvgl_load_default_screen();
   lv_obj_del(pClient->pScreen);
   {
     tClockModernInternalParam *pClientPrivateParams = (tClockModernInternalParam *)pClient->customized.p_anything;

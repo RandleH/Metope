@@ -138,7 +138,7 @@ void os_init(void){
     "app_clock_main",\
     sizeof(metope.app.rtos.task.clock_ui._stack) / sizeof(metope.app.rtos.task.clock_ui._stack[0]),\
     &metope.app.clock ,\
-    kAppPriority_VERY_IMPORTANT,\
+    kAppPriority_IMPORTANT,\
     &metope.app.rtos.task.clock_ui._stack[0],\
     &metope.app.rtos.task.clock_ui._tcb\
   );
@@ -148,7 +148,7 @@ void os_init(void){
     "bsp_screen_onoff",\
     sizeof(metope.app.rtos.task.screen_onoff._stack) / sizeof(metope.app.rtos.task.screen_onoff._stack[0]),\
     NULL ,\
-    kAppPriority_VERY_IMPORTANT,\
+    kAppPriority_IMPORTANT,\
     &metope.app.rtos.task.screen_onoff._stack[0],\
     &metope.app.rtos.task.screen_onoff._tcb\
   );

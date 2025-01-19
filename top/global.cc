@@ -49,11 +49,12 @@ tMainSystemStatus  metope = {
       .disp          = NULL,
       .disp_draw_buf = {0},
       .gram          = {0},
-      .isFlushDone   = true
+      .isFlushDone   = true,
 #elif LVGL_VERSION==922
       .pDisplayHandle = NULL,
       .pLvglTheme     = NULL
 #endif
+      .default_scr  = NULL
     },
     .rtos = {.status = {0}},
     .clock = {

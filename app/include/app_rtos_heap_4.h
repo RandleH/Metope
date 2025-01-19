@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    app_lvgl.h
+ * @file    app_rtos.h
  * @author  RandleH
- * @brief   Application Program - LVGL Library Application Interface
+ * @brief   Application - FreeRTOS Application Interface
  ******************************************************************************
  * @attention
  *
@@ -17,25 +17,21 @@
  ******************************************************************************
 */
 
+#include <stdlib.h>
 
-#include <stdarg.h>
-#include "cmn_type.h"
 
-#ifndef APP_LVGL_H
-#define APP_LVGL_H
+#ifndef APP_RTOS_HEAP4_H
+#define APP_RTOS_HEAP4_H
+
+
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-u32 app_lvgl_get_tick(void);
-
-void app_lvgl_init(void);
-void app_lvgl_flush_all( void);
-void app_lvgl_load_default_screen(void);
-
-int app_lvgl_snprintf(char * buffer, size_t count, const char * format, ...);
-int app_lvgl_vsnprintf(char * buffer, size_t count, const char * format, va_list va);
+void *pvPortMalloc( size_t xWantedSize );
+void vPortFree( void *pv );
+void *pvPortRealloc( void *pv, size_t xWantedSize );
 
 #ifdef __cplusplus
 }
