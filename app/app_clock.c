@@ -237,20 +237,23 @@ static void analogclk_idle(tAppGuiClockParam *pClient, tAnalogClockInternalParam
 extern "C"{
 #endif
 
+typedef struct{
+  tAnalogClockInternalParam  analog_clk;
+  lv_obj_t *ui_sun;
+  lv_obj_t *ui_moon;
+  lv_obj_t *ui_weekday_obj[kWeekDay_TOTAL];
+  lv_obj_t *ui_weekday_mat[kWeekDay_TOTAL];
+  lv_color_t ui_weekday_color[kWeekDay_TOTAL+1]; /*!< Last Element will be inactive color */
+  lv_obj_t *ui_battery;
+}tClockModernInternalParam;
+
 static void ui_clockmodern_init    (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
 static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time) APP_CLOCK_API;
 static void ui_clockmodern_inc_time(tAppGuiClockParam *pClient, uint32_t ms)        APP_CLOCK_API;
 static void ui_clockmodern_idle    (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
 static void ui_clockmodern_deinit  (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
-
-typedef struct{
-  tAnalogClockInternalParam  analog_clk;
-  lv_obj_t *ui_sun;
-  lv_obj_t *ui_moon;
-  lv_obj_t *ui_weekday_obj[7];
-  lv_obj_t *ui_weekday_mat[7];
-  lv_obj_t *ui_battery;
-}tClockModernInternalParam;
+static void ui_clockmodern_set_weekday(tClockModernInternalParam *pClientPrivateParams, cmnWeekday_t weekday);
+static void ui_clockmodern_daynight   (tClockModernInternalParam *pClientPrivateParams, cmnDateTime_t time);
 
 /**
  * @brief UI Clock Modern Initialization
@@ -258,8 +261,7 @@ typedef struct{
  * @note UI Clock Modern has no special parameters. `pClient->p_anything` will set to `NULL`
  * @addtogroup ThreadSafe
  */
-static void ui_clockmodern_init(tAppGuiClockParam *pClient)
-{
+static void ui_clockmodern_init(tAppGuiClockParam *pClient) APP_CLOCK_API {
   pClient->customized._semphr = xSemaphoreCreateMutex();
   ASSERT(pClient->customized._semphr, "Mutex was NOT created");
   BaseType_t                 ret                  = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
@@ -298,26 +300,70 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     /**
      * @note: Clock Panel Digits
      */
-    // for( u8 i=0; i<6; ++i){
-    //   lv_obj_t *ui_PitDigits = lv_obj_create(ui_ClockExteriorPanel);
-    //   if(i==0 || i==3){
-    //     lv_obj_set_width( ui_PitDigits, 4);
-    //   }else{
-    //     lv_obj_set_width( ui_PitDigits, 2);
-    //   }
-    //   lv_obj_set_height( ui_PitDigits, 240);
-    //   lv_obj_set_align( ui_PitDigits, LV_ALIGN_CENTER );
-    //   lv_obj_clear_flag( ui_PitDigits, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    //   lv_obj_set_style_transform_angle( ui_PitDigits, i*300, LV_PART_MAIN| LV_STATE_DEFAULT);
-    //   lv_obj_set_style_transform_pivot_x( ui_PitDigits, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-    //   lv_obj_set_style_transform_pivot_y( ui_PitDigits, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
-    // }
+#if 0 // Screen Messed up
+    for( u8 i=0; i<6; ++i){
+      lv_obj_t *ui_PitDigits = lv_obj_create(ui_ClockExteriorPanel);
+      if(i==0 || i==3){
+        lv_obj_set_width( ui_PitDigits, 4);
+      }else{
+        lv_obj_set_width( ui_PitDigits, 2);
+      }
+      lv_obj_set_height( ui_PitDigits, 240);
+      lv_obj_set_align( ui_PitDigits, LV_ALIGN_CENTER );
+      lv_obj_clear_flag( ui_PitDigits, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+      lv_obj_set_style_transform_angle( ui_PitDigits, i*300, LV_PART_MAIN| LV_STATE_DEFAULT);
+      lv_obj_set_style_transform_pivot_x( ui_PitDigits, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+      lv_obj_set_style_transform_pivot_y( ui_PitDigits, 120, LV_PART_MAIN| LV_STATE_DEFAULT);
+    }
+#else
+    const lv_coord_t dot_position[][2] = {
+      { 82,-48},
+      { 95,  0},
+      { 82, 48},
+      { 48, 82},
+      {  0, 95},
+      {-48, 82},
+      {-82, 48},
+      {-95,  0},
+      {-82,-48}
+    };
+
+    for( u8 i=0; i<sizeof(dot_position)/sizeof(*dot_position); ++i){
+      lv_obj_t *ui_dot = lv_obj_create(pClient->pScreen);
+      if(i==(3-2)||i==(6-2)||i==(9-2)){
+        if(i==(6-2)){
+          lv_obj_set_width( ui_dot, 6);
+          lv_obj_set_height( ui_dot, 12);
+        }else{
+          lv_obj_set_width( ui_dot, 12);
+          lv_obj_set_height( ui_dot, 6);
+        }
+      }else{
+        lv_obj_set_width( ui_dot, 6);
+        lv_obj_set_height( ui_dot, 6);
+      }
+      lv_obj_set_x( ui_dot, dot_position[i][0]);
+      lv_obj_set_y( ui_dot, dot_position[i][1]);
+      lv_obj_set_align( ui_dot, LV_ALIGN_CENTER );
+      lv_obj_clear_flag( ui_dot, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+      if(i==(3-2)||i==(6-2)||i==(9-2)){
+        lv_obj_set_style_radius(ui_dot, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(ui_dot, lv_color_hex(0xFF8200), LV_PART_MAIN | LV_STATE_DEFAULT );
+      }else{
+        lv_obj_set_style_radius(ui_dot, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(ui_dot, lv_color_hex(0xFFE000), LV_PART_MAIN | LV_STATE_DEFAULT );
+      }
+      lv_obj_set_style_bg_opa(ui_dot, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+      lv_obj_set_style_border_width(ui_dot, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+    }
+#endif
   }
 
   /**
    * @note: Clock Interior Panel
    * @remarks UI
    */
+#if 1
   {
     lv_obj_t *ui_ClockInteriorPanel = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_ClockInteriorPanel, 180);
@@ -331,7 +377,9 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     lv_obj_set_style_border_opa(ui_ClockInteriorPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_ClockInteriorPanel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
   }
+#endif
 
+#if 1
   /**
    * @note: Sun & Moon
    */
@@ -358,249 +406,88 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     lv_obj_clear_flag( ui_Moon, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     pClientPrivateParams->ui_moon = ui_Moon;
   }
+#endif
 
   /**
-   * @note Sunday
+   * @note
+   *  `Sunday`|`Monday`|`Tuesday`|`Wednesday`|`Thursday`|`Friday`|`Saturday`
    */
+#if 1
   {
-    pClientPrivateParams->ui_weekday_mat[7-1] = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_mat[7-1], 24);
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_mat[7-1], 24);
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_mat[7-1], -70 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_mat[7-1], 0 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_mat[7-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_mat[7-1], LV_OBJ_FLAG_HIDDEN );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_mat[7-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_radius(pClientPrivateParams->ui_weekday_mat[7-1], 24, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(pClientPrivateParams->ui_weekday_mat[7-1], lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_bg_opa(pClientPrivateParams->ui_weekday_mat[7-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(pClientPrivateParams->ui_weekday_mat[7-1], lv_color_hex(0x01CCAF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_opa(pClientPrivateParams->ui_weekday_mat[7-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(pClientPrivateParams->ui_weekday_mat[7-1], 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(pClientPrivateParams->ui_weekday_mat[7-1], 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+    const lv_coord_t weekday_icon_position[kWeekDay_TOTAL][2] = {
+      {-61,-35},
+      {-35,-61},
+      {  0,-70},
+      { 35,-61},
+      { 61,-35},
+      { 70,  0},
+      {-70,  0}
+    };
 
-    pClientPrivateParams->ui_weekday_obj[7-1] = lv_img_create(pClient->pScreen);
-    lv_img_set_src(pClientPrivateParams->ui_weekday_obj[7-1], &ui_img_ball_S_24);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_obj[7-1], LV_SIZE_CONTENT);  /// 24
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_obj[7-1], LV_SIZE_CONTENT);   /// 24
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_obj[7-1], -70 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_obj[7-1], 0 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_obj[7-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_obj[7-1], LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_obj[7-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_img_set_angle(pClientPrivateParams->ui_weekday_obj[7-1],2700);
-    lv_obj_set_style_img_recolor(pClientPrivateParams->ui_weekday_obj[7-1], lv_color_hex(0x3E3E3E), LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(pClientPrivateParams->ui_weekday_obj[7-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    const u16 weekday_icon_angle[kWeekDay_TOTAL] = {
+      3000, 3300, 0, 300, 600, 900, 2700
+    };
+
+    const lv_img_dsc_t *weekday_icon_img[kWeekDay_TOTAL] = {
+      &ui_img_ball_M_24,
+      &ui_img_ball_T_24,
+      &ui_img_ball_W_24,
+      &ui_img_ball_T_24,
+      &ui_img_ball_F_24,
+      &ui_img_ball_S_24,
+      &ui_img_ball_S_24
+    };
+
+    const u8 weekday_mat_icon_size = 22;
+
+    pClientPrivateParams->ui_weekday_color[kWeekDay_Monday]    = lv_color_hex(0xFFAB00);
+    pClientPrivateParams->ui_weekday_color[kWeekDay_Tuesday]   = lv_color_hex(0xD4D400);
+    pClientPrivateParams->ui_weekday_color[kWeekDay_Wednesday] = lv_color_hex(0x00FF05);
+    pClientPrivateParams->ui_weekday_color[kWeekDay_Thursday]  = lv_color_hex(0x0082FB);
+    pClientPrivateParams->ui_weekday_color[kWeekDay_Friday]    = lv_color_hex(0x2028FF);
+    pClientPrivateParams->ui_weekday_color[kWeekDay_Saturday]  = lv_color_hex(0xD100FB);
+    pClientPrivateParams->ui_weekday_color[kWeekDay_Sunday]    = lv_color_hex(0xFF2200);
+    pClientPrivateParams->ui_weekday_color[kWeekDay_TOTAL]     = lv_color_hex(0x3E3E3E);
+
+    for(u8 weekday=kWeekDay_Monday; weekday<kWeekDay_TOTAL; ++weekday){
+      pClientPrivateParams->ui_weekday_mat[weekday] = lv_obj_create(pClient->pScreen);
+      lv_obj_set_width( pClientPrivateParams->ui_weekday_mat[weekday],weekday_mat_icon_size);
+      lv_obj_set_height( pClientPrivateParams->ui_weekday_mat[weekday], weekday_mat_icon_size);
+      lv_obj_set_x( pClientPrivateParams->ui_weekday_mat[weekday], weekday_icon_position[weekday][0]);
+      lv_obj_set_y( pClientPrivateParams->ui_weekday_mat[weekday], weekday_icon_position[weekday][1]);
+      lv_obj_set_align( pClientPrivateParams->ui_weekday_mat[weekday], LV_ALIGN_CENTER );
+      lv_obj_add_flag( pClientPrivateParams->ui_weekday_mat[weekday], LV_OBJ_FLAG_HIDDEN );   /// Flags
+      lv_obj_clear_flag( pClientPrivateParams->ui_weekday_mat[weekday], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+      lv_obj_set_style_radius( pClientPrivateParams->ui_weekday_mat[weekday], weekday_mat_icon_size, LV_PART_MAIN| LV_STATE_DEFAULT);
+      lv_obj_set_style_bg_color( pClientPrivateParams->ui_weekday_mat[weekday], lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+      lv_obj_set_style_bg_opa( pClientPrivateParams->ui_weekday_mat[weekday], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+      lv_obj_set_style_shadow_color( pClientPrivateParams->ui_weekday_mat[weekday], pClientPrivateParams->ui_weekday_color[weekday], LV_PART_MAIN | LV_STATE_DEFAULT );
+      lv_obj_set_style_shadow_opa( pClientPrivateParams->ui_weekday_mat[weekday], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+      lv_obj_set_style_shadow_width( pClientPrivateParams->ui_weekday_mat[weekday], 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+      lv_obj_set_style_shadow_spread( pClientPrivateParams->ui_weekday_mat[weekday], 2, LV_PART_MAIN| LV_STATE_DEFAULT);
+      
+      pClientPrivateParams->ui_weekday_obj[weekday] = lv_img_create(pClient->pScreen);
+      lv_img_set_src( pClientPrivateParams->ui_weekday_obj[weekday], weekday_icon_img[weekday]);
+      lv_obj_set_width( pClientPrivateParams->ui_weekday_obj[weekday], LV_SIZE_CONTENT);  /// 24
+      lv_obj_set_height( pClientPrivateParams->ui_weekday_obj[weekday], LV_SIZE_CONTENT);   /// 24
+      lv_obj_set_x( pClientPrivateParams->ui_weekday_obj[weekday], weekday_icon_position[weekday][0]);
+      lv_obj_set_y( pClientPrivateParams->ui_weekday_obj[weekday], weekday_icon_position[weekday][1]);
+      lv_obj_set_align( pClientPrivateParams->ui_weekday_obj[weekday], LV_ALIGN_CENTER );
+      lv_obj_add_flag( pClientPrivateParams->ui_weekday_obj[weekday], LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
+      lv_obj_clear_flag( pClientPrivateParams->ui_weekday_obj[weekday], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+      lv_img_set_angle( pClientPrivateParams->ui_weekday_obj[weekday], weekday_icon_angle[weekday]);
+
+      lv_obj_set_style_img_recolor( pClientPrivateParams->ui_weekday_obj[weekday], pClientPrivateParams->ui_weekday_color[kWeekDay_TOTAL], LV_PART_MAIN| LV_STATE_DEFAULT);
+      
+      lv_obj_set_style_img_recolor_opa( pClientPrivateParams->ui_weekday_obj[weekday], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    }
   }
-
-
-  /**
-   * @note Monday
-   */
-  {
-    pClientPrivateParams->ui_weekday_mat[1-1] = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_mat[1-1], 24);
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_mat[1-1], 24);
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_mat[1-1], -61 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_mat[1-1], -35 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_mat[1-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_mat[1-1], LV_OBJ_FLAG_HIDDEN );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_mat[1-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_radius(pClientPrivateParams->ui_weekday_mat[1-1], 24, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(pClientPrivateParams->ui_weekday_mat[1-1], lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_bg_opa(pClientPrivateParams->ui_weekday_mat[1-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(pClientPrivateParams->ui_weekday_mat[1-1], lv_color_hex(0x01CCAF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_opa(pClientPrivateParams->ui_weekday_mat[1-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(pClientPrivateParams->ui_weekday_mat[1-1], 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(pClientPrivateParams->ui_weekday_mat[1-1], 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    pClientPrivateParams->ui_weekday_obj[1-1] = lv_img_create(pClient->pScreen);
-    lv_img_set_src(pClientPrivateParams->ui_weekday_obj[1-1], &ui_img_ball_M_24);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_obj[1-1], LV_SIZE_CONTENT);  /// 24
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_obj[1-1], LV_SIZE_CONTENT);   /// 24
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_obj[1-1], -61 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_obj[1-1], -35 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_obj[1-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_obj[1-1], LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_obj[1-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_img_set_angle(pClientPrivateParams->ui_weekday_obj[1-1],3000);
-    lv_obj_set_style_img_recolor(pClientPrivateParams->ui_weekday_obj[1-1], lv_color_hex(0x3E3E3E), LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(pClientPrivateParams->ui_weekday_obj[1-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-  }
-
-  /**
-   * @note Tuesday
-   */
-  {
-    pClientPrivateParams->ui_weekday_mat[2-1] = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_mat[2-1], 24);
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_mat[2-1], 24);
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_mat[2-1], -35 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_mat[2-1], -61 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_mat[2-1], LV_ALIGN_CENTER );
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_mat[2-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_radius(pClientPrivateParams->ui_weekday_mat[2-1], 24, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(pClientPrivateParams->ui_weekday_mat[2-1], lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_bg_opa(pClientPrivateParams->ui_weekday_mat[2-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(pClientPrivateParams->ui_weekday_mat[2-1], lv_color_hex(0x01CCAF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_opa(pClientPrivateParams->ui_weekday_mat[2-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(pClientPrivateParams->ui_weekday_mat[2-1], 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(pClientPrivateParams->ui_weekday_mat[2-1], 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    pClientPrivateParams->ui_weekday_obj[2-1] = lv_img_create(pClient->pScreen);
-    lv_img_set_src(pClientPrivateParams->ui_weekday_obj[2-1], &ui_img_ball_T_24);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_obj[2-1], LV_SIZE_CONTENT);  /// 24
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_obj[2-1], LV_SIZE_CONTENT);   /// 24
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_obj[2-1], -35 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_obj[2-1], -61 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_obj[2-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_obj[2-1], LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_obj[2-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_img_set_angle(pClientPrivateParams->ui_weekday_obj[2-1],3300);
-    lv_obj_set_style_img_recolor(pClientPrivateParams->ui_weekday_obj[2-1], lv_color_hex(0x01CCAF), LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(pClientPrivateParams->ui_weekday_obj[2-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-  }
-
-  /**
-   * @note Wednesday
-   */
-  {
-    pClientPrivateParams->ui_weekday_mat[3-1] = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_mat[3-1], 24);
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_mat[3-1], 24);
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_mat[3-1], 0 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_mat[3-1], -70 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_mat[3-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_mat[3-1], LV_OBJ_FLAG_HIDDEN );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_mat[3-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_radius(pClientPrivateParams->ui_weekday_mat[3-1], 24, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(pClientPrivateParams->ui_weekday_mat[3-1], lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_bg_opa(pClientPrivateParams->ui_weekday_mat[3-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(pClientPrivateParams->ui_weekday_mat[3-1], lv_color_hex(0x01CCAF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_opa(pClientPrivateParams->ui_weekday_mat[3-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(pClientPrivateParams->ui_weekday_mat[3-1], 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(pClientPrivateParams->ui_weekday_mat[3-1], 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    pClientPrivateParams->ui_weekday_obj[3-1] = lv_img_create(pClient->pScreen);
-    lv_img_set_src(pClientPrivateParams->ui_weekday_obj[3-1], &ui_img_ball_W_24);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_obj[3-1], LV_SIZE_CONTENT);  /// 24
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_obj[3-1], LV_SIZE_CONTENT);   /// 24
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_obj[3-1], 0 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_obj[3-1], -70 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_obj[3-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_obj[3-1], LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_obj[3-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_img_recolor(pClientPrivateParams->ui_weekday_obj[3-1], lv_color_hex(0x3E3E3E), LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(pClientPrivateParams->ui_weekday_obj[3-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-  }
-
-  /**
-   * @note Thursday
-   */
-  {
-    pClientPrivateParams->ui_weekday_mat[4-1] = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_mat[4-1], 24);
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_mat[4-1], 24);
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_mat[4-1], 35 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_mat[4-1], -61 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_mat[4-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_mat[4-1], LV_OBJ_FLAG_HIDDEN );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_mat[4-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_radius(pClientPrivateParams->ui_weekday_mat[4-1], 24, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(pClientPrivateParams->ui_weekday_mat[4-1], lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_bg_opa(pClientPrivateParams->ui_weekday_mat[4-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(pClientPrivateParams->ui_weekday_mat[4-1], lv_color_hex(0x01CCAF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_opa(pClientPrivateParams->ui_weekday_mat[4-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(pClientPrivateParams->ui_weekday_mat[4-1], 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(pClientPrivateParams->ui_weekday_mat[4-1], 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    pClientPrivateParams->ui_weekday_obj[4-1] = lv_img_create(pClient->pScreen);
-    lv_img_set_src(pClientPrivateParams->ui_weekday_obj[4-1], &ui_img_ball_T_24);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_obj[4-1], LV_SIZE_CONTENT);  /// 24
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_obj[4-1], LV_SIZE_CONTENT);   /// 24
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_obj[4-1], 35 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_obj[4-1], -61 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_obj[4-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_obj[4-1], LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_obj[4-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_img_set_angle(pClientPrivateParams->ui_weekday_obj[4-1],300);
-    lv_obj_set_style_img_recolor(pClientPrivateParams->ui_weekday_obj[4-1], lv_color_hex(0x3E3E3E), LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(pClientPrivateParams->ui_weekday_obj[4-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-  }
-
-  /**
-   * @note Friday
-   */
-  {
-    pClientPrivateParams->ui_weekday_mat[5-1] = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_mat[5-1], 24);
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_mat[5-1], 24);
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_mat[5-1], 61 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_mat[5-1], -35 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_mat[5-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_mat[5-1], LV_OBJ_FLAG_HIDDEN );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_mat[5-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_radius(pClientPrivateParams->ui_weekday_mat[5-1], 24, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(pClientPrivateParams->ui_weekday_mat[5-1], lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_bg_opa(pClientPrivateParams->ui_weekday_mat[5-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(pClientPrivateParams->ui_weekday_mat[5-1], lv_color_hex(0x01CCAF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_opa(pClientPrivateParams->ui_weekday_mat[5-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(pClientPrivateParams->ui_weekday_mat[5-1], 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(pClientPrivateParams->ui_weekday_mat[5-1], 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    pClientPrivateParams->ui_weekday_obj[5-1] = lv_img_create(pClient->pScreen);
-    lv_img_set_src(pClientPrivateParams->ui_weekday_obj[5-1], &ui_img_ball_F_24);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_obj[5-1], LV_SIZE_CONTENT);  /// 24
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_obj[5-1], LV_SIZE_CONTENT);   /// 24
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_obj[5-1], 61 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_obj[5-1], -35 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_obj[5-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_obj[5-1], LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_obj[5-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_img_set_angle(pClientPrivateParams->ui_weekday_obj[5-1],600);
-    lv_obj_set_style_img_recolor(pClientPrivateParams->ui_weekday_obj[5-1], lv_color_hex(0x3E3E3E), LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(pClientPrivateParams->ui_weekday_obj[5-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-  }
-
-  /**
-   * @note Saturday
-   */
-  {
-    pClientPrivateParams->ui_weekday_mat[6-1] = lv_obj_create(pClient->pScreen);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_mat[6-1], 24);
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_mat[6-1], 24);
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_mat[6-1], 70 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_mat[6-1], 0 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_mat[6-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_mat[6-1], LV_OBJ_FLAG_HIDDEN );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_mat[6-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_radius(pClientPrivateParams->ui_weekday_mat[6-1], 24, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(pClientPrivateParams->ui_weekday_mat[6-1], lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_bg_opa(pClientPrivateParams->ui_weekday_mat[6-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(pClientPrivateParams->ui_weekday_mat[6-1], lv_color_hex(0x01CCAF), LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_opa(pClientPrivateParams->ui_weekday_mat[6-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(pClientPrivateParams->ui_weekday_mat[6-1], 10, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(pClientPrivateParams->ui_weekday_mat[6-1], 2, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-    pClientPrivateParams->ui_weekday_obj[6-1] = lv_img_create(pClient->pScreen);
-    lv_img_set_src(pClientPrivateParams->ui_weekday_obj[6-1], &ui_img_ball_S_24);
-    lv_obj_set_width( pClientPrivateParams->ui_weekday_obj[6-1], LV_SIZE_CONTENT);  /// 24
-    lv_obj_set_height( pClientPrivateParams->ui_weekday_obj[6-1], LV_SIZE_CONTENT);   /// 24
-    lv_obj_set_x( pClientPrivateParams->ui_weekday_obj[6-1], 70 );
-    lv_obj_set_y( pClientPrivateParams->ui_weekday_obj[6-1], 0 );
-    lv_obj_set_align( pClientPrivateParams->ui_weekday_obj[6-1], LV_ALIGN_CENTER );
-    lv_obj_add_flag( pClientPrivateParams->ui_weekday_obj[6-1], LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-    lv_obj_clear_flag( pClientPrivateParams->ui_weekday_obj[6-1], LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_img_set_angle(pClientPrivateParams->ui_weekday_obj[6-1],900);
-    lv_obj_set_style_img_recolor(pClientPrivateParams->ui_weekday_obj[6-1], lv_color_hex(0x3E3E3E), LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_img_recolor_opa(pClientPrivateParams->ui_weekday_obj[6-1], 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-  }
-
+#endif
   /**
    * @note: Hour Hand Needle
    */
   {
-#if 0
+#if 0 // Screen Messed up
     lv_obj_t *ui_PinHour = lv_img_create(pClient->pScreen);
     lv_img_set_src(ui_PinHour, &ui_img_pin_hour_type1);
     lv_obj_set_width( ui_PinHour, LV_SIZE_CONTENT);  /// 10
@@ -616,7 +503,7 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     lv_obj_set_style_img_recolor_opa(ui_PinHour, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     pClient->pPinHour = ui_PinHour;
 #else
-    const u8 ui_NeedleLen   = 64;
+    const u8 ui_NeedleLen   = 50;
     const u8 ui_NeedleWidth = 8;
     lv_obj_t *ui_PinHour = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_PinHour, ui_NeedleWidth);
@@ -642,7 +529,7 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
    * @note: Minute Hand Needle
    */
   {
-#if 0
+#if 0 // Screen Messed up
     lv_obj_t *ui_PinMinute = lv_img_create(pClient->pScreen);
     lv_img_set_src(ui_PinMinute, &ui_img_pin_minute_type3);
     lv_obj_set_width( ui_PinMinute, LV_SIZE_CONTENT);  /// 10
@@ -684,6 +571,7 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
   /**
    * @note: Knotch
    */
+#if 1
   {
     lv_obj_t *ui_Knotch = lv_obj_create(pClient->pScreen);
     lv_obj_set_width( ui_Knotch, 20);
@@ -698,10 +586,12 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     lv_obj_set_style_border_color(ui_Knotch, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_opa(ui_Knotch, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
   }
-  
+#endif
+
   /**
    * @note: Battery
    */
+#if 1
   {
     lv_obj_t *ui_Battery = lv_arc_create(pClient->pScreen);
     lv_obj_set_width( ui_Battery, 225);
@@ -723,10 +613,12 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
 
     pClientPrivateParams->ui_battery = ui_Battery;
   }
+#endif
 
   /**
    * @note: Text for digits
    */
+#if 1
   {
     lv_obj_t *ui_Txt2 = lv_label_create(pClient->pScreen);
     lv_obj_set_width( ui_Txt2, LV_SIZE_CONTENT);  /// 1
@@ -818,12 +710,12 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
     lv_obj_set_style_text_color(ui_Txt10, lv_color_hex(0x9E9E9E), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_text_opa(ui_Txt10, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
   }
+#endif
 
   pClient->customized.p_anything = pClientPrivateParams;
 
   pClient->_idle_task_timer = app_clock_idle_timer_regist();
   lv_scr_load(pClient->pScreen);
-  // lv_disp_load_scr
 
   xTimerStart(pClient->_idle_task_timer, 0);
   //////////////////////// Safe Zone End ////////////////////////
@@ -839,7 +731,7 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient)
  * @note Update needle angle
  * @addtogroup ThreadSafe
  */
-static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time){
+static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time) APP_CLOCK_API {
   tClockModernInternalParam *pClientPrivateParams = (tClockModernInternalParam *)pClient->customized.p_anything;
   
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
@@ -847,9 +739,54 @@ static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t ti
   /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
   analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
+  ui_clockmodern_daynight( pClientPrivateParams, time);
+  ui_clockmodern_set_weekday( pClientPrivateParams, cmn_utility_get_weekday(time));
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
   xSemaphoreGive(pClient->customized._semphr);
+}
+
+/**
+ * @brief UI Clock Modern Set the weekday icon on the clock panel
+ * @param [inout] pClientPrivateParams - Clock Private Parameters
+ * @param [in]    weekday              - Weekday
+ * @addtogroup ThreadNotSafe
+ */
+static void ui_clockmodern_set_weekday(tClockModernInternalParam *pClientPrivateParams, cmnWeekday_t weekday){
+  for(u8 day=0; day<kWeekDay_TOTAL; ++day){
+    if(day==weekday){
+      lv_obj_clear_flag(pClientPrivateParams->ui_weekday_mat[weekday], LV_OBJ_FLAG_HIDDEN);
+      lv_obj_set_style_img_recolor( pClientPrivateParams->ui_weekday_obj[weekday], pClientPrivateParams->ui_weekday_color[weekday], LV_PART_MAIN| LV_STATE_DEFAULT);
+    }else{
+      if(!lv_obj_has_flag(pClientPrivateParams->ui_weekday_mat[day], LV_OBJ_FLAG_HIDDEN)){
+        lv_obj_add_flag( pClientPrivateParams->ui_weekday_mat[day], LV_OBJ_FLAG_HIDDEN );
+        lv_obj_set_style_img_recolor( pClientPrivateParams->ui_weekday_obj[day], pClientPrivateParams->ui_weekday_color[kWeekDay_TOTAL], LV_PART_MAIN| LV_STATE_DEFAULT);
+      }
+    }
+  }
+}
+
+/**
+ * @brief UI Clock Modern Set Day Night
+ * @param [inout] pClientPrivateParams - Clock Private Parameters
+ * @param [in]    time                 - Time
+ * @note Update sun / moon icon
+ * @addtogroup NotThreadSafe
+ */
+static void ui_clockmodern_daynight(tClockModernInternalParam *pClientPrivateParams, cmnDateTime_t time){
+  if(time.hour >= 18){
+    if(!lv_obj_has_flag( pClientPrivateParams->ui_sun, LV_OBJ_FLAG_HIDDEN) || lv_obj_has_flag(pClientPrivateParams->ui_moon, LV_OBJ_FLAG_HIDDEN)){ 
+      /* Moon Rise */
+      lv_obj_add_flag( pClientPrivateParams->ui_sun, LV_OBJ_FLAG_HIDDEN );
+      lv_obj_clear_flag( pClientPrivateParams->ui_moon, LV_OBJ_FLAG_HIDDEN);
+    }
+  }else if(time.hour >= 8){
+    if(lv_obj_has_flag(pClientPrivateParams->ui_sun, LV_OBJ_FLAG_HIDDEN) || !lv_obj_has_flag(pClientPrivateParams->ui_moon, LV_OBJ_FLAG_HIDDEN)){
+      /* Sun Rise */
+      lv_obj_add_flag( pClientPrivateParams->ui_moon, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_clear_flag( pClientPrivateParams->ui_sun, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
 }
 
 /**
@@ -859,7 +796,7 @@ static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t ti
  * @note Update needle angle
  * @addtogroup ThreadSafe
  */
-static void ui_clockmodern_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
+static void ui_clockmodern_inc_time(tAppGuiClockParam *pClient, uint32_t ms) APP_CLOCK_API {
   tClockModernInternalParam *pClientPrivateParams = (tClockModernInternalParam *)pClient->customized.p_anything;
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
   ///////////////////////////////////////////////////////////////
@@ -877,7 +814,7 @@ static void ui_clockmodern_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
  * @param [inout] pClient - The UI Widget Structure Variable
  * @addtogroup ThreadSafe
  */
-static void ui_clockmodern_idle(tAppGuiClockParam *pClient){
+static void ui_clockmodern_idle(tAppGuiClockParam *pClient) APP_CLOCK_API {
   BaseType_t ret = xSemaphoreTake(pClient->customized._semphr, portMAX_DELAY);
   ///////////////////////////////////////////////////////////////
   /////////////////////// Safe Zone Start ///////////////////////
@@ -917,7 +854,7 @@ static void ui_clockmodern_idle(tAppGuiClockParam *pClient){
  * @param [inout] pClient - The UI Widget Structure Variable
  * @addtogroup ThreadSafe
  */
-static void ui_clockmodern_deinit(tAppGuiClockParam *pClient){
+static void ui_clockmodern_deinit(tAppGuiClockParam *pClient) APP_CLOCK_API {
   SemaphoreHandle_t _semphr = pClient->customized._semphr;
   BaseType_t            ret = xSemaphoreTake( _semphr, portMAX_DELAY);
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
@@ -974,9 +911,9 @@ typedef struct{
 static void ui_clocknana_init    (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
 static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time) APP_CLOCK_API;
 static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms)        APP_CLOCK_API;
-static void ui_clocknana_daynight(tAppGuiClockParam *pClient);
 static void ui_clocknana_idle    (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
 static void ui_clocknana_deinit  (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
+static void ui_clocknana_daynight(tClockNanaInternalParam *pClientPrivateParams, cmnDateTime_t time);
 
 /**
  * @brief UI ClockNaNa Initialization
@@ -1174,22 +1111,22 @@ static void ui_clocknana_init(tAppGuiClockParam *pClient){
 
 /**
  * @brief UI ClockNaNa Set Day Night
- * @param [inout] pClient - The UI Widget Structure Variable
+ * @param [inout] pClientPrivateParams - Clock Private Parameters
+ * @param [in]    time                 - Time
  * @note Update NaNa's eyes
  * @addtogroup NotThreadSafe
  */
-static void ui_clocknana_daynight(tAppGuiClockParam *pClient){
-  tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
+static void ui_clocknana_daynight(tClockNanaInternalParam *pClientPrivateParams, cmnDateTime_t time){
   lv_obj_t *ui_nanaeyeopen   = pClientPrivateParams->ui_nanaeyeopen;
   lv_obj_t *ui_nanaeyeclosed = pClientPrivateParams->ui_nanaeyeclosed;
 
-  if(pClient->time.hour >= 18){
+  if(time.hour >= 18){
     if(!lv_obj_has_flag(ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN) || lv_obj_has_flag(ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN)){ 
       /* Close Eyes */
       lv_obj_add_flag( ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN );
       lv_obj_clear_flag( ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN);
     }
-  }else if(pClient->time.hour >= 8){
+  }else if(time.hour >= 8){
     if(lv_obj_has_flag(ui_nanaeyeopen, LV_OBJ_FLAG_HIDDEN) || !lv_obj_has_flag(ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN)){
       /* Open Eyes */
       lv_obj_add_flag( ui_nanaeyeclosed, LV_OBJ_FLAG_HIDDEN);
@@ -1213,7 +1150,7 @@ static void ui_clocknana_set_time(tAppGuiClockParam *pClient, cmnDateTime_t time
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
   analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
-  ui_clocknana_daynight(pClient);
+  ui_clocknana_daynight(pClientPrivateParams, pClient->time);
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
   xSemaphoreGive(pClient->customized._semphr);
@@ -1233,7 +1170,7 @@ static void ui_clocknana_inc_time(tAppGuiClockParam *pClient, uint32_t ms){
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
   
   analogclk_inc_time( pClient, &pClientPrivateParams->analog_clk, ms);
-  ui_clocknana_daynight(pClient);
+  ui_clocknana_daynight(pClientPrivateParams, pClient->time);
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
   xSemaphoreGive(pClient->customized._semphr);

@@ -148,7 +148,7 @@ void os_init(void){
     "bsp_screen_onoff",\
     sizeof(metope.app.rtos.task.screen_onoff._stack) / sizeof(metope.app.rtos.task.screen_onoff._stack[0]),\
     NULL ,\
-    kAppPriority_IMPORTANT,\
+    kAppPriority_VERY_IMPORTANT,\
     &metope.app.rtos.task.screen_onoff._stack[0],\
     &metope.app.rtos.task.screen_onoff._tcb\
   );

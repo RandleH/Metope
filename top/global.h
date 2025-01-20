@@ -99,7 +99,7 @@ typedef struct{
       lv_disp_drv_t      disp_drv;
       lv_disp_t         *disp;
       lv_disp_draw_buf_t disp_draw_buf;
-      lv_color_t         gram[2][BSP_SCREEN_WIDTH*4];
+      lv_color_t         gram[2][BSP_SCREEN_WIDTH*6];
       cmnBoolean_t       isFlushDone;
 #elif LVGL_VERSION==922
       lv_display_t *pDisplayHandle;
