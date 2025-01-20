@@ -317,7 +317,9 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient) APP_CLOCK_API {
     }
 #else
     const lv_coord_t dot_position[][2] = {
-      { 82,-48},
+      {  0,-95}, // digit 12
+      { 48,-82}, // digit 1
+      { 82,-48}, // digit 2
       { 95,  0},
       { 82, 48},
       { 48, 82},
@@ -325,19 +327,18 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient) APP_CLOCK_API {
       {-48, 82},
       {-82, 48},
       {-95,  0},
-      {-82,-48}
+      {-82,-48},
+      {-48,-82}
     };
 
     for( u8 i=0; i<sizeof(dot_position)/sizeof(*dot_position); ++i){
       lv_obj_t *ui_dot = lv_obj_create(pClient->pScreen);
-      if(i==(3-2)||i==(6-2)||i==(9-2)){
-        if(i==(6-2)){
-          lv_obj_set_width( ui_dot, 6);
-          lv_obj_set_height( ui_dot, 12);
-        }else{
-          lv_obj_set_width( ui_dot, 12);
-          lv_obj_set_height( ui_dot, 6);
-        }
+      if(i==0 || i==6){
+        lv_obj_set_width( ui_dot, 6);
+        lv_obj_set_height( ui_dot, 12);
+      }else if(i==3 || i==9){
+        lv_obj_set_width( ui_dot, 12);
+        lv_obj_set_height( ui_dot, 6);
       }else{
         lv_obj_set_width( ui_dot, 6);
         lv_obj_set_height( ui_dot, 6);
@@ -346,7 +347,7 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient) APP_CLOCK_API {
       lv_obj_set_y( ui_dot, dot_position[i][1]);
       lv_obj_set_align( ui_dot, LV_ALIGN_CENTER );
       lv_obj_clear_flag( ui_dot, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-      if(i==(3-2)||i==(6-2)||i==(9-2)){
+      if(i==0||i==3||i==6||i==9){
         lv_obj_set_style_radius(ui_dot, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
         lv_obj_set_style_bg_color(ui_dot, lv_color_hex(0xFF8200), LV_PART_MAIN | LV_STATE_DEFAULT );
       }else{
@@ -825,7 +826,9 @@ static void ui_clockmodern_idle(tAppGuiClockParam *pClient) APP_CLOCK_API {
   /**
    * @note: Store to the temperary variable to avoid dead lock
    */
-  cmnDateTime_t clk_time = pClient->time;
+  const cmnDateTime_t clk_time = pClient->time;
+  ui_clockmodern_daynight(pClientPrivateParams, clk_time);
+  ui_clockmodern_set_weekday(pClientPrivateParams, cmn_utility_get_weekday(clk_time));
 
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
