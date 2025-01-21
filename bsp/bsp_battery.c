@@ -39,7 +39,8 @@ extern "C"{
 uint8_t bsp_battery_measure(void){
   HAL_ADC_Start(metope.dev.pHadc1);
   HAL_ADC_PollForConversion(metope.dev.pHadc1, HAL_MAX_DELAY);
-  uint32_t raw = HAL_ADC_GetValue(metope.dev.pHadc1);
+  uint32_t raw      = HAL_ADC_GetValue(metope.dev.pHadc1);
+  uint32_t raw_copy = raw;
 
   if( raw > MAX_BATTERY_ADC_VALUE ){
     raw = MAX_BATTERY_ADC_VALUE;
@@ -50,7 +51,7 @@ uint8_t bsp_battery_measure(void){
   uint8_t ans = (uint8_t)(((raw - MIN_BATTERY_ADC_VALUE)<<8) / (MAX_BATTERY_ADC_VALUE-MIN_BATTERY_ADC_VALUE+1));
 
 
-  TRACE_DEBUG("BSP - Battery ADC raw=%u ans=%u", raw, ans);
+  TRACE_DEBUG("BSP - Battery ADC raw=%u ans=%u", raw_copy, ans);
   return ans;
 }
 
