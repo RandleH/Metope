@@ -28,6 +28,7 @@
 #include "app_lvgl.h"
 #include "app_clock.h"
 #include "cmn_utility.h"
+#include "cmn_color.h"
 #include "app_gui_asset"
 #include "bsp_rtc.h"
 
@@ -237,6 +238,10 @@ static void analogclk_idle(tAppGuiClockParam *pClient, tAnalogClockInternalParam
 extern "C"{
 #endif
 
+#define UI_CLOCK_MODERN_COLOR_BATTERY_FULL     lv_color_hex(0x00DF11)
+#define UI_CLOCK_MODERN_COLOR_BATTERY_DEAD     lv_color_hex(0xDE0303)
+#define UI_CLOCK_MODERN_COLOR_BATTERY_INACTIVE lv_color_hex(0x3E3E3E)
+
 typedef struct{
   tAnalogClockInternalParam  analog_clk;
   lv_obj_t *ui_sun;
@@ -253,7 +258,7 @@ static void ui_clockmodern_inc_time(tAppGuiClockParam *pClient, uint32_t ms)    
 static void ui_clockmodern_idle    (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
 static void ui_clockmodern_deinit  (tAppGuiClockParam *pClient)                     APP_CLOCK_API;
 static void ui_clockmodern_set_weekday(tClockModernInternalParam *pClientPrivateParams, cmnWeekday_t weekday);
-static void ui_clockmodern_daynight   (tClockModernInternalParam *pClientPrivateParams, cmnDateTime_t time);
+static void ui_clockmodern_set_daynight   (tClockModernInternalParam *pClientPrivateParams, cmnDateTime_t time);
 
 /**
  * @brief UI Clock Modern Initialization
@@ -380,10 +385,10 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient) APP_CLOCK_API {
   }
 #endif
 
-#if 1
   /**
    * @note: Sun & Moon
    */
+#if 1
   {
     lv_obj_t *ui_Sun = lv_img_create(pClient->pScreen);
     lv_img_set_src(ui_Sun, &ui_img_sun_32);
@@ -601,11 +606,11 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient) APP_CLOCK_API {
     lv_arc_set_range(ui_Battery, 0,255);
     lv_arc_set_value(ui_Battery, 190);
     lv_arc_set_bg_angles(ui_Battery,230,310);
-    lv_obj_set_style_arc_color(ui_Battery, lv_color_hex(0x3E3E3E), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_arc_color(ui_Battery, UI_CLOCK_MODERN_COLOR_BATTERY_INACTIVE, LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_arc_opa(ui_Battery, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_obj_set_style_arc_width(ui_Battery, 6, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-    lv_obj_set_style_arc_color(ui_Battery, lv_color_hex(0x00DF11), LV_PART_INDICATOR | LV_STATE_DEFAULT );
+    lv_obj_set_style_arc_color(ui_Battery, UI_CLOCK_MODERN_COLOR_BATTERY_FULL, LV_PART_INDICATOR | LV_STATE_DEFAULT );
     lv_obj_set_style_arc_opa(ui_Battery, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
     lv_obj_set_style_arc_width(ui_Battery, 6, LV_PART_INDICATOR| LV_STATE_DEFAULT);
 
@@ -740,7 +745,7 @@ static void ui_clockmodern_set_time(tAppGuiClockParam *pClient, cmnDateTime_t ti
   /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
   analogclk_set_time( pClient, &pClientPrivateParams->analog_clk, time);
-  ui_clockmodern_daynight( pClientPrivateParams, time);
+  ui_clockmodern_set_daynight( pClientPrivateParams, time);
   ui_clockmodern_set_weekday( pClientPrivateParams, cmn_utility_get_weekday(time));
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
@@ -774,7 +779,7 @@ static void ui_clockmodern_set_weekday(tClockModernInternalParam *pClientPrivate
  * @note Update sun / moon icon
  * @addtogroup NotThreadSafe
  */
-static void ui_clockmodern_daynight(tClockModernInternalParam *pClientPrivateParams, cmnDateTime_t time){
+static void ui_clockmodern_set_daynight(tClockModernInternalParam *pClientPrivateParams, cmnDateTime_t time){
   if(time.hour >= 18){
     if(!lv_obj_has_flag( pClientPrivateParams->ui_sun, LV_OBJ_FLAG_HIDDEN) || lv_obj_has_flag(pClientPrivateParams->ui_moon, LV_OBJ_FLAG_HIDDEN)){ 
       /* Moon Rise */
@@ -788,6 +793,18 @@ static void ui_clockmodern_daynight(tClockModernInternalParam *pClientPrivatePar
       lv_obj_clear_flag( pClientPrivateParams->ui_sun, LV_OBJ_FLAG_HIDDEN);
     }
   }
+}
+
+/**
+ * @brief
+ * @param [inout] pClientPrivateParams   - 
+ * @param [in]    battery_percentage_256 - Battery Percentage in the scale of 256
+ * @addtogroup ThreadNotSafe
+ */
+static void ui_clockmodern_set_battery(tClockModernInternalParam *pClientPrivateParams, uint8_t battery_percentage_256){
+  lv_arc_set_value(pClientPrivateParams->ui_battery, battery_percentage_256);
+  lv_color_t rgb = cmn_color_gradient( UI_CLOCK_MODERN_COLOR_BATTERY_DEAD, UI_CLOCK_MODERN_COLOR_BATTERY_FULL, battery_percentage_256);
+  lv_obj_set_style_arc_color(pClientPrivateParams->ui_battery, rgb, LV_PART_INDICATOR | LV_STATE_DEFAULT );
 }
 
 /**
@@ -827,8 +844,13 @@ static void ui_clockmodern_idle(tAppGuiClockParam *pClient) APP_CLOCK_API {
    * @note: Store to the temperary variable to avoid dead lock
    */
   const cmnDateTime_t clk_time = pClient->time;
-  ui_clockmodern_daynight(pClientPrivateParams, clk_time);
+  ui_clockmodern_set_daynight(pClientPrivateParams, clk_time);
   ui_clockmodern_set_weekday(pClientPrivateParams, cmn_utility_get_weekday(clk_time));
+
+  /**
+   * @todo
+   */
+  ui_clockmodern_set_battery(pClientPrivateParams, 167);
 
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
