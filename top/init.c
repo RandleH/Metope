@@ -79,6 +79,8 @@ void hw_init(void){
 
   MX_I2C2_Init();
 
+  MX_ADC1_Init();
+
   MX_USB_OTG_FS_USB_Init();
   
   cmn_interrupt_init_priority();

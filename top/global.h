@@ -75,6 +75,7 @@ typedef struct{
     UART_HandleTypeDef * const pHuart2;
     TIM_HandleTypeDef  * const pHtim3;
     I2C_HandleTypeDef  * const pHi2c1;
+    ADC_HandleTypeDef  * const pHadc1;
     
     union{
       struct{
@@ -175,6 +176,7 @@ typedef struct{
 
 extern tMainSystemStatus   metope;
 
+extern ADC_HandleTypeDef   hadc1;
 extern SPI_HandleTypeDef   hspi2;
 extern DMA_HandleTypeDef   hdma_spi2_tx;
 extern TIM_HandleTypeDef   htim2;

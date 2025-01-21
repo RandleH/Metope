@@ -31,6 +31,7 @@
 #include "cmn_color.h"
 #include "app_gui_asset"
 #include "bsp_rtc.h"
+#include "bsp_battery.h"
 
 /* ************************************************************************** */
 /*                               Private Macros                               */
@@ -850,7 +851,7 @@ static void ui_clockmodern_idle(tAppGuiClockParam *pClient) APP_CLOCK_API {
   /**
    * @todo
    */
-  ui_clockmodern_set_battery(pClientPrivateParams, 167);
+  ui_clockmodern_set_battery(pClientPrivateParams, bsp_battery_measure());
 
   //////////////////////// Safe Zone End ////////////////////////
   ///////////////////////////////////////////////////////////////
