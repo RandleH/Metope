@@ -47,7 +47,7 @@ uint8_t bsp_battery_measure(void){
     raw = MIN_BATTERY_ADC_VALUE;
   }
 
-  uint8_t ans = (uint8_t)(((raw - MIN_BATTERY_ADC_VALUE)<<8) / (MAX_BATTERY_ADC_VALUE-MIN_BATTERY_ADC_VALUE));
+  uint8_t ans = (uint8_t)(((raw - MIN_BATTERY_ADC_VALUE)<<8) / (MAX_BATTERY_ADC_VALUE-MIN_BATTERY_ADC_VALUE+1));
 
 
   TRACE_DEBUG("BSP - Battery ADC raw=%u ans=%u", raw, ans);

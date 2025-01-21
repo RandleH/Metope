@@ -465,7 +465,7 @@ void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScr
   PIN_CS(0);
   bsp_screen_area( xs, ys, xe, ye);
   PIN_DC(1);
-  bsp_screen_spi_dma_send( (const u8*)buf, (xe-xs+1)*(ye-ys+1)*sizeof(bspScreenPixel_t), 1);
+  bsp_screen_spi_polling_send( (const u8*)buf, (xe-xs+1)*(ye-ys+1)*sizeof(bspScreenPixel_t), 1);
   PIN_CS(1);
 }
 
