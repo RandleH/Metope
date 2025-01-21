@@ -26,32 +26,52 @@
 extern "C"{
 #endif
 
+#define ADC_REPETITION_POW2   3
+#define ADC_REPETITION        (1<<ADC_REPETITION_POW2)
 
-#define MIN_BATTERY_ADC_VALUE 1450
-#define MAX_BATTERY_ADC_VALUE 1732
+#define MIN_BATTERY_ADC_VALUE 1850
+#define MAX_BATTERY_ADC_VALUE 2450
 
 /**
  * @note
- *  Analog Battery Voltage Range: 1800mv ~ 2150mv => 1450 ~ 1732
+ *  Analog Battery Voltage Range: 1800mv ~ 2150mv => 1450 ~ 1732 (This value is subject to the actual measurement)
  *  Periphral ADC Range Mapping: 0mv ~ 3300mv => 0 ~ 4095 (12Bit)
  *  Function Output Range: 0 ~ 255 (8Bit)
  */
 uint8_t bsp_battery_measure(void){
-  HAL_ADC_Start(metope.dev.pHadc1);
-  HAL_ADC_PollForConversion(metope.dev.pHadc1, HAL_MAX_DELAY);
-  uint32_t raw      = HAL_ADC_GetValue(metope.dev.pHadc1);
-  uint32_t raw_copy = raw;
+  uint32_t raw = 0;
+  {
+    HAL_ADC_Start(metope.dev.pHadc1);
 
-  if( raw > MAX_BATTERY_ADC_VALUE ){
-    raw = MAX_BATTERY_ADC_VALUE;
-  }else if( raw < MIN_BATTERY_ADC_VALUE ){
-    raw = MIN_BATTERY_ADC_VALUE;
+  /**
+   * @todo
+   *  `HAL_ADC_PollForConversion()` is getting stuck.
+   */
+#if 0
+    for(int i=0; i<ADC_REPETITION; ++i){
+      HAL_ADC_PollForConversion(metope.dev.pHadc1, HAL_MAX_DELAY);
+      raw += HAL_ADC_GetValue(metope.dev.pHadc1);
+    }
+    raw >>= ADC_REPETITION_POW2;
+#else
+    HAL_ADC_PollForConversion(metope.dev.pHadc1, HAL_MAX_DELAY);
+    raw = HAL_ADC_GetValue(metope.dev.pHadc1);
+#endif
+
+    HAL_ADC_Stop(metope.dev.pHadc1);
   }
 
-  uint8_t ans = (uint8_t)(((raw - MIN_BATTERY_ADC_VALUE)<<8) / (MAX_BATTERY_ADC_VALUE-MIN_BATTERY_ADC_VALUE+1));
+  uint32_t raw_copy = raw;
 
+  if( raw_copy > MAX_BATTERY_ADC_VALUE ){
+    raw_copy = MAX_BATTERY_ADC_VALUE;
+  }else if( raw_copy < MIN_BATTERY_ADC_VALUE ){
+    raw_copy = MIN_BATTERY_ADC_VALUE;
+  }
 
-  TRACE_DEBUG("BSP - Battery ADC raw=%u ans=%u", raw_copy, ans);
+  uint8_t ans = (uint8_t)(((raw_copy - MIN_BATTERY_ADC_VALUE)<<8) / (MAX_BATTERY_ADC_VALUE-MIN_BATTERY_ADC_VALUE+1));
+
+  TRACE_DEBUG("BSP - Battery ADC raw=%u raw_copy=%u ans=%u", raw, raw_copy, ans);
   return ans;
 }
 
