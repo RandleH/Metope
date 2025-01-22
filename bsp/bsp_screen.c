@@ -29,6 +29,10 @@
 #include "bsp_timer.h"
 #include "cmn_delay.h"
 
+
+/* ************************************************************************** */
+/*                               Private Macros                               */
+/* ************************************************************************** */
 #define CMD    0
 #define DAT    1
 
@@ -54,13 +58,19 @@
     }while(0)
 #endif
 
+
+/* ************************************************************************** */
+/*                             Private Functions                              */
+/* ************************************************************************** */
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-
 /**
- * @brief
+ * @brief BSP Screen Block SPI transmission function
+ * @param [in] buf    - Data Buffer
+ * @param [in] nItems - Data Length
+ * @param [in] nTimes - How many times do you want to transmit?
  * @addtogroup MachineDependent
  */
 STATIC cmnBoolean_t bsp_screen_spi_polling_send( const uint8_t *buf, size_t nItems, size_t nTimes){
@@ -92,9 +102,7 @@ STATIC cmnBoolean_t bsp_screen_spi_polling_send( const uint8_t *buf, size_t nIte
 }
 
 /**
- * @brief
- *    BSP Screen Non-Block SPI transmission function using DMA
- * 
+ * @brief BSP Screen Non-Block SPI transmission function using DMA
  * @param [in] buf    - Data Buffer
  * @param [in] nItems - Data Length
  * @param [in] nTimes - How many times do you want to transmit?
@@ -173,6 +181,81 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
   return ret;
 }
 
+/**
+ * @brief Internal function. Given a predefined transmission code and transfer it in blocking mode. DMA bypass.
+ * @param [in] code - Code buffer
+ * @param [in] len  - Buffer length
+*/
+STATIC void bsp_screen_parse_code( const uint8_t *code, size_t len){
+  while( len!=0 ){
+    PIN_DC( *code++);       /* Determine command or data */
+    --len;
+    uint8_t nItem = *code++;     /* Parse num of items */
+    --len;
+
+    bsp_screen_spi_polling_send( code, nItem, 1);
+    code += nItem;
+    len  -= nItem;
+  }
+}
+
+
+/**
+ * @brief Internal function. Select screen area. DMA bypass.
+ * @param [in] x0 - Start X
+ * @param [in] y0 - Start Y
+ * @param [in] x1 - End X
+ * @param [in] y1 - End Y
+*/
+STATIC void bsp_screen_area( u8 x0, u8 y0, u8 x1, u8 y1){
+    const u8 code[] = {
+        /* Set the X coordinates */
+        CMD, 1, 0x2A,\
+        DAT, 4, 0x00,  x0,0x00,  x1,\
+        
+        /* Set the Y coordinates */
+        CMD, 1, 0x2B,\
+        DAT, 4, 0x00,  y0,0x00,  y1,\
+
+        CMD, 1, 0x2C
+    };
+    bsp_screen_parse_code( code, sizeof(code)/sizeof(*code));
+}
+
+/**
+ * @brief Change scan direction. DMA bypass.
+ * @param [in] mode - 0: L->R; U->D; 1: R->L; D->U;
+*/
+STATIC void bsp_screen_scan_mode( u8 mode){
+  u8 code[] = {
+    CMD, 1, 0x36,\
+    DAT, 1, 0x08
+  };
+
+  switch(mode){
+    case 0: // L->R; U->D;
+      code[5] = 0x08;
+      break;
+    case 1: // R->L; D->U;
+      code[5] = 0xC8;
+      break;
+    default:
+      break;
+  }
+
+  bsp_screen_parse_code( code, sizeof(code)/sizeof(*code));
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+/* ************************************************************************** */
+/*                              Public Functions                              */
+/* ************************************************************************** */
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 /**
  * @brief
@@ -240,78 +323,6 @@ void bsp_screen_smooth_on(void){
     cmn_tim9_sleep(20000, metope.app.rtos.status.running==true); // 20ms
   }
   bsp_screen_set_bright(metope.bsp.screen.brightness);
-}
-
-
-/**
- * @brief       Internal function. Given a predefined transmission code and transfer it in blocking mode. DMA bypass.
- * @param [in]  code  - Code buffer
- * @param [in]  len   - Buffer length
- * @return      (none)
-*/
-STATIC void bsp_screen_parse_code( const uint8_t *code, size_t len){
-  while( len!=0 ){
-    PIN_DC( *code++);       /* Determine command or data */
-    --len;
-    uint8_t nItem = *code++;     /* Parse num of items */
-    --len;
-
-    bsp_screen_spi_polling_send( code, nItem, 1);
-    code += nItem;
-    len  -= nItem;
-  }
-}
-
-
-
-
-/**
- * @brief       Internal function. Select screen area. DMA bypass.
- * @param       x0  Start X
- * @param       y0  Start Y
- * @param       x1  End X
- * @param       y1  End Y
- * @return      (none)
-*/
-STATIC void bsp_screen_area( u8 x0, u8 y0, u8 x1, u8 y1){
-    const u8 code[] = {
-        /* Set the X coordinates */
-        CMD, 1, 0x2A,\
-        DAT, 4, 0x00,  x0,0x00,  x1,\
-        
-        /* Set the Y coordinates */
-        CMD, 1, 0x2B,\
-        DAT, 4, 0x00,  y0,0x00,  y1,\
-
-        CMD, 1, 0x2C
-    };
-    bsp_screen_parse_code( code, sizeof(code)/sizeof(*code));
-}
-
-/**
- * @brief       Change scan direction. DMA bypass.
- * @param       mode    @ref 0: L->R; U->D;
- *                      @ref 1: R->L; D->U;
- * @return      (none)
-*/
-STATIC void bsp_screen_scan_mode( u8 mode){
-  u8 code[] = {
-    CMD, 1, 0x36,\
-    DAT, 1, 0x08
-  };
-
-  switch(mode){
-    case 0: // L->R; U->D;
-      code[5] = 0x08;
-      break;
-    case 1: // R->L; D->U;
-      code[5] = 0xC8;
-      break;
-    default:
-      break;
-  }
-
-  bsp_screen_parse_code( code, sizeof(code)/sizeof(*code));
 }
 
 
@@ -440,10 +451,13 @@ cmnBoolean_t bsp_screen_init( void){
 
 
 /**
- * @brief       Fill screen with single color
- *              Length of the buffer must be valid great or equal than (xe-xs+1)*(ye-ys+1)
- * @return      Return 0, if success
- *              Return 1, if area params are wrong
+ * @brief Fill screen with single color
+ * @attention Length of the buffer must be valid great or equal than (xe-xs+1)*(ye-ys+1)
+ * @param [in] color - Color aligned with the screen color depth
+ * @param [in] xs    - Coordinates
+ * @param [in] ys    - Coordinates
+ * @param [in] xe    - Coordinates
+ * @param [in] ye    - Coordinates
 */
 void bsp_screen_fill( const bspScreenPixel_t color, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye){
   if( xs>xe || ys>ye ){
@@ -460,7 +474,14 @@ void bsp_screen_fill( const bspScreenPixel_t color, bspScreenCood_t xs, bspScree
   PIN_CS(1);
 }
 
-
+/**
+ * @brief Refresh screen within an area
+ * @param [in] buf - Color buffer aligned with the screen color depth
+ * @param [in] xs  - Coordinates
+ * @param [in] ys  - Coordinates
+ * @param [in] xe  - Coordinates
+ * @param [in] ye  - Coordinates
+ */
 void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye){
   PIN_CS(0);
   bsp_screen_area( xs, ys, xe, ye);
@@ -523,8 +544,5 @@ void bsp_screen_onoff(void *param) RTOSTHREAD{
 #endif
 
 
-
-
-
-
+/* ********************************** EOF *********************************** */
 

@@ -17,23 +17,62 @@
  ******************************************************************************
 */
 
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
-  #include "stm32f4xx_hal.h"
-#endif
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include "app_lvgl.h"
 #include "lvgl.h"
 #include "global.h"
+#include "device.h"
 #include "bsp_type.h"
 #include "bsp_screen.h"
 
-
+/* ************************************************************************** */
+/*                               Private Macros                               */
+/* ************************************************************************** */
 #define THIS (&metope.app)
 
 
+/* ************************************************************************** */
+/*                             Private Functions                              */
+/* ************************************************************************** */
 #ifdef __cplusplus
 extern "C"{
 #endif
 
+#if LVGL_VERSION==836
+STATIC void app_lvgl_flush_cb(struct _lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *buf);
+#elif LVGL_VERSION==922
+STATIC void app_lvgl_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map);
+#endif
+
+#if LVGL_VERSION==836
+STATIC void app_lvgl_flush_cb(struct _lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *buf){
+#elif LVGL_VERSION==922
+STATIC void app_lvgl_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
+#endif
+  THIS->lvgl.isFlushDone = lv_disp_flush_is_last(disp);
+
+  bsp_screen_refresh( (bspScreenPixel_t *)buf, area->x1, area->y1, area->x2, area->y2);
+
+#if LVGL_VERSION==836
+  lv_disp_flush_ready(disp);
+#elif LVGL_VERSION==922
+  lv_display_flush_ready(disp);
+#endif
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/* ************************************************************************** */
+/*                              Public Functions                              */
+/* ************************************************************************** */
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 const lv_font_t dummy_font;
 
@@ -57,24 +96,6 @@ int app_lvgl_vsnprintf(char * buffer, size_t count, const char * format, va_list
     buffer[0] = '\0';
   }
   return 0;
-}
-
-
-
-#if LVGL_VERSION==836
-STATIC void app_lvgl_flush_cb(struct _lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *buf){
-#elif LVGL_VERSION==922
-STATIC void app_lvgl_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
-#endif
-  THIS->lvgl.isFlushDone = lv_disp_flush_is_last(disp);
-
-  bsp_screen_refresh( (bspScreenPixel_t *)buf, area->x1, area->y1, area->x2, area->y2);
-
-#if LVGL_VERSION==836
-  lv_disp_flush_ready(disp);
-#elif LVGL_VERSION==922
-  lv_display_flush_ready(disp);
-#endif
 }
 
 
@@ -152,3 +173,4 @@ void app_lvgl_load_default_screen(void){
 }
 #endif
 
+/* ********************************** EOF *********************************** */

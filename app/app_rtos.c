@@ -24,6 +24,7 @@
 #include "FreeRTOS.h"
 #include "global.h"
 #include "trace.h"
+#include "assert.h"
 #include "app_rtos.h"
 #include "app_clock.h"
 #include "cmn_type.h"
@@ -87,7 +88,7 @@ void vApplicationIdleHook(void){
  * @addtogroup FreeRTOS
  */
 void vApplicationMallocFailedHook (void){
-
+  ASSERT(0, "FreeRTOS malloc failed");
 }
 
 /**
@@ -108,9 +109,7 @@ void vApplicationGetIdleTaskMemory (StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
  */
 void vApplicationStackOverflowHook (TaskHandle_t xTask, signed char *pcTaskName) {
   (void)xTask;
-  (void)pcTaskName;
-  TRACE_ERROR("Stack overflow detected. Task=%s", pcTaskName);
-  configASSERT(0);
+  ASSERT(0, "Stack overflow detected. Task=%s", pcTaskName);
 }
 
 /**

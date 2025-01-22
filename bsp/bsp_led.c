@@ -32,7 +32,12 @@
     }\
   }while(0)
 
-
+/* ************************************************************************** */
+/*                              Public Functions                              */
+/* ************************************************************************** */
+#ifdef __cplusplus
+extern "C"{
+#endif
 /**
  * @addtogroup MachineDependent
  */
@@ -58,7 +63,7 @@ void inline bsp_led_toggle( void){
 /**
  * @addtogroup MachineDependent
  */
-void inline bsp_led__switch( cmnBoolean_t status){
+void inline bsp_led_switch( cmnBoolean_t status){
   if(ON==status){
     LED_GPIO_Port->BSRR |= (uint32_t)(LED_Pin << 16U);
   }
@@ -66,3 +71,9 @@ void inline bsp_led__switch( cmnBoolean_t status){
     LED_GPIO_Port->BSRR |= LED_Pin;
   }
 }
+
+#ifdef __cplusplus
+}
+#endif
+
+/* ********************************** EOF *********************************** */

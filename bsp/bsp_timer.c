@@ -26,10 +26,13 @@
 #include "assert.h"
 #include "bsp_timer.h"
 
+
+/* ************************************************************************** */
+/*                             Private Functions                              */
+/* ************************************************************************** */
 #ifdef __cplusplus
 extern "C"{
 #endif
-
 
 /**
  * @brief Timer Register Initialization
@@ -67,7 +70,7 @@ static void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
       break;
     }
     default:{
-      ASSERT( false, "Unknown timer base");
+      ASSERT( 0, "Unknown timer base");
       break;
     }
   }
@@ -75,7 +78,17 @@ static void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
   CLEAR_BIT( TIMx->CR1, TIM_CR1_CEN);  // Disable timer
 }
 
+#ifdef __cplusplus
+}
+#endif
 
+
+/* ************************************************************************** */
+/*                              Public Functions                              */
+/* ************************************************************************** */
+#ifdef __cplusplus
+extern "C"{
+#endif
 /**
  * @brief Timer Initialization
  * @addtogroup MachineDependent
@@ -135,3 +148,5 @@ void bsp_tim9_delay(u16 us){
 #ifdef __cplusplus
 }
 #endif
+
+/* ********************************** EOF *********************************** */

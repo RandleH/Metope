@@ -17,21 +17,31 @@
  ******************************************************************************
 */
 
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include "device.h"
 #include "global.h"
 #include "trace.h"
 #include "bsp_battery.h"
 
-#ifdef __cplusplus
-extern "C"{
-#endif
 
+/* ************************************************************************** */
+/*                               Private Macros                               */
+/* ************************************************************************** */
 #define ADC_REPETITION_POW2   3
 #define ADC_REPETITION        (1<<ADC_REPETITION_POW2)
 
 #define MIN_BATTERY_ADC_VALUE 1850
 #define MAX_BATTERY_ADC_VALUE 2450
 
+
+/* ************************************************************************** */
+/*                              Public Functions                              */
+/* ************************************************************************** */
+#ifdef __cplusplus
+extern "C"{
+#endif
 /**
  * @note
  *  Analog Battery Voltage Range: 1800mv ~ 2150mv => 1450 ~ 1732 (This value is subject to the actual measurement)

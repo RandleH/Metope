@@ -34,7 +34,7 @@ extern "C"{
 void bsp_led_on( void);
 void bsp_led_off( void);
 void bsp_led_toggle( void);
-void bsp_led__switch( cmnBoolean_t status);
+void bsp_led_switch( cmnBoolean_t status);
 
 #ifdef __cplusplus
 }
