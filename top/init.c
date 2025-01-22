@@ -79,6 +79,8 @@ void hw_init(void){
 
   MX_I2C2_Init();
 
+  MX_ADC1_Init();
+
   MX_USB_OTG_FS_USB_Init();
   
   cmn_interrupt_init_priority();
@@ -138,7 +140,7 @@ void os_init(void){
     "app_clock_main",\
     sizeof(metope.app.rtos.task.clock_ui._stack) / sizeof(metope.app.rtos.task.clock_ui._stack[0]),\
     &metope.app.clock ,\
-    kAppPriority_VERY_IMPORTANT,\
+    kAppPriority_IMPORTANT,\
     &metope.app.rtos.task.clock_ui._stack[0],\
     &metope.app.rtos.task.clock_ui._tcb\
   );

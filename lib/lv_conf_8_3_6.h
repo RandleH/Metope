@@ -33,7 +33,7 @@
  *=========================*/
 
 /*1: use custom malloc/free, 0: use the built-in `lv_mem_alloc()` and `lv_mem_free()`*/
-#define LV_MEM_CUSTOM 0
+#define LV_MEM_CUSTOM 1
 #if LV_MEM_CUSTOM == 0
     /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
     #define LV_MEM_SIZE (48U * 1024U)          /*[bytes]*/
@@ -47,22 +47,11 @@
     #endif
 
 #else       /*LV_MEM_CUSTOM*/
-    // #define LV_MEM_CUSTOM_INCLUDE  "FreeRTOS.h"   /*Header for the dynamic memory function*/
-
-    #ifdef __cplusplus
-        extern "C"{
-    #endif
-    #include <stddef.h>
-        extern void* pvPortMalloc(size_t);
-        extern void  vPortFree( void*);
-        extern void* pvPortRealloc( void*, size_t);
-    #ifdef __cplusplus
-        }
-    #endif
-
-    #define LV_MEM_CUSTOM_ALLOC    pvPortMalloc  //malloc
-    #define LV_MEM_CUSTOM_FREE     vPortFree     //free
-    #define LV_MEM_CUSTOM_REALLOC  pvPortRealloc //realloc
+    #define LV_MEM_CUSTOM_INCLUDE  "app_rtos_heap_4.h"   /*Header for the dynamic memory function*/
+    
+    #define LV_MEM_CUSTOM_ALLOC(x)    pvPortMalloc((x))
+    #define LV_MEM_CUSTOM_FREE(p)     vPortFree(p)
+    #define LV_MEM_CUSTOM_REALLOC(p, x)  pvPortRealloc((p),(x))
 #endif     /*LV_MEM_CUSTOM*/
 
 /*Number of the intermediate memory buffer used during rendering and other internal processing mechanisms.
@@ -254,7 +243,9 @@
     #define LV_LOG_TRACE_OBJ_CREATE 1
     #define LV_LOG_TRACE_LAYOUT     1
     #define LV_LOG_TRACE_ANIM       1
-
+#else
+//   #include "trace.h"
+//   #define LV_LOG_ERROR( msg, ...) TRACE_ERROR(msg, ##__VA_ARGS__)
 #endif  /*LV_USE_LOG*/
 
 /*-------------
@@ -368,7 +359,7 @@
 #define LV_FONT_MONTSERRAT_8  0
 #define LV_FONT_MONTSERRAT_10 0
 #define LV_FONT_MONTSERRAT_12 0
-#define LV_FONT_MONTSERRAT_14 0
+#define LV_FONT_MONTSERRAT_14 1
 #define LV_FONT_MONTSERRAT_16 0
 #define LV_FONT_MONTSERRAT_18 0
 #define LV_FONT_MONTSERRAT_20 0
@@ -403,7 +394,7 @@
 #define LV_FONT_CUSTOM_DECLARE extern const lv_font_t dummy_font;
 
 /** Always set a default font */
-#define LV_FONT_DEFAULT &dummy_font
+#define LV_FONT_DEFAULT &lv_font_montserrat_14
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
@@ -475,7 +466,7 @@
 
 /*Documentation of the widgets: https://docs.lvgl.io/latest/en/html/widgets/index.html*/
 
-#define LV_USE_ARC        0
+#define LV_USE_ARC        1
 
 #define LV_USE_BAR        0
 

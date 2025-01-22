@@ -33,6 +33,7 @@
   #include "stm32f4xx_hal_spi.h"
   #include "stm32f4xx_hal_dma.h"
   #include "stm32f4xx_hal_tim.h"
+  #include "stm32f4xx_hal_adc.h"
 
   #define LED_Pin               GPIO_PIN_13
   #define LED_GPIO_Port         GPIOC

@@ -72,6 +72,8 @@ list(APPEND SRC_FREERTOS        "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Pa
                                 "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/tasks.c"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/timers.c" )
 
+# `app_rtos_heap.c` will use heap4 plus some enhancements
+list(REMOVE_ITEM SRC_FREERTOS   "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c")
 
 list(APPEND INC_FREERTOS        "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Middlewares/Third_Party/FreeRTOS/Source/include"

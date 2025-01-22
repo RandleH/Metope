@@ -131,6 +131,7 @@ void app_lvgl_init(void){
 
 #endif
 
+  THIS->lvgl.default_scr = lv_scr_act();
 }
 
 
@@ -140,6 +141,12 @@ void app_lvgl_flush_all( void){
     HAL_Delay(10);
   }while(!THIS->lvgl.isFlushDone);
 }
+
+
+void app_lvgl_load_default_screen(void){
+  lv_scr_load(THIS->lvgl.default_scr);
+}
+
 
 #ifdef __cplusplus
 }

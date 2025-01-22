@@ -587,7 +587,7 @@ void cmn_utility_timeinc( uint32_t *ms_rem, cmnDateTime_t *pTime, uint32_t ms){
 
   if(trace_triggered){
     cmnDateTime_t time = *pTime;
-    TRACE_DEBUG("Time increased to %u/%u/%u %u:%u:%u", time.year+2024, time.month, time.day, time.hour, time.minute, time.second);
+    TRACE_DEBUG("CMN - Time increased to %u/%u/%u %u:%u:%u", time.year+2024, time.month, time.day, time.hour, time.minute, time.second);
   }
 }
 
@@ -610,6 +610,21 @@ int32_t cmn_utility_timediff( cmnDateTime_t timeA, cmnDateTime_t timeB){
   sec += ((signed)(timeA.second - timeB.second));
 
   return sec;
+}
+
+/**
+ * @brief Get weekday from time info
+ * @param [in] time - Input Time
+ * @return Return weekday
+ */
+cmnWeekday_t cmn_utility_get_weekday( cmnDateTime_t time){
+  int Y, C, M, N, D;
+  M = 1 + (9 + time.month) % 12;
+  Y = 2024 + time.year - (M > 10);
+  C = Y / 100;
+  D = Y % 100;
+  N = ((13 * M - 1) / 5 + D + D / 4 + 6 * C + time.day + 5) % 7;
+  return (cmnWeekday_t)((7 + N) % 7);
 }
 
 /**

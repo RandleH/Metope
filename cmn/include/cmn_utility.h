@@ -82,6 +82,8 @@ void cmn_utility_angleset(                                \
 
 int32_t cmn_utility_timediff( cmnDateTime_t timeA, cmnDateTime_t timeB);
 
+cmnWeekday_t cmn_utility_get_weekday( cmnDateTime_t time);
+
 void cmn_utility_timeinc( uint32_t      *ms_rem,\
                           cmnDateTime_t *pTime, 
                           uint32_t       ms);

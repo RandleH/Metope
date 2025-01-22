@@ -68,7 +68,7 @@
 
 #define configQUEUE_REGISTRY_SIZE            (8)
 #define configNUMBER_OF_CORES                (1)
-#define configTOTAL_HEAP_SIZE                ((size_t)(10 * 1024))
+#define configTOTAL_HEAP_SIZE                ((size_t)(64 * 1024))
 
 /* ************************************************************************** */
 /*                               Property Macro                               */

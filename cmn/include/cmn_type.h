@@ -128,7 +128,16 @@ typedef union cmnDateTime_t{
   uint32_t word;
 }cmnDateTime_t;
 
-
+typedef enum cmnWeekday_t{
+  kWeekDay_Monday    = 0,
+  kWeekDay_Tuesday   = 1,
+  kWeekDay_Wednesday = 2,
+  kWeekDay_Thursday  = 3,
+  kWeekDay_Friday    = 4,
+  kWeekDay_Saturday  = 5,
+  kWeekDay_Sunday    = 6,
+  kWeekDay_TOTAL
+}cmnWeekday_t;
 
 
 #ifdef __cplusplus

@@ -75,6 +75,7 @@ typedef struct{
     UART_HandleTypeDef * const pHuart2;
     TIM_HandleTypeDef  * const pHtim3;
     I2C_HandleTypeDef  * const pHi2c1;
+    ADC_HandleTypeDef  * const pHadc1;
     
     union{
       struct{
@@ -99,12 +100,13 @@ typedef struct{
       lv_disp_drv_t      disp_drv;
       lv_disp_t         *disp;
       lv_disp_draw_buf_t disp_draw_buf;
-      lv_color_t         gram[2][BSP_SCREEN_WIDTH*4];
+      lv_color_t         gram[2][BSP_SCREEN_WIDTH*6];
       cmnBoolean_t       isFlushDone;
 #elif LVGL_VERSION==922
       lv_display_t *pDisplayHandle;
       lv_theme_t   *pLvglTheme;
 #endif
+      lv_obj_t          *default_scr;
     }lvgl;
 
     struct{
@@ -174,6 +176,7 @@ typedef struct{
 
 extern tMainSystemStatus   metope;
 
+extern ADC_HandleTypeDef   hadc1;
 extern SPI_HandleTypeDef   hspi2;
 extern DMA_HandleTypeDef   hdma_spi2_tx;
 extern TIM_HandleTypeDef   htim2;

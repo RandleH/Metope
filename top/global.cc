@@ -40,6 +40,7 @@ tMainSystemStatus  metope = {
     .pHuart2 = &huart2,
     .pHtim3  = &htim3,
     .pHi2c1  = &hi2c1,
+    .pHadc1  = &hadc1,
     .status  = {.word=0}
   },
   .app = {
@@ -49,11 +50,12 @@ tMainSystemStatus  metope = {
       .disp          = NULL,
       .disp_draw_buf = {0},
       .gram          = {0},
-      .isFlushDone   = true
+      .isFlushDone   = true,
 #elif LVGL_VERSION==922
       .pDisplayHandle = NULL,
       .pLvglTheme     = NULL
 #endif
+      .default_scr  = NULL
     },
     .rtos = {.status = {0}},
     .clock = {
