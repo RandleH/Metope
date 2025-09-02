@@ -114,6 +114,7 @@ typedef IRQn_Type cmnIRQn_t;
 #define CMN_EVENT_QMI8658_INT1        (1<<8)  /*!< CTRL9 Command Done */
 #define CMN_EVENT_QMI8658_INT2        (1<<9)  /*!< FIFO Watermark Reached */
 #define CMN_EVENT_UPDATE_RTC          (1<<10) /*!< System update RTC time */
+#define CMN_EVENT_UART_INPUT          (1<<11) /*!< Received a new message from uart port */
 
 
 typedef union cmnDateTime_t{
