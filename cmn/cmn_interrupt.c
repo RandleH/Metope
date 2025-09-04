@@ -356,8 +356,6 @@ void TIM1_UP_TIM10_IRQHandler(void){}
 void TIM1_TRG_COM_TIM11_IRQHandler(void){}
 void TIM1_CC_IRQHandler(void){}           
 void TIM2_IRQHandler(void){
-  // extern volatile u32 gDummy;
-  // gDummy = 0;
 #if (defined USE_REGISTER) && (USE_REGISTER==1)
   TIM2->SR = 0x00000000;
   CLEAR_BIT( TIM2->CR1, TIM_CR1_CEN);  // Disable timer
@@ -398,21 +396,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   tBspUart *p_uart = &metope.bsp.uart;
   
   if(huart->Instance == USART2) {
-    // if (p_uart->rx_status.is_locked){
-    //   p_uart->rx_idx += Size;
-
-    //   if (p_uart->rx_idx == BSP_CFG_UART_RX_BUF_SIZE){
-    //     p_uart->rx_status.is_overflowed = 1;
-    //   }
-    // }else{
-    //   p_uart->rx_idx = 0;
-    //   p_uart->rx_status.is_locked = 1;
-    // }
-
-    // if (!p_uart->rx_status.is_overflowed){
-    //   HAL_UARTEx_ReceiveToIdle_IT( huart, (uint8_t*)&p_uart->rx_buf[p_uart->rx_idx], BSP_CFG_UART_RX_BUF_SIZE-p_uart->rx_idx);
-    // }
-    
     p_uart->rx_idx      = 0;
     p_uart->rx_status.has_new_msg = 1;
     HAL_UART_Receive_IT( huart, (uint8_t*)&p_uart->rx_buf[0], BSP_CFG_UART_RX_BUF_SIZE);
@@ -433,18 +416,8 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
   p_uart->rx_status.error_code = huart->ErrorCode;
 }
 
-
-void USART2_IRQHandler1(void) {
-  /* USER CODE BEGIN USART2_IRQn 0 */
-  
-  /* USER CODE END USART2_IRQn 0 */
-  HAL_UART_IRQHandler(&huart2);
-  /* USER CODE BEGIN USART2_IRQn 1 */
-
-  /* USER CODE END USART2_IRQn 1 */
-}
-
 void USART2_IRQHandler(void) {
+  // HAL_UART_IRQHandler(&huart2);
   tBspUart *p_uart = &metope.bsp.uart;
   volatile uint32_t REG_USART2_SR = USART2->SR;
   volatile uint32_t REG_USART2_DR = USART2->DR;
@@ -466,6 +439,15 @@ void USART2_IRQHandler(void) {
 
   if (REG_USART2_SR & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE)) {
     p_uart->rx_status.error_code = (uint8_t)(REG_USART2_SR & 0x1F);
+  }
+
+  if(metope.app.rtos.status.running){
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+    xHigherPriorityTaskWoken = pdFALSE;
+    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_UART_INPUT, &xHigherPriorityTaskWoken );
+    if( xResult != pdFAIL ){
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
   }
 }
 

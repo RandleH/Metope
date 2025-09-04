@@ -20,10 +20,16 @@
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
+#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
 #include "lvgl.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "timers.h"
+#elif (defined SYS_TARGET_NATIVE)
+typedef uint32_t lv_obj_t;
+typedef void*    TimerHandle_t;
+typedef void*    SemaphoreHandle_t;
+#endif
 
 /* ************************************************************************** */
 /*                              Headfile Guards                               */
@@ -32,9 +38,9 @@
 #define APP_TYPE_H
 
 #define APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE (2048U)
-#define APP_CFG_TASK_CLOCK_UI_STACK_SIZE     (512U)
-#define APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE (256U)
-#define APP_CFG_TASK_CMD_BOX_STACK_SIZE (256U)
+#define APP_CFG_TASK_CLOCK_UI_STACK_SIZE     ( 512U)
+#define APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE ( 256U)
+#define APP_CFG_TASK_CMD_BOX_STACK_SIZE      (1024U)
 
 
 #define APP_IDLE_CLOCK       (1<<0)

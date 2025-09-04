@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    app_cmdbox.h
+ * @file    memory.h
  * @author  RandleH
- * @brief   Application Program - Command Box
+ * @brief   Memory Interface Layer
  ******************************************************************************
  * @attention
  *
@@ -17,32 +17,25 @@
  ******************************************************************************
 */
 
+#ifndef MEMORY_H
+#define MEMORY_H
+
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
-#include "cmn_type.h"
-#include "app_type.h"
-
-/* ************************************************************************** */
-/*                              Headfile Guards                               */
-/* ************************************************************************** */
-#ifndef APP_CMDBOX_H
-#define APP_CMDBOX_H
+#include <stddef.h>
 
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-void app_cmdbox_main(void *param) RTOSTHREAD;
-void app_cmdbox_idle(void *param) RTOSIDLE;
-void app_cmdbox_parse(const char *cmd);
+void *MALLOC(size_t xWantedSize);
+void FREE(void *pv);
+void *REALLOC(void *pv, size_t xWantedSize);
+
 
 #ifdef __cplusplus
 }
 #endif
-
-
-
 #endif
-/* ********************************** EOF *********************************** */

@@ -47,11 +47,11 @@
     #endif
 
 #else       /*LV_MEM_CUSTOM*/
-    #define LV_MEM_CUSTOM_INCLUDE  "app_lvgl.h"   /*Header for the dynamic memory function*/
+    #define LV_MEM_CUSTOM_INCLUDE  "memory.h"   /*Header for the dynamic memory function*/
 
-    #define LV_MEM_CUSTOM_ALLOC(x)       app_lvgl_malloc((x))
-    #define LV_MEM_CUSTOM_FREE(p)        app_lvgl_free(p)
-    #define LV_MEM_CUSTOM_REALLOC(p, x)  app_lvgl_realloc((p),(x))
+    #define LV_MEM_CUSTOM_ALLOC(x)       MALLOC((x))
+    #define LV_MEM_CUSTOM_FREE(p)        FREE(p)
+    #define LV_MEM_CUSTOM_REALLOC(p, x)  REALLOC((p),(x))
 #endif     /*LV_MEM_CUSTOM*/
 
 /*Number of the intermediate memory buffer used during rendering and other internal processing mechanisms.

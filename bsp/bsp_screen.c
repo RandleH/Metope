@@ -519,7 +519,7 @@ void bsp_screen_onoff(void *param) RTOSTHREAD{
   xEventGroupClearBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M);
   
   while(1){
-    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M|CMN_EVENT_SCREEN_NEED_OFF, pdTRUE, pdFALSE, portMAX_DELAY);
+    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M|CMN_EVENT_SCREEN_DISPOFF|CMN_EVENT_SCREEN_DISPON, pdTRUE, pdFALSE, portMAX_DELAY);
     
     /* Always process the user button clicking first */
     if(uxBits & CMN_EVENT_USER_KEY_M){
@@ -531,9 +531,13 @@ void bsp_screen_onoff(void *param) RTOSTHREAD{
       metope.info.status.scroff = !metope.info.status.scroff;
     }
     /* Now it's time to process the long time inactive screen */
-    else if(uxBits & CMN_EVENT_SCREEN_NEED_OFF){
+    else if(uxBits & CMN_EVENT_SCREEN_DISPOFF) {
       bsp_screen_smooth_off();
       metope.info.status.scroff = 1;
+    }
+    else if(uxBits & CMN_EVENT_SCREEN_DISPON) {
+      bsp_screen_smooth_on();
+      metope.info.status.scroff = 0;
     }
   }
 }
