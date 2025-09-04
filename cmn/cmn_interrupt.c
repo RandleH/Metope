@@ -57,9 +57,6 @@ extern "C"{
 /*                      Interrupt Management Variable                         */
 /* ************************************************************************** */
 tCmnInterruptProc gInterruptProcess = {0};
-extern DMA_HandleTypeDef hdma_spi2_tx;
-extern SPI_HandleTypeDef hspi2;
-
 
 
 /* ************************************************************************** */
@@ -169,11 +166,20 @@ void cmn_interrupt_execute( void){
   }
 }
 
-
-
-#define CMN_NVIC_PRIORITY_CRITICAL   4,0
-#define CMN_NVIC_PRIORITY_IMPORTANT  8,0
-#define CMN_NVIC_PRIORITY_NORMAL     9,0
+/**
+ * @note
+ * The priority grouping bits length. This parameter can be one of the following values:
+ *  - NVIC_PRIORITYGROUP_0: 0 bits for preemption priority 4 bits for subpriority
+ *  - NVIC_PRIORITYGROUP_1: 1 bits for preemption priority 3 bits for subpriority
+ *  - NVIC_PRIORITYGROUP_2: 2 bits for preemption priority 2 bits for subpriority
+ *  - NVIC_PRIORITYGROUP_3: 3 bits for preemption priority 1 bits for subpriority
+ *  - NVIC_PRIORITYGROUP_4: 4 bits for preemption priority 0 bits for subpriority
+ * @note
+ *  NVIC_PRIORITYGROUP_4 was used by default
+ */
+#define CMN_NVIC_PRIORITY_CRITICAL    4,0
+#define CMN_NVIC_PRIORITY_IMPORTANT   8,0
+#define CMN_NVIC_PRIORITY_NORMAL      9,0
 #define CMN_NVIC_PRIORITY_CASUAL     10,0
 
 
@@ -213,6 +219,10 @@ void cmn_interrupt_init_priority( void){
 
   HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, CMN_NVIC_PRIORITY_NORMAL);
   HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+
+  /* USART2 interrupt Init */
+  HAL_NVIC_SetPriority(USART2_IRQn, CMN_NVIC_PRIORITY_NORMAL);
+  HAL_NVIC_EnableIRQ(USART2_IRQn);
 #endif
 }
 
@@ -378,7 +388,86 @@ void SPI2_IRQHandler(void){
   HAL_SPI_IRQHandler(&hspi2);
 }
 
-void USART1_IRQHandler(void){}            
+void USART1_IRQHandler(void){}
+
+/**
+ * @brief
+ * @note Only DMA or Idle Interrupt, HAL will call this function.
+ */
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+  tBspUart *p_uart = &metope.bsp.uart;
+  
+  if(huart->Instance == USART2) {
+    // if (p_uart->rx_status.is_locked){
+    //   p_uart->rx_idx += Size;
+
+    //   if (p_uart->rx_idx == BSP_CFG_UART_RX_BUF_SIZE){
+    //     p_uart->rx_status.is_overflowed = 1;
+    //   }
+    // }else{
+    //   p_uart->rx_idx = 0;
+    //   p_uart->rx_status.is_locked = 1;
+    // }
+
+    // if (!p_uart->rx_status.is_overflowed){
+    //   HAL_UARTEx_ReceiveToIdle_IT( huart, (uint8_t*)&p_uart->rx_buf[p_uart->rx_idx], BSP_CFG_UART_RX_BUF_SIZE-p_uart->rx_idx);
+    // }
+    
+    p_uart->rx_idx      = 0;
+    p_uart->rx_status.has_new_msg = 1;
+    HAL_UART_Receive_IT( huart, (uint8_t*)&p_uart->rx_buf[0], BSP_CFG_UART_RX_BUF_SIZE);
+  }
+}
+
+/**
+ * @brief
+ * @note Each time when the transfer count reaches the buffer size, this function will be called.
+ */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+  tBspUart *p_uart = &metope.bsp.uart;
+  p_uart->rx_status.is_locked = 1;
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
+  tBspUart *p_uart = &metope.bsp.uart;
+  p_uart->rx_status.error_code = huart->ErrorCode;
+}
+
+
+void USART2_IRQHandler1(void) {
+  /* USER CODE BEGIN USART2_IRQn 0 */
+  
+  /* USER CODE END USART2_IRQn 0 */
+  HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART2_IRQn 1 */
+
+  /* USER CODE END USART2_IRQn 1 */
+}
+
+void USART2_IRQHandler(void) {
+  tBspUart *p_uart = &metope.bsp.uart;
+  volatile uint32_t REG_USART2_SR = USART2->SR;
+  volatile uint32_t REG_USART2_DR = USART2->DR;
+  
+  if (REG_USART2_SR & USART_SR_RXNE) {
+    if (likely(!p_uart->rx_status.is_overflowed)) {
+      p_uart->rx_buf[p_uart->rx_idx++] = (char)REG_USART2_DR;
+      if (p_uart->rx_idx == BSP_CFG_UART_RX_BUF_SIZE) {
+        p_uart->rx_status.is_overflowed = 1;
+      }
+      if (REG_USART2_DR == '\n' || REG_USART2_DR == '\r') {
+        p_uart->rx_status.has_new_msg = 1;
+      }
+    }
+  }
+
+  /* Always set the '\0' after the string */
+  p_uart->rx_buf[p_uart->rx_idx] = '\0';
+
+  if (REG_USART2_SR & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE)) {
+    p_uart->rx_status.error_code = (uint8_t)(REG_USART2_SR & 0x1F);
+  }
+}
 
 void DEFAULT EXTI15_10_IRQHandler( void){
   HAL_GPIO_EXTI_IRQHandler(KEY_L_Pin);

@@ -63,9 +63,6 @@
 void hw_init(void){
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  
-  /* Init the low level hardware */
-  HAL_MspInit();
 
 #if (defined USE_REGISTER) && (USE_REGISTER==1)
   bsp_cpu_clock_init();
@@ -118,9 +115,9 @@ void bsp_init(void){
   /**
    * @note: Module will be initialized during the test
    */
-  bsp_qmi8658_init();
+  // bsp_qmi8658_init();
 #endif
-
+  bsp_uart_init();
 }
 
 

@@ -25,7 +25,7 @@
 extern "C"{
 #endif
 
-
+void bsp_uart_init(void);
 int bsp_uart_printf( const char *format, ...); // __attribute__ (( format(printf,1,2)));
 
 

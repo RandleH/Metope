@@ -34,16 +34,49 @@ extern "C"{
 #endif
 
 
+/* ////////////////////////////////////////////////////////////////////////// */
+/*                             BSP Screen Objects                             */
+/* ////////////////////////////////////////////////////////////////////////// */
 typedef struct stBspScreen{
   bspScreenBrightness_t brightness;
   TickType_t            refresh_rate_ms;
   //...//
 } tBspScreen;
 
+/* ////////////////////////////////////////////////////////////////////////// */
+/*                              BSP Uart Objects                              */
+/* ////////////////////////////////////////////////////////////////////////// */
+typedef union stBspUartStatus {
+  struct {
+    uint8_t is_locked     : 1;
+    uint8_t is_overflowed : 1;
+    uint8_t has_new_msg   : 1;
+    uint8_t error_code    : 5;
+  };
+  uint8_t word;
+} tBspUartStatus;
+
+typedef struct stBspUart{
+  char           tx_buf[BSP_CFG_UART_TX_BUF_SIZE+1];
+  char           rx_buf[BSP_CFG_UART_RX_BUF_SIZE+1];
+  uint8_t        rx_idx;
+  tBspUartStatus rx_status;
+  //...//
+} tBspUart;
+
+/* ////////////////////////////////////////////////////////////////////////// */
+/*                                 BSP Objects                                */
+/* ////////////////////////////////////////////////////////////////////////// */
+typedef struct stBsp {
+  tBspScreen screen;
+  tBspUart   uart;
+} tBsp;
 
 
+/* ========================================================================== */
+/*                                 APP Objects                                */
+/* ========================================================================== */
 typedef struct stAppClock{
-  // cmnDateTime_t time;
   TaskHandle_t  _handle;
   
   AppGuiClockEnum_t style;
@@ -139,10 +172,7 @@ typedef struct stRtos {
  * @todo: Clean up unused terms
  */
 typedef struct{
-  struct{
-    tBspScreen screen;
-  
-  }bsp;
+  tBsp bsp;
 
   struct{
     SPI_HandleTypeDef  * const pHspi2;

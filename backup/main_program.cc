@@ -29,8 +29,7 @@
 #include "bsp_led.h"
 #include "app_rtos.h"
 
-
-
+#include "cmn_delay.h"
 #ifndef TEST_ONLY
 
 #ifdef __cplusplus
@@ -53,16 +52,90 @@ int main(int argc, char *argv[]){
   */
   hw_init();
   bsp_init();
-  app_init();
-  os_init();
+  // app_init();
+  // os_init();
 
-  TRACE_INFO("Initialization Completed");
+  // __enable_irq();
 
-  app_rtos_start();
+  TRACE_INFO("Initialization Completed.");
+
+#if 1
+  {
+    const volatile uint32_t REG_SCB_CPUID = SCB->CPUID;
+    TRACE_INFO("HW_SCB_CPUID_INFO: 0x%08X", REG_SCB_CPUID);
+  }
+#endif
+
+#if 1
+  {
+    const volatile uint32_t REG_SCB_AIRCR = SCB->AIRCR;
+    uint32_t is_little_endian = (REG_SCB_AIRCR & SCB_AIRCR_ENDIANESS_Msk) >> SCB_AIRCR_ENDIANESS_Pos;
+    uint32_t priority_grp     = (REG_SCB_AIRCR & SCB_AIRCR_PRIGROUP_Msk) >> SCB_AIRCR_PRIGROUP_Pos;
+    TRACE_INFO("HW_SCB_AIRCR_INFO: is_little_endian=%d priority_grp=%d", is_little_endian, priority_grp);
+  }
+#endif
+
+#if 1
+  {
+    const volatile uint32_t *REG_NVIC_ISER = NVIC->ISER;
+    uint32_t is_irq_enabled           = (0 == __get_PRIMASK());
+    uint32_t is_USART2_IRQn_active    = (0 != (REG_NVIC_ISER[USART2_IRQn >> 5] & (1 << (USART2_IRQn & 0x1F))));
+    uint32_t is_EXTI15_10_IRQn_active = (0 != (REG_NVIC_ISER[EXTI15_10_IRQn >> 5] & (1 << (EXTI15_10_IRQn & 0x1F))));
+    uint32_t is_TIM2_IRQn_active      = (0 != (REG_NVIC_ISER[TIM2_IRQn >> 5] & (1 << (TIM2_IRQn & 0x1F))));
+
+    TRACE_INFO("HW_NVIC_ISER_INFO: is_irq_enabled=%d\n USART2_IRQn=%d\n EXTI15_10_IRQn=%d\n TIM2_IRQn=%d\n", is_irq_enabled, is_USART2_IRQn_active, is_EXTI15_10_IRQn_active, is_TIM2_IRQn_active);
+
+    // NVIC->ISER[(((uint32_t)IRQn) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)IRQn) & 0x1FUL));
+  }
+#endif
+  
+  // app_rtos_start();
+
+  // HAL_UART_Receive_IT(&huart2, (uint8_t*)metope.bsp.uart.rx_buf, BSP_CFG_UART_RX_BUF_SIZE);
+
+  USART2->CR1 |= USART_CR1_RXNEIE;
+  USART2->CR3 |= USART_CR3_EIE;
   
   while(1){
+    tBspUart *p_uart = &metope.bsp.uart;
+    cmn_timer_delay(1000);
+    
+    if (p_uart->rx_status.has_new_msg) {
+      uint8_t cnt = 0;
+      char   *ptr = &metope.bsp.uart.rx_buf[cnt];
 
+      while ( *ptr != '\0') {
+        while( *ptr != '\n' && *ptr != '\r' && *ptr != '\0') {
+          TRACE_INFO("rx_buf[%d]='%c'", cnt++, *ptr++);
+        }
+        if (*ptr == '\0') {
+          break;
+        }else {
+          TRACE_DEBUG("rx_buf[%d]=%d", cnt++, *ptr++);
+        }
+      }
+      p_uart->rx_idx                  = 0;
+      p_uart->rx_status.has_new_msg   = 0;
+      p_uart->rx_status.is_overflowed = 0;
+
+      if (p_uart->rx_status.error_code) {
+        TRACE_WARNING("rx_error_code=0x%08X", p_uart->rx_status.error_code);
+        p_uart->rx_status.error_code = 0;
+      }
+    }
   }
+
+  // while(1){
+  //   if (HAL_OK == HAL_UART_Receive(&huart2, (uint8_t*)metope.bsp.uart.rx_buf, 7, HAL_MAX_DELAY)) {
+  //     char * ptr = metope.bsp.uart.rx_buf;
+  //     uint8_t cnt = 0;
+  //     while( *ptr != '\0') {
+  //       TRACE_INFO("rx_buf[%d]=%2d", cnt++, *ptr++);
+  //     }
+  //   }
+
+  //   bsp_tim2_delay(1000);
+  // }
 }
 
 #ifdef __cplusplus

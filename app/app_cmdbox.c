@@ -32,8 +32,7 @@
 void app_cmdbox_main(void *param) RTOSTHREAD {
   tRtosEvent *p_event = &metope.app.rtos.event;
 
-  
-  xEventGroupSetBits(p_event->_handle, CMN_EVENT_UART_INPUT);
+  xEventGroupClearBits(p_event->_handle, CMN_EVENT_UART_INPUT);
   while(1){
     EventBits_t uxBits = xEventGroupWaitBits( p_event->_handle, CMN_EVENT_UART_INPUT, pdFALSE, pdFALSE, portMAX_DELAY);
 

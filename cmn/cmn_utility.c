@@ -53,6 +53,7 @@
 #define FMT_STR_DEC_SIGNED               2
 #define FMT_STR_DEC_UNSIGNED             3
 #define FMT_STR_STR                      4
+#define FMT_STR_CHAR                     5
 
 #ifdef __cplusplus
 extern "C"{
@@ -353,6 +354,13 @@ int cmn_utility_vsnprintf(char * restrict buf, size_t size, const char * restric
             idx += cmn_utility_uint2strdec_width( &buf[idx], size-idx, va_arg(va, uint32_t), width);
           }
           flag = FMT_STR_DEC_UNSIGNED;
+          break;
+        }
+        case 'c':
+        case 'C':{
+          buf[idx] = (char)va_arg(va, int);
+          idx += 1;
+          flag = FMT_STR_CHAR;
           break;
         }
         case 'd':
