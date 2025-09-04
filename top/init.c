@@ -115,7 +115,7 @@ void bsp_init(void){
   /**
    * @note: Module will be initialized during the test
    */
-  // bsp_qmi8658_init();
+  bsp_qmi8658_init();
 #endif
   bsp_uart_init();
 }

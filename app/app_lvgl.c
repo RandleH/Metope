@@ -20,6 +20,7 @@
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
+#include <stdlib.h>
 #include "app_lvgl.h"
 #include "lvgl.h"
 #include "global.h"
@@ -53,7 +54,7 @@ STATIC void app_lvgl_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8
 #endif
   THIS->lvgl.isFlushDone = lv_disp_flush_is_last(disp);
 
-  bsp_screen_refresh( (bspScreenPixel_t *)buf, area->x1, area->y1, area->x2, area->y2);
+  // bsp_screen_refresh( (bspScreenPixel_t *)buf, area->x1, area->y1, area->x2, area->y2);
 
 #if LVGL_VERSION==836
   lv_disp_flush_ready(disp);
@@ -99,8 +100,42 @@ int app_lvgl_vsnprintf(char * buffer, size_t count, const char * format, va_list
 }
 
 
-u32 app_lvgl_get_tick(void){
+uint32_t app_lvgl_get_tick(void){
   return HAL_GetTick();
+}
+
+/**
+ * @brief Malloc Wrapper Function
+ * 
+ */
+void *app_lvgl_malloc(size_t xWantedSize) {
+  extern void *pvPortMalloc( size_t xWantedSize );
+  const tRtos *p_rtos = &THIS->rtos;
+  if (p_rtos->status.running) {
+    return pvPortMalloc(xWantedSize);
+  }else {
+    return malloc(xWantedSize);
+  }
+}
+
+void app_lvgl_free(void *pv) {
+  extern void vPortFree( void *pv );
+  const tRtos *p_rtos = &THIS->rtos;
+  if (p_rtos->status.running) {
+    vPortFree(pv);
+  }else {
+    free(pv);
+  }
+}
+
+void *app_lvgl_realloc(void *pv, size_t xWantedSize) {
+  extern void *pvPortRealloc( void *pv, size_t xWantedSize );
+  const tRtos *p_rtos = &THIS->rtos;
+  if (p_rtos->status.running) {
+    return pvPortRealloc(pv, xWantedSize);
+  }else {
+    return realloc(pv, xWantedSize);
+  }
 }
 
 /**
@@ -111,19 +146,19 @@ void app_lvgl_init(void){
   lv_init();
   
 #if LVGL_VERSION==836
-  lv_disp_drv_init( &THIS->lvgl.disp_drv);
-  THIS->lvgl.disp_drv.draw_buf    = &THIS->lvgl.disp_draw_buf;
-  THIS->lvgl.disp_drv.flush_cb    = app_lvgl_flush_cb;
-  THIS->lvgl.disp_drv.hor_res     = BSP_SCREEN_HEIGHT;
-  THIS->lvgl.disp_drv.ver_res     = BSP_SCREEN_WIDTH;
-  THIS->lvgl.disp_drv.direct_mode = false;
-  lv_disp_draw_buf_init( &THIS->lvgl.disp_draw_buf, THIS->lvgl.gram[0], THIS->lvgl.gram[1], sizeof(THIS->lvgl.gram[0])/sizeof(THIS->lvgl.gram[0][0]));
+  // lv_disp_drv_init( &THIS->lvgl.disp_drv);
+  // THIS->lvgl.disp_drv.draw_buf    = &THIS->lvgl.disp_draw_buf;
+  // THIS->lvgl.disp_drv.flush_cb    = app_lvgl_flush_cb;
+  // THIS->lvgl.disp_drv.hor_res     = BSP_SCREEN_HEIGHT;
+  // THIS->lvgl.disp_drv.ver_res     = BSP_SCREEN_WIDTH;
+  // THIS->lvgl.disp_drv.direct_mode = false;
+  // lv_disp_draw_buf_init( &THIS->lvgl.disp_draw_buf, THIS->lvgl.gram[0], THIS->lvgl.gram[1], sizeof(THIS->lvgl.gram[0])/sizeof(THIS->lvgl.gram[0][0]));
 
-  THIS->lvgl.disp = lv_disp_drv_register( &THIS->lvgl.disp_drv);
+  // THIS->lvgl.disp = lv_disp_drv_register( &THIS->lvgl.disp_drv);
 
-  lv_disp_t *dispp = lv_disp_get_default();
-  lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), false, LV_FONT_DEFAULT);
-  lv_disp_set_theme(dispp, theme);
+  // lv_disp_t *dispp = lv_disp_get_default();
+  // lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), false, LV_FONT_DEFAULT);
+  // lv_disp_set_theme(dispp, theme);
 
 #elif LVGL_VERSION==922
 
@@ -152,7 +187,7 @@ void app_lvgl_init(void){
 
 #endif
 
-  THIS->lvgl.default_scr = lv_scr_act();
+  // THIS->lvgl.default_scr = lv_scr_act();
 }
 
 

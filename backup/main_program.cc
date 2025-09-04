@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
   */
   hw_init();
   bsp_init();
-  // app_init();
+  app_init();
   // os_init();
 
 
