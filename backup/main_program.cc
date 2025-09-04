@@ -55,7 +55,6 @@ int main(int argc, char *argv[]){
   // app_init();
   // os_init();
 
-  // __enable_irq();
 
   TRACE_INFO("Initialization Completed.");
 
@@ -91,16 +90,11 @@ int main(int argc, char *argv[]){
   
   // app_rtos_start();
 
-  // HAL_UART_Receive_IT(&huart2, (uint8_t*)metope.bsp.uart.rx_buf, BSP_CFG_UART_RX_BUF_SIZE);
-
-  USART2->CR1 |= USART_CR1_RXNEIE;
-  USART2->CR3 |= USART_CR3_EIE;
-  
   while(1){
     tBspUart *p_uart = &metope.bsp.uart;
     cmn_timer_delay(1000);
     
-    if (p_uart->rx_status.has_new_msg) {
+    if (p_uart->rx_status.has_new_msg || p_uart->rx_status.is_overflowed) {
       uint8_t cnt = 0;
       char   *ptr = &metope.bsp.uart.rx_buf[cnt];
 
@@ -125,17 +119,6 @@ int main(int argc, char *argv[]){
     }
   }
 
-  // while(1){
-  //   if (HAL_OK == HAL_UART_Receive(&huart2, (uint8_t*)metope.bsp.uart.rx_buf, 7, HAL_MAX_DELAY)) {
-  //     char * ptr = metope.bsp.uart.rx_buf;
-  //     uint8_t cnt = 0;
-  //     while( *ptr != '\0') {
-  //       TRACE_INFO("rx_buf[%d]=%2d", cnt++, *ptr++);
-  //     }
-  //   }
-
-  //   bsp_tim2_delay(1000);
-  // }
 }
 
 #ifdef __cplusplus

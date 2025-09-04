@@ -44,13 +44,12 @@ extern "C"{
 void bsp_uart_init(void) {
   tBspUart *p_uart = &metope.bsp.uart;
 
-  // HAL_UART_Receive_IT( metope.dev.pHuart2, p_uart->rx_buf, 5);
-  // USART2->CR1 |= (USART_CR1_TE | USART_CR1_RE);
-  // SET_BIT(USART2->CR1, USART_CR1_RXNEIE);
-  // SET_BIT(USART2->CR3, USART_CR3_EIE);
-  // USART2->CR1 |= USART_CR1_UE; // Enable USART
+  USART2->CR1 |= USART_CR1_RXNEIE;
+  USART2->CR3 |= USART_CR3_EIE;
 
   p_uart->rx_buf[BSP_CFG_UART_RX_BUF_SIZE] = '\0';
+  p_uart->rx_status.word                   = 0;
+  p_uart->rx_idx                           = 0;
 }
 
 /**

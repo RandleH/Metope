@@ -387,7 +387,12 @@ extern "C"{
 
 
 
+## Lesson Learnt
 
+Sep 3rd, 2025
+>Register SR got cleared when inserting a breakpoint in the handler. Consequently the system can not recognize the new RX message because the SR register was cleared.
+>
+>Do not add the break point ahead of the program reading the register. Because reading the register value means something else in the embedded system. It may clear the internal bits by hardware. Your debugger will sceiently read those value causing register value cleared and this may impact your callflow.
 
 
 
