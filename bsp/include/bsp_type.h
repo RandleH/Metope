@@ -50,6 +50,8 @@ extern "C"{
 
 typedef u16 bspScreenBrightness_t;
 
+typedef u8 bspScreenRotate_t;
+
 typedef union{
   struct{
     u16 r : 5;

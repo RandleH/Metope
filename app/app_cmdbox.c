@@ -88,6 +88,11 @@ static tAppCmdboxDatabaseList CMD_C = {
 };
 static tAppCmdboxDatabaseListUnit CMD_D_LIST[] = {
   {
+    .keyword  = "DISPBR",
+    .callback = app_cmdbox_callback_1args_DISPBR,
+    .nargs    = 1
+  },
+  {
     .keyword  = "DISPOFF",
     .callback = app_cmdbox_callback_0args_DISPOFF,
     .nargs    = 0
@@ -194,7 +199,7 @@ void app_cmdbox_parse(const char *cmd) {
   tAppCmdboxDatabaseList *cmd_database_list = CMD_TABLE[cmd_copy[0]-'A'];
 
   
-  uint8_t                    cursor = 0;
+  size_t                     cursor = 0;
   char                       *ptr   = NULL;
   tAppCmdboxDatabaseListUnit *p_matched_cmd = NULL;
 

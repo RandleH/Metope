@@ -39,6 +39,7 @@ void bsp_screen_off(void);
 void bsp_screen_smooth_on(void);
 void bsp_screen_smooth_off(void);
 void bsp_screen_set_bright( bspScreenBrightness_t value);
+void bsp_screen_rotate( bspScreenRotate_t delta, uint8_t cw_ccw);
 void bsp_screen_fill( const bspScreenPixel_t color, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye);
 void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScreenCood_t ys, bspScreenCood_t xe, bspScreenCood_t ye);
 void bsp_screen_main(void *param) RTOSTHREAD;

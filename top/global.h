@@ -39,6 +39,7 @@ extern "C"{
 /* ////////////////////////////////////////////////////////////////////////// */
 typedef struct stBspScreen{
   bspScreenBrightness_t brightness;
+  bspScreenRotate_t     rotation;
   TickType_t            refresh_rate_ms;
   //...//
 } tBspScreen;
