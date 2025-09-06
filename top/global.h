@@ -34,16 +34,50 @@ extern "C"{
 #endif
 
 
+/* ////////////////////////////////////////////////////////////////////////// */
+/*                             BSP Screen Objects                             */
+/* ////////////////////////////////////////////////////////////////////////// */
 typedef struct stBspScreen{
   bspScreenBrightness_t brightness;
+  bspScreenRotate_t     rotation;
   TickType_t            refresh_rate_ms;
   //...//
 } tBspScreen;
 
+/* ////////////////////////////////////////////////////////////////////////// */
+/*                              BSP Uart Objects                              */
+/* ////////////////////////////////////////////////////////////////////////// */
+typedef union stBspUartStatus {
+  struct {
+    uint8_t is_locked     : 1;
+    uint8_t is_overflowed : 1;
+    uint8_t has_new_msg   : 1;
+    uint8_t error_code    : 5;
+  };
+  uint8_t word;
+} tBspUartStatus;
+
+typedef struct stBspUart{
+  char           tx_buf[BSP_CFG_UART_TX_BUF_SIZE+1];
+  char           rx_buf[BSP_CFG_UART_RX_BUF_SIZE+1];
+  uint8_t        rx_idx;
+  tBspUartStatus rx_status;
+  //...//
+} tBspUart;
+
+/* ////////////////////////////////////////////////////////////////////////// */
+/*                                 BSP Objects                                */
+/* ////////////////////////////////////////////////////////////////////////// */
+typedef struct stBsp {
+  tBspScreen screen;
+  tBspUart   uart;
+} tBsp;
 
 
+/* ========================================================================== */
+/*                                 APP Objects                                */
+/* ========================================================================== */
 typedef struct stAppClock{
-  // cmnDateTime_t time;
   TaskHandle_t  _handle;
   
   AppGuiClockEnum_t style;
@@ -57,6 +91,80 @@ typedef struct stAppClock{
   } gui;
 } tAppClock;
 
+/* ************************************************************************** */
+/*                             RTOS Task Objects                              */
+/* ************************************************************************** */
+typedef struct stRtosTask_ScreenRefreash {
+  TaskHandle_t _handle;
+  StaticTask_t _tcb;
+  StackType_t  _stack[APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE];
+} tRtosTask_ScreenRefreash;
+
+typedef struct stRtosTask_ClockUi {
+  TaskHandle_t _handle;
+  StaticTask_t _tcb;
+  StackType_t  _stack[APP_CFG_TASK_CLOCK_UI_STACK_SIZE];
+} tRtosTask_ClockUi;
+
+typedef struct stRtosTask_ScreenOnOff {
+  TaskHandle_t _handle;
+  StaticTask_t _tcb;
+  StackType_t  _stack[APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE];
+} tRtosTask_ScreenOnOff;
+
+typedef struct stRtosTask_CmdBox {
+  TaskHandle_t _handle;
+  StaticTask_t _tcb;
+  StackType_t  _stack[APP_CFG_TASK_CMD_BOX_STACK_SIZE];
+} tRtosTask_CmdBox;
+
+typedef union stRtosTaskIdleBitmap {
+  struct{
+    uint8_t reserved : 7;
+    uint8_t clock    : 1;
+  };
+  uint8_t word;
+} tRtosTaskIdleBitmap;
+
+typedef struct stRtosTask {
+  tRtosTask_ScreenRefreash  screen_refresh;
+  tRtosTask_ClockUi         clock_ui;
+  tRtosTask_ScreenOnOff     screen_onoff;
+  tRtosTask_CmdBox          cmd_box;
+  tRtosTaskIdleBitmap       bitmap_idle;
+} tRtosTask;
+
+/* ************************************************************************** */
+/*                             RTOS Event Objects                             */
+/* ************************************************************************** */
+typedef struct stRtosEvent {
+  StaticEventGroup_t _eg_buffer;  /*!< Event Group Buffer */
+  EventGroupHandle_t _handle;     /*!< Event Group Handle */
+} tRtosEvent;
+
+/* ************************************************************************** */
+/*                             RTOS Status Objects                            */
+/* ************************************************************************** */
+typedef union stRtosStatus {
+  struct {
+    uint8_t running  : 1; /*!< `ON` | `OFF` */
+    uint8_t stkovfl  : 1; /*!< Stack Overflow */
+    uint8_t nomem    : 1; /*!< Out of memory */
+    uint8_t reserved : 5;
+  };
+  uint8_t word;
+} tRtosStatus;
+
+/* ************************************************************************** */
+/*                                 RTOS Objects                               */
+/* ************************************************************************** */
+typedef struct stRtos {
+  tRtosTask   task;
+  tRtosEvent  event;
+  tRtosStatus status;
+} tRtos;
+
+
 /**
  * @note
  *  Naming convention: 
@@ -65,10 +173,7 @@ typedef struct stAppClock{
  * @todo: Clean up unused terms
  */
 typedef struct{
-  struct{
-    tBspScreen screen;
-  
-  }bsp;
+  tBsp bsp;
 
   struct{
     SPI_HandleTypeDef  * const pHspi2;
@@ -109,51 +214,7 @@ typedef struct{
       lv_obj_t          *default_scr;
     }lvgl;
 
-    struct{
-      struct{
-        struct{
-          TaskHandle_t _handle;
-          StaticTask_t _tcb;
-          StackType_t  _stack[APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE];
-        }screen_refresh;
-
-        struct{
-          TaskHandle_t _handle;
-          StaticTask_t _tcb;
-          StackType_t  _stack[APP_CFG_TASK_CLOCK_UI_STACK_SIZE];
-        }clock_ui;
-        
-        struct{
-          TaskHandle_t _handle;
-          StaticTask_t _tcb;
-          StackType_t  _stack[APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE];
-        }screen_onoff;
-
-        /**
-         * @author
-         *  
-         */
-        union{
-          struct{
-            uint8_t reserved : 7;
-            uint8_t clock    : 1;
-          };
-          uint8_t word;
-        }bitmap_idle;
-      }task;
-
-      struct{
-        StaticEventGroup_t _eg_buffer;  /*!< Event Group Buffer */
-        EventGroupHandle_t _handle;     /*!< Event Group Handle */
-      }event;
-
-      struct{
-        cmnBoolean_t running  : 1; /*!< `ON` | `OFF` */
-        cmnBoolean_t stkovfl  : 1;
-        cmnBoolean_t nomem    : 1;
-        cmnBoolean_t reserved : 5;
-      }status;
-    }rtos;
+    tRtos rtos;
 
     tAppClock clock;
 

@@ -19,7 +19,8 @@
 
 
 #include <stdarg.h>
-#include "cmn_type.h"
+#include <stdint.h>
+#include <stddef.h>
 
 #ifndef APP_LVGL_H
 #define APP_LVGL_H
@@ -28,7 +29,7 @@
 extern "C"{
 #endif
 
-u32 app_lvgl_get_tick(void);
+uint32_t app_lvgl_get_tick(void);
 
 void app_lvgl_init(void);
 void app_lvgl_flush_all( void);
@@ -37,6 +38,9 @@ void app_lvgl_load_default_screen(void);
 int app_lvgl_snprintf(char * buffer, size_t count, const char * format, ...);
 int app_lvgl_vsnprintf(char * buffer, size_t count, const char * format, va_list va);
 
+void *app_lvgl_malloc(size_t xWantedSize);
+void app_lvgl_free(void *pv);
+void *app_lvgl_realloc(void *pv, size_t xWantedSize);
 #ifdef __cplusplus
 }
 #endif

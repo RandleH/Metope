@@ -81,13 +81,13 @@ static cmnBoolean_t is_time_expired(cmnDateTime_t rtc_time, cmnDateTime_t clk_ti
 
   if( CMN_ABS(diff) > MAX_CLOCK_DIFF_SEC ){
     TRACE_DEBUG("RTC=%u/%u/%u %u:%u:%u CLK=%u/%u/%u %u:%u:%u",\
-      rtc_time.year+2024,                                     \
+      rtc_time.year + CMN_DATE_YEAR_OFFSET,                   \
       rtc_time.month,                                         \
       rtc_time.day,                                           \
       rtc_time.hour,                                          \
       rtc_time.minute,                                        \
       rtc_time.second,                                        \
-      clk_time.year+2024,                                     \
+      clk_time.year + CMN_DATE_YEAR_OFFSET,                   \
       clk_time.month,                                         \
       clk_time.day,                                           \
       clk_time.hour,                                          \
@@ -167,7 +167,7 @@ static void analogclk_inc_time(tAppGuiClockParam *pClient, tAnalogClockInternalP
    * @note
    *  `H % (3600/12) == M / 12`
    * @example
-   *  Time: 2024/12/30 14:57:59
+   *  Time: 2022/08/13 14:57:59
    *  - The minute hand swept angle is `3479` in the scale of `3600`
    *  - The hour hand swept angle is `889`.
    *  - The hour hand interval angle is equal to the current hour hand angle minus the hour hand angle at 2 o'clock
@@ -203,7 +203,7 @@ static void analogclk_inc_time(tAppGuiClockParam *pClient, tAnalogClockInternalP
   cmn_utility_timeinc( &params->_rem_microsecond, &pClient->time, ms);
   {
     cmnDateTime_t time = pClient->time;
-    TRACE_DUMMY("After %u ms, time => %u/%u/%u %u:%u:%u rem_ms=%u", ms, time.year+2024, time.month, time.day, time.hour, time.minute, time.second, params->_rem_microsecond);
+    TRACE_DUMMY("After %u ms, time => %u/%u/%u %u:%u:%u rem_ms=%u", ms, time.year + CMN_DATE_YEAR_OFFSET, time.month, time.day, time.hour, time.minute, time.second, params->_rem_microsecond);
   }
   
   lv_obj_set_style_transform_angle(pClient->pPinHour, params->_degree_hour, LV_PART_MAIN| LV_STATE_DEFAULT);

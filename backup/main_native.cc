@@ -1,10 +1,27 @@
 
 #include <stdio.h>
 #include "cmn_utility.h"
-
+#include "app_cmdbox.h"
+// #include "/Users/randleh/GitHub/Metope_cmdbox/app/app_cmdbox.c"
 #include "trace.h"
 
+
 int main(int argc, char *argv[]){
+  TRACE_INFO("Hello world");
+
+  app_cmdbox_parse("DISPOFF\r");
+  app_cmdbox_parse("DISPON\r");
+  app_cmdbox_parse("CCW 1\r");
+  app_cmdbox_parse("CW  3\r");
+  app_cmdbox_parse("HEL 1\r");
+  
+  return 0;
+}
+
+/**
+ * @note Misc `cmnDateTime_t` | `cmn_utility_timediff()`
+ */
+int main_template_1(int argc, char *argv[]){
 
   cmnDateTime_t timeA = {
     .year   = 0,
@@ -32,7 +49,10 @@ int main(int argc, char *argv[]){
   return 0;
 }
 
-int main1(int argc, char *argv[]){
+/**
+ * @note Misc `cmn_utility_angleinc()`, `cmn_utility_mindeg2_ms()`, `cmn_utility_hrdeg2_ms()`
+ */
+int main_template_2(int argc, char *argv[]){
   TRACE_INFO("2025/01/01 21:48:9\n");
 
   cmnDateTime_t time = {

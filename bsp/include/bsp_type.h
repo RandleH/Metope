@@ -40,12 +40,17 @@ typedef u16 bspScreenCood_t;
 
 #define BSP_SCREEN_USE_HARDWARE_NSS   1
 
+#define BSP_CFG_UART_TX_BUF_SIZE        256
+#define BSP_CFG_UART_RX_BUF_SIZE        32
+
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 
 typedef u16 bspScreenBrightness_t;
+
+typedef u8 bspScreenRotate_t;
 
 typedef union{
   struct{

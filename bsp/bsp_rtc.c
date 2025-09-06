@@ -75,6 +75,7 @@
 #define PCF8563_CLKOUT_CONTROL_FD1     1
 #define PCF8563_CLKOUT_CONTROL_FD0     0
 
+#define PCF8563_STARTING_YEAR           2000
 
 #ifdef __cplusplus
 extern "C"{
@@ -203,7 +204,7 @@ void bsp_rtc_decode_datetime( cmnDateTime_t *x, u8 *raw_7){
   x->hour   = bcd2dec(raw_7[2] & 0x3F);
   x->day    = bcd2dec(raw_7[3] & 0x3F);
   x->month  = bcd2dec(raw_7[5] & 0x1F);
-  x->year   = 2000+bcd2dec(raw_7[6])-2024;
+  x->year   = bcd2dec(raw_7[6]) + PCF8563_STARTING_YEAR - CMN_DATE_YEAR_OFFSET;
   // DayOfWeek = bcd2dec(raw_7[4] + 1);
 }
 
@@ -219,7 +220,7 @@ cmnDateTime_t bsp_rtc_get_time__debug( u8 *raw_7){
  * @example 2025/01/01 22:21:17 => `time = {.word=1163592769}`
  * @return Return Time Info aligned with `cmnDataTime_t`
  */
-cmnDateTime_t bsp_rtc_get_time( void){
+cmnDateTime_t bsp_rtc_get_time(void){
   u8 raw_7[7];
   return bsp_rtc_get_time__debug(raw_7);
 }
@@ -231,9 +232,9 @@ void bsp_rtc_set_time( const cmnDateTime_t t){
 	tmp[1] = dec2bcd(t.minute);
 	tmp[2] = dec2bcd(t.hour);
 	tmp[3] = dec2bcd(t.day);
-	tmp[4] = dayofweek(t.day, t.month, 2024+t.year);
+	tmp[4] = dayofweek(t.day, t.month, t.year + CMN_DATE_YEAR_OFFSET);
 	tmp[5] = dec2bcd(t.month);
-	tmp[6] = dec2bcd(2024+t.year -2000);
+	tmp[6] = dec2bcd(t.year + CMN_DATE_YEAR_OFFSET - PCF8563_STARTING_YEAR);
   
   bsp_rtc_write_reg( PCF8563_REG_TIME, tmp, 7);
 }

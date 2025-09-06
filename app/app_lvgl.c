@@ -99,9 +99,10 @@ int app_lvgl_vsnprintf(char * buffer, size_t count, const char * format, va_list
 }
 
 
-u32 app_lvgl_get_tick(void){
+uint32_t app_lvgl_get_tick(void){
   return HAL_GetTick();
 }
+
 
 /**
  * @brief

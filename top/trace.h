@@ -27,7 +27,7 @@
   #define TRACE_PRINTF( fmt, ...) bsp_uart_printf( fmt, ##__VA_ARGS__)
 #elif defined (SYS_TARGET_NATIVE)
   #include <stdio.h>
-  #define TRACE_PRINTF( fmt, ...) printf( fmt, ##__VA_ARGS__)
+  #define TRACE_PRINTF( fmt, ...) printf( fmt"\n", ##__VA_ARGS__)
 #else
   
 #endif // SYS_TARGET

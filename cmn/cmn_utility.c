@@ -53,6 +53,7 @@
 #define FMT_STR_DEC_SIGNED               2
 #define FMT_STR_DEC_UNSIGNED             3
 #define FMT_STR_STR                      4
+#define FMT_STR_CHAR                     5
 
 #ifdef __cplusplus
 extern "C"{
@@ -355,6 +356,13 @@ int cmn_utility_vsnprintf(char * restrict buf, size_t size, const char * restric
           flag = FMT_STR_DEC_UNSIGNED;
           break;
         }
+        case 'c':
+        case 'C':{
+          buf[idx] = (char)va_arg(va, int);
+          idx += 1;
+          flag = FMT_STR_CHAR;
+          break;
+        }
         case 'd':
         case 'D':{
           if(width==0xFF){
@@ -587,7 +595,7 @@ void cmn_utility_timeinc( uint32_t *ms_rem, cmnDateTime_t *pTime, uint32_t ms){
 
   if(trace_triggered){
     cmnDateTime_t time = *pTime;
-    TRACE_DEBUG("CMN - Time increased to %u/%u/%u %u:%u:%u", time.year+2024, time.month, time.day, time.hour, time.minute, time.second);
+    TRACE_DEBUG("CMN - Time increased to %u/%u/%u %u:%u:%u", time.year + CMN_DATE_YEAR_OFFSET, time.month, time.day, time.hour, time.minute, time.second);
   }
 }
 
@@ -620,7 +628,7 @@ int32_t cmn_utility_timediff( cmnDateTime_t timeA, cmnDateTime_t timeB){
 cmnWeekday_t cmn_utility_get_weekday( cmnDateTime_t time){
   int Y, C, M, N, D;
   M = 1 + (9 + time.month) % 12;
-  Y = 2024 + time.year - (M > 10);
+  Y = CMN_DATE_YEAR_OFFSET + time.year - (M > 10);
   C = Y / 100;
   D = Y % 100;
   N = ((13 * M - 1) / 5 + D + D / 4 + 6 * C + time.day + 5) % 7;
@@ -631,11 +639,11 @@ cmnWeekday_t cmn_utility_get_weekday( cmnDateTime_t time){
  * @brief Assign the datetime from an ISO string 
  * @param [in] __timestamp__  An ISO string for time representation. Use C/C++ `__TIMESTAMP__`.
  * @example
- *  "Thu Dec  5 23:47:39 2024"
+ *  "Sat Aug 13 23:47:39 2022" Happy birthday to MEILIDEBEIBEI
  */
 cmnDateTime_t cmn_utility_set_time_from_iso( const char* __timestamp__){
   cmnDateTime_t result = {
-    .year   = (__timestamp__[20]-'0')*1000 + (__timestamp__[21]-'0')*100 + (__timestamp__[22]-'0')*10 + (__timestamp__[23]-'0') - 2024,
+    .year   = (__timestamp__[20]-'0')*1000 + (__timestamp__[21]-'0')*100 + (__timestamp__[22]-'0')*10 + (__timestamp__[23]-'0') - CMN_DATE_YEAR_OFFSET,
     .month  = 0, // @todo: Fix the correct month
     .day    = (__timestamp__[8]-'0')*10 + (__timestamp__[9]-'0'),
     .hour   = (__timestamp__[11]-'0')*10 + (__timestamp__[12]-'0'),

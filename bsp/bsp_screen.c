@@ -58,6 +58,7 @@
     }while(0)
 #endif
 
+static tBspScreen *THIS = &metope.bsp.screen;
 
 /* ************************************************************************** */
 /*                             Private Functions                              */
@@ -284,6 +285,30 @@ void inline bsp_screen_set_bright( bspScreenBrightness_t value){
 
 /**
  * @brief
+ * @param [in] delta  - 0:255
+ * @param [in] cw_ccw - cw=0 ccw=1
+ */
+void bsp_screen_rotate( bspScreenRotate_t delta, uint8_t cw_ccw) {
+  const u8 parameter[] = {0b00001000, 0b01101000, 0b10001000, 0b10101000}; // cw => | ccw <= 
+
+  u8 rotation = THIS->rotation;
+  
+  delta    %= 4;
+  rotation += 4;
+  rotation  = (cw_ccw != 0) ? ((rotation - delta) % 4) : ((rotation + delta) % 4);
+
+  const u8 code[] = {
+    /* Set the MAC */
+    CMD, 1, 0x36 ,\
+    DAT, 1, parameter[rotation]
+  };
+  bsp_screen_parse_code( code, sizeof(code)/sizeof(*code));
+
+  THIS->rotation = rotation;
+}
+
+/**
+ * @brief
  * @addtogroup MachineDependent
  */
 void inline bsp_screen_on(void){
@@ -307,7 +332,7 @@ void inline bsp_screen_off(void){
 
 
 void bsp_screen_smooth_off(void){
-  u32 brightness = metope.bsp.screen.brightness;
+  u32 brightness = THIS->brightness;
   do{
     brightness >>= 1;
     bsp_screen_set_bright(brightness);
@@ -317,12 +342,12 @@ void bsp_screen_smooth_off(void){
 
 void bsp_screen_smooth_on(void){
   u32 brightness = 1;
-  while(brightness < metope.bsp.screen.brightness){
+  while(brightness < THIS->brightness){
     brightness <<= 1;
     bsp_screen_set_bright(brightness);
     cmn_tim9_sleep(20000, metope.app.rtos.status.running==true); // 20ms
   }
-  bsp_screen_set_bright(metope.bsp.screen.brightness);
+  bsp_screen_set_bright(THIS->brightness);
 }
 
 
@@ -519,7 +544,11 @@ void bsp_screen_onoff(void *param) RTOSTHREAD{
   xEventGroupClearBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M);
   
   while(1){
-    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M|CMN_EVENT_SCREEN_NEED_OFF, pdTRUE, pdFALSE, portMAX_DELAY);
+    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, 
+      CMN_EVENT_USER_KEY_M    |
+      CMN_EVENT_SCREEN_DISPOFF|
+      CMN_EVENT_SCREEN_DISPON |
+      CMN_EVENT_SCREEN_DISPBR, pdTRUE, pdFALSE, portMAX_DELAY);
     
     /* Always process the user button clicking first */
     if(uxBits & CMN_EVENT_USER_KEY_M){
@@ -531,9 +560,17 @@ void bsp_screen_onoff(void *param) RTOSTHREAD{
       metope.info.status.scroff = !metope.info.status.scroff;
     }
     /* Now it's time to process the long time inactive screen */
-    else if(uxBits & CMN_EVENT_SCREEN_NEED_OFF){
+    else if(uxBits & CMN_EVENT_SCREEN_DISPOFF) {
       bsp_screen_smooth_off();
       metope.info.status.scroff = 1;
+    }
+    else if(uxBits & CMN_EVENT_SCREEN_DISPON) {
+      bsp_screen_smooth_on();
+      metope.info.status.scroff = 0;
+    }
+    
+    if(uxBits & CMN_EVENT_SCREEN_DISPBR) {
+      bsp_screen_set_bright(THIS->brightness);
     }
   }
 }

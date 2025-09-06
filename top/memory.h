@@ -1,12 +1,12 @@
 /**
  ******************************************************************************
- * @file    bsp_uart.h
+ * @file    memory.h
  * @author  RandleH
- * @brief   Global Variable Declaration
+ * @brief   Memory Interface Layer
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2024 RandleH.
+ * Copyright (c) 2022 RandleH.
  * All rights reserved.
  *
  * This software component is licensed by RandleH under BSD 3-Clause license,
@@ -17,22 +17,25 @@
  ******************************************************************************
 */
 
+#ifndef MEMORY_H
+#define MEMORY_H
 
-#ifndef BSP_UART_H
-#define BSP_UART_H
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
+#include <stddef.h>
+
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-void bsp_uart_init(void);
-int bsp_uart_printf( const char *format, ...); // __attribute__ (( format(printf,1,2)));
+void *MALLOC(size_t xWantedSize);
+void FREE(void *pv);
+void *REALLOC(void *pv, size_t xWantedSize);
 
 
 #ifdef __cplusplus
 }
 #endif
-
-
-
 #endif

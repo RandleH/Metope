@@ -1,5 +1,21 @@
-
-
+/**
+ ******************************************************************************
+ * @file    init.c
+ * @author  RandleH
+ * @brief   Initialization Program
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 RandleH.
+ * All rights reserved.
+ *
+ * This software component is licensed by RandleH under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+*/
 
 
 
@@ -24,12 +40,14 @@
   #include "bsp_cpu.h"
   #include "bsp_timer.h"
 #endif
-
 #include "bsp_screen.h"
 #include "bsp_rtc.h"
 #include "bsp_gyro.h"
 #include "app_type.h"
 #include "app_task.h"
+#include "app_lvgl.h"
+#include "app_clock.h"
+#include "app_cmdbox.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -45,9 +63,6 @@
 void hw_init(void){
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  
-  /* Init the low level hardware */
-  HAL_MspInit();
 
 #if (defined USE_REGISTER) && (USE_REGISTER==1)
   bsp_cpu_clock_init();
@@ -102,10 +117,10 @@ void bsp_init(void){
    */
   bsp_qmi8658_init();
 #endif
-
+  bsp_uart_init();
 }
 
-#include "app_lvgl.h"
+
 void app_init(void){
 
 #if ((!(defined TEST_ONLY)) || (TEST_ONLY==0)) || ((defined TEST_ONLY) && (TEST_ONLY==1) && (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1))
@@ -114,9 +129,12 @@ void app_init(void){
 }
 
 
-#include "app_clock.h"
+
 void os_init(void){
-  metope.app.rtos.event._handle = xEventGroupCreateStatic( &metope.app.rtos.event._eg_buffer);
+  tRtosTask  *p_task  = &metope.app.rtos.task;
+  tRtosEvent *p_event = &metope.app.rtos.event;
+
+  p_event->_handle = xEventGroupCreateStatic( &p_event->_eg_buffer);
 
 #if (defined TEST_ONLY) && (TEST_ONLY==1)
   /**
@@ -125,34 +143,44 @@ void os_init(void){
    */
 #else
 
-  metope.app.rtos.task.screen_refresh._handle = xTaskCreateStatic(\
+  p_task->screen_refresh._handle = xTaskCreateStatic(\
     bsp_screen_main,\
     "bsp_screen_main",\
-    sizeof(metope.app.rtos.task.screen_refresh._stack) / sizeof(metope.app.rtos.task.screen_refresh._stack[0]),\
+    sizeof(p_task->screen_refresh._stack) / sizeof(p_task->screen_refresh._stack[0]),\
     &metope.bsp.screen,\
     kAppPriority_VERY_IMPORTANT,\
-    &metope.app.rtos.task.screen_refresh._stack[0],\
-    &metope.app.rtos.task.screen_refresh._tcb\
+    &p_task->screen_refresh._stack[0],\
+    &p_task->screen_refresh._tcb\
   );
   
-  metope.app.rtos.task.clock_ui._handle = xTaskCreateStatic(\
+  p_task->clock_ui._handle = xTaskCreateStatic(\
     app_clock_main,\
     "app_clock_main",\
-    sizeof(metope.app.rtos.task.clock_ui._stack) / sizeof(metope.app.rtos.task.clock_ui._stack[0]),\
+    sizeof(p_task->clock_ui._stack) / sizeof(p_task->clock_ui._stack[0]),\
     &metope.app.clock ,\
     kAppPriority_IMPORTANT,\
-    &metope.app.rtos.task.clock_ui._stack[0],\
-    &metope.app.rtos.task.clock_ui._tcb\
+    &p_task->clock_ui._stack[0],\
+    &p_task->clock_ui._tcb\
   );
   
-  metope.app.rtos.task.screen_onoff._handle = xTaskCreateStatic(\
+  p_task->screen_onoff._handle = xTaskCreateStatic(\
     bsp_screen_onoff,\
     "bsp_screen_onoff",\
-    sizeof(metope.app.rtos.task.screen_onoff._stack) / sizeof(metope.app.rtos.task.screen_onoff._stack[0]),\
+    sizeof(p_task->screen_onoff._stack) / sizeof(p_task->screen_onoff._stack[0]),\
     NULL ,\
     kAppPriority_VERY_IMPORTANT,\
-    &metope.app.rtos.task.screen_onoff._stack[0],\
-    &metope.app.rtos.task.screen_onoff._tcb\
+    &p_task->screen_onoff._stack[0],\
+    &p_task->screen_onoff._tcb\
+  );
+
+  p_task->cmd_box._handle = xTaskCreateStatic(\
+    app_cmdbox_main,\
+    "app_cmdbox_main",\
+    sizeof(p_task->cmd_box._stack) / sizeof(p_task->cmd_box._stack[0]),\
+    &metope.bsp.uart ,\
+    kAppPriority_NORMAL,\
+    &p_task->cmd_box._stack[0],\
+    &p_task->cmd_box._tcb\
   );
 #endif
 

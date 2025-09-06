@@ -41,6 +41,17 @@
 extern "C"{
 #endif
 
+void bsp_uart_init(void) {
+  tBspUart *p_uart = &metope.bsp.uart;
+
+  USART2->CR1 |= USART_CR1_RXNEIE;
+  USART2->CR3 |= USART_CR3_EIE;
+
+  p_uart->rx_buf[BSP_CFG_UART_RX_BUF_SIZE] = '\0';
+  p_uart->rx_status.word                   = 0;
+  p_uart->rx_idx                           = 0;
+}
+
 /**
  * @brief
  * @param [in] format - Formatted String
@@ -50,11 +61,13 @@ extern "C"{
  * @return `SUCCESS` | `ERROR` - Something wrong with prarmeters
  */
 int bsp_uart_printf( const char *format, ...){
-  char    buf[BSP_UART_PRINTF_BUF_SIZE] = {0};
+  tBspUart *p_uart = &metope.bsp.uart;
   va_list va;
   va_start(va, format);
-  int num_c_inserted = cmn_utility_vsnprintf( buf, sizeof(buf)/sizeof(*buf), format, va);
+  int num_c_inserted = cmn_utility_vsnprintf( p_uart->tx_buf, BSP_CFG_UART_TX_BUF_SIZE, format, va);
   va_end(va);
+
+  p_uart->tx_buf[BSP_CFG_UART_TX_BUF_SIZE] = '\0';
 
   if(num_c_inserted==0){
     const char *msg = "Unable to print the message => ";
@@ -65,10 +78,10 @@ int bsp_uart_printf( const char *format, ...){
 
 #if 1
   HAL_StatusTypeDef hstatus;
-  hstatus  = HAL_UART_Transmit( metope.dev.pHuart2, buf, num_c_inserted, HAL_MAX_DELAY);
-  buf[0] = '\n';
-  buf[1] = '\0';
-  hstatus |= HAL_UART_Transmit( metope.dev.pHuart2, buf, 2, HAL_MAX_DELAY);
+  hstatus  = HAL_UART_Transmit( metope.dev.pHuart2, p_uart->tx_buf, num_c_inserted, HAL_MAX_DELAY);
+  p_uart->tx_buf[0] = '\n';
+  p_uart->tx_buf[1] = '\0';
+  hstatus |= HAL_UART_Transmit( metope.dev.pHuart2, p_uart->tx_buf, 2, HAL_MAX_DELAY);
   return hstatus==HAL_OK ? SUCCESS : ERROR;
 #else
 #ifdef __cplusplus
