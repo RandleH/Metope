@@ -428,7 +428,7 @@ public:
     this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp2.str();
     this->_cout << "\n";
     
-    tmp3 << "t = "      << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(8) << ((float)(data.temp_H+data.temp_L/256.0));
+    tmp3 << "t = "      << std::fixed << std::setprecision(2) << std::setfill(' ') << std::setw(8) << ((float)(data.temperature.H+data.temperature.L/256.0));
     this->_cout << std::setfill(' ') << std::left << std::setw(60) << tmp3.str();
     this->_cout << "\r" << "\033[F" << "\r" << "\033[F" << "\r" << std::flush;
   }
@@ -564,52 +564,50 @@ public:
  * @addtogroup TestBench
  */
 void add_bsp_test(void){
-#if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
   tb_infra_bsp
-    // .insert(
-    //   TestBspUsartEcho(),
-    //   std::array<char,6>{{'R','a','n','d','l','e'}},
-    //   '\0'
-    // )
-    // .insert(
-    //   TestBspScreenBrightness(),
-    //   (char)'\0',
-    //   (char)'\0'
-    // )
-    // .insert(
-    //   TestBspScreenSmoothness(),
-    //   (char)'\0',
-    //   (char)'\0'
-    // )
-    // .insert(
-    //   TestBspScreenFill(),
-    //   (char)'\0',
-    //   (char)'\0'
-    // )
-    // .insert(
-    //   TestBspScreenDrawArea(),
-    //   (char)'\0',
-    //   (char)'\0'
-    // )
-    // .insert(
-    //   TestBspScreenDrawAreaStatic(),
-    //   std::array<std::array<bspScreenCood_t,4>,3>{{
-    //     {66,66,77,77},
-    //     {120,120,140,150},
-    //     {190,100, 195,130}
-    //   }},
-    //   (char)'\0'
-    // )
-    // .insert(
-    //   TestBspRTC(),'\0','\0'
-    // )
-    // .insert(
-    //   TestBspQMI8658A(),'\0','\0'
-    // )
+    .insert(
+      TestBspUsartEcho(),
+      std::array<char,6>{{'R','a','n','d','l','e'}},
+      '\0'
+    )
+    .insert(
+      TestBspScreenBrightness(),
+      (char)'\0',
+      (char)'\0'
+    )
+    .insert(
+      TestBspScreenSmoothness(),
+      (char)'\0',
+      (char)'\0'
+    )
+    .insert(
+      TestBspScreenFill(),
+      (char)'\0',
+      (char)'\0'
+    )
+    .insert(
+      TestBspScreenDrawArea(),
+      (char)'\0',
+      (char)'\0'
+    )
+    .insert(
+      TestBspScreenDrawAreaStatic(),
+      std::array<std::array<bspScreenCood_t,4>,3>{{
+        {66,66,77,77},
+        {120,120,140,150},
+        {190,100, 195,130}
+      }},
+      (char)'\0'
+    )
+    .insert(
+      TestBspRTC(),'\0','\0'
+    )
+    .insert(
+      TestBspQMI8658A(),'\0','\0'
+    )
     .insert(
       TestBspQMI8658A_FIFO(),'\0','\0'
     )
   ;
-#endif
 
 }

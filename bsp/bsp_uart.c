@@ -44,8 +44,11 @@ extern "C"{
 void bsp_uart_init(void) {
   tBspUart *p_uart = &metope.bsp.uart;
 
+#ifndef TEST_ONLY
+  /* Use RX interrupt for main program */
   USART2->CR1 |= USART_CR1_RXNEIE;
   USART2->CR3 |= USART_CR3_EIE;
+#endif
 
   p_uart->rx_buf[BSP_CFG_UART_RX_BUF_SIZE] = '\0';
   p_uart->rx_status.word                   = 0;

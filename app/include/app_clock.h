@@ -21,7 +21,6 @@
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
-#include "lvgl.h"
 #include "cmn_type.h"
 #include "app_type.h"
 
@@ -39,6 +38,13 @@ extern "C"{
 
 void app_clock_main(void *param) RTOSTHREAD;
 void app_clock_idle(void *param) RTOSIDLE;
+
+#ifdef TEST_ONLY
+extern void         app_clock_gui_switch         (AppGuiClockEnum_t x);
+extern void         app_clock_idle_timer_callback(xTimerHandle xTimer);
+extern xTimerHandle app_clock_idle_timer_regist  (void);
+extern void         app_clock_idle_timer_unregist(xTimerHandle xTimer);
+#endif
 
 #ifdef __cplusplus
 }

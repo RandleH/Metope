@@ -68,10 +68,10 @@ static int app_cmdbox_callback_0args_GT(const char *cmd, ...) {
 static int app_cmdbox_callback_6args_ST(const char *cmd, ...) {
   va_list args;
   va_start(args, cmd);
-  cmnDateTime_t time = {0};
 #if (defined SYS_TARGET_NATIVE)
   TRACE_DEBUG("\tExecute user command: %s", cmd);
 #elif (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+  cmnDateTime_t time = {0};
   time.year   = va_arg(args, int) - CMN_DATE_YEAR_OFFSET;
   time.month  = va_arg(args, int);
   time.day    = va_arg(args, int);

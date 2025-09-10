@@ -25,6 +25,7 @@
 #include "trace.h"
 #include "FreeRTOS.h"
 #include "timers.h"
+#include "lvgl.h"
 #include "app_lvgl.h"
 #include "app_clock.h"
 #include "cmn_utility.h"
@@ -45,6 +46,12 @@
 #define DEFAULT_IDLE_TASK_PERIOD       (3000) // ms
 #define DEFAULT_CLOCK_REFREASH_PERIOD  (64)   // ticks
 
+#ifndef TEST_ONLY
+  #define STATIC static
+#else
+  #define STATIC
+#endif
+
 
 
 /* ************************************************************************** */
@@ -62,10 +69,12 @@
 extern "C"{
 #endif
 
-static void         app_clock_gui_switch         (AppGuiClockEnum_t x);
-static void         app_clock_idle_timer_callback(xTimerHandle xTimer);
-static xTimerHandle app_clock_idle_timer_regist  (void);
-static void         app_clock_idle_timer_unregist(xTimerHandle xTimer);
+#ifndef TEST_ONLY
+STATIC void         app_clock_gui_switch         (AppGuiClockEnum_t x);
+STATIC void         app_clock_idle_timer_callback(xTimerHandle xTimer);
+STATIC xTimerHandle app_clock_idle_timer_regist  (void);
+STATIC void         app_clock_idle_timer_unregist(xTimerHandle xTimer);
+#endif
 
 /**
  * @brief Private time check
@@ -1655,7 +1664,7 @@ extern "C"{
  *  This function assumes the `deinit()` is NULL when clock ui is deactivated, vice versa.
  * @addtogroup ThreadSafe
  */
-static void app_clock_gui_switch( AppGuiClockEnum_t x){
+STATIC void app_clock_gui_switch( AppGuiClockEnum_t x){
   if(NULL!=metope.app.clock.gui.deinit){
     metope.app.clock.gui.deinit( &metope.app.clock.gui.param );
   }
@@ -1728,7 +1737,7 @@ static void app_clock_gui_switch( AppGuiClockEnum_t x){
  * @param [in] xTimer - FreeRTOS Software Timer Handle
  * @addtogroup FreeRTOS
  */
-static void app_clock_idle_timer_callback(xTimerHandle xTimer){
+STATIC void app_clock_idle_timer_callback(xTimerHandle xTimer){
   if(xTimer && !xTimerIsTimerActive(xTimer)){
     metope.app.rtos.task.bitmap_idle.clock = 1;
   }
@@ -1740,7 +1749,7 @@ static void app_clock_idle_timer_callback(xTimerHandle xTimer){
  * 
  * @addtogroup FreeRTOS
  */
-static xTimerHandle app_clock_idle_timer_regist(void){
+STATIC xTimerHandle app_clock_idle_timer_regist(void){
   xTimerHandle _idle_task_timer = xTimerCreate( \
     "app_clock_idle_timer",
     pdMS_TO_TICKS(DEFAULT_IDLE_TASK_PERIOD),
@@ -1759,7 +1768,7 @@ static xTimerHandle app_clock_idle_timer_regist(void){
  * @param [in] xTimer - FreeRTOS Software Timer Handle
  * @addtogroup FreeRTOS
  */
-static void app_clock_idle_timer_unregist(xTimerHandle xTimer){
+STATIC void app_clock_idle_timer_unregist(xTimerHandle xTimer){
   ASSERT(pdPASS==xTimerDelete(xTimer, 0), "Timer is NOT deleted");
 }
 
