@@ -215,7 +215,7 @@ static size_t app_cmdbox_parse_search(const char *cmd, const tAppCmdboxDatabaseL
   if (isalpha(cmd[0]) && cmd[0] >= 'A') {
     const tAppCmdboxDatabaseList *cmd_database_list = CMD_TABLE[cmd[cursor]-'A'];
     /* Search if command was supported */
-    char *ptr   = NULL;
+    const char *ptr   = NULL;
     for( int i = 0; i < cmd_database_list->len; ++i){
       ptr = strstr( &cmd[cursor], cmd_database_list->database[i].keyword);
       if (ptr == &cmd[cursor]) {
