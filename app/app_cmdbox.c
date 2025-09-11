@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include "assert.h"
 #include "trace.h"
@@ -57,20 +58,20 @@ typedef struct stAppCmdboxDatabaseListUnit {
 } tAppCmdboxDatabaseListUnit;
 
 typedef struct stAppCmdboxDatabaseList{
-  tAppCmdboxDatabaseListUnit *database;
-  size_t                     len;
+  const tAppCmdboxDatabaseListUnit *database;
+  const size_t                     len;
 } tAppCmdboxDatabaseList;
 
 
 /* ************************************************************************** */
 /*                             Private Variables                              */
 /* ************************************************************************** */
-static tAppCmdboxDatabaseList CMD_DUMMY = {
+static const tAppCmdboxDatabaseList CMD_DUMMY = {
   .database = NULL,
   .len      = 0
 };
 
-static tAppCmdboxDatabaseListUnit CMD_C_LIST[] = {
+static const tAppCmdboxDatabaseListUnit CMD_C_LIST[] = {
   {
     .keyword  = "CCW",
     .callback = app_cmdbox_callback_1args_CCW,
@@ -82,11 +83,11 @@ static tAppCmdboxDatabaseListUnit CMD_C_LIST[] = {
     .nargs    = 1
   }
 };
-static tAppCmdboxDatabaseList CMD_C = {
+static const tAppCmdboxDatabaseList CMD_C = {
   .database = &CMD_C_LIST[0],
   .len      = sizeof(CMD_C_LIST)/sizeof(tAppCmdboxDatabaseListUnit)
 };
-static tAppCmdboxDatabaseListUnit CMD_D_LIST[] = {
+static const tAppCmdboxDatabaseListUnit CMD_D_LIST[] = {
   {
     .keyword  = "DISPBR",
     .callback = app_cmdbox_callback_1args_DISPBR,
@@ -103,34 +104,34 @@ static tAppCmdboxDatabaseListUnit CMD_D_LIST[] = {
     .nargs    = 0
   }
 };
-static tAppCmdboxDatabaseList CMD_D = {
+static const tAppCmdboxDatabaseList CMD_D = {
   .database = &CMD_D_LIST[0],
   .len      = sizeof(CMD_D_LIST)/sizeof(tAppCmdboxDatabaseListUnit)
 };
-static tAppCmdboxDatabaseListUnit CMD_G_LIST[] = {
+static const tAppCmdboxDatabaseListUnit CMD_G_LIST[] = {
   {
     .keyword  = "GT",
     .callback = app_cmdbox_callback_0args_GT,
     .nargs    = 0
   }
 };
-static tAppCmdboxDatabaseList CMD_G = {
+static const tAppCmdboxDatabaseList CMD_G = {
   .database = &CMD_G_LIST[0],
   .len      = sizeof(CMD_G_LIST)/sizeof(tAppCmdboxDatabaseListUnit)
 };
-static tAppCmdboxDatabaseListUnit CMD_S_LIST[] = {
+static const tAppCmdboxDatabaseListUnit CMD_S_LIST[] = {
   {
     .keyword  = "ST",
     .callback = app_cmdbox_callback_6args_ST,
     .nargs    = 6
   }
 };
-static tAppCmdboxDatabaseList CMD_S = {
+static const tAppCmdboxDatabaseList CMD_S = {
   .database = &CMD_S_LIST[0],
   .len      = sizeof(CMD_S_LIST)/sizeof(tAppCmdboxDatabaseListUnit)
 };
 
-static tAppCmdboxDatabaseList *CMD_TABLE[] = {
+static const tAppCmdboxDatabaseList *CMD_TABLE[] = {
   [('A'-'A') ... ('B'-'A')] = &CMD_DUMMY,
   [('C'-'A')]               = &CMD_C,
   [('D'-'A')]               = &CMD_D,
@@ -171,6 +172,65 @@ int (*app_cmdbox_callback_wrapper[7])(const char *cmd, int(*callback)(const char
 /*                             Private Functions                              */
 /* ************************************************************************** */
 
+typedef cmnBoolean_t (*tAppCmnBoxStrCmpFunc)(char);
+
+
+static cmnBoolean_t app_cmdbox_string_is_LF(char c) {
+  return (c == '\r');
+}
+
+static cmnBoolean_t app_cmdbox_string_is_CR(char c) {
+  return (c == '\n');
+}
+
+static cmnBoolean_t app_cmdbox_string_is_NULL(char c) {
+  return (c == '\0');
+}
+
+static cmnBoolean_t app_cmdbox_string_is_enter(char c) {
+  return app_cmdbox_string_is_LF(c) || app_cmdbox_string_is_CR(c) || app_cmdbox_string_is_NULL(c);
+}
+
+static cmnBoolean_t app_cmdbox_string_is_SP(char c) {
+  return (c == '\x20');
+}
+
+static cmnBoolean_t app_cmdbox_string_is_digit(char c) {
+  return (0x00 != isdigit(c));
+}
+
+
+static size_t app_cmdbox_string_skip_until(const char *cmd, tAppCmnBoxStrCmpFunc comparator, cmnBoolean_t reversed, const char *p_end) {
+  size_t cursor = 0;
+  while ( ((true == comparator(cmd[cursor])) ^ reversed) && (&cmd[cursor] != p_end)) {
+    ++cursor;
+  }
+  return cursor;
+}
+
+static size_t app_cmdbox_parse_search(const char *cmd, const tAppCmdboxDatabaseListUnit **pp_matched_cmd) {
+  const tAppCmdboxDatabaseListUnit *p_matched_cmd = NULL;
+  size_t                           cursor         = 0;
+
+  if (isalpha(cmd[0]) && cmd[0] >= 'A') {
+    const tAppCmdboxDatabaseList *cmd_database_list = CMD_TABLE[cmd[cursor]-'A'];
+    /* Search if command was supported */
+    const char *ptr   = NULL;
+    for( int i = 0; i < cmd_database_list->len; ++i){
+      ptr = strstr( &cmd[cursor], cmd_database_list->database[i].keyword);
+      if (ptr == &cmd[cursor]) {
+        p_matched_cmd = &cmd_database_list->database[i];
+        TRACE_INFO("Received user command: [%s]", &cmd[cursor]);
+        cursor = strlen(cmd_database_list->database[i].keyword);
+        break;
+      }
+    }
+  }
+  ASSERT( (!p_matched_cmd) || (p_matched_cmd->callback), "Found a command with a null callback" );
+  *pp_matched_cmd = p_matched_cmd;
+  return cursor;
+}
+
 /**
  * @brief Parse the user commands
  * @attention
@@ -196,51 +256,39 @@ void app_cmdbox_parse(const char *cmd) {
     }
   }
 
-  tAppCmdboxDatabaseList *cmd_database_list = CMD_TABLE[cmd_copy[0]-'A'];
-
-  
-  size_t                     cursor = 0;
-  char                       *ptr   = NULL;
-  tAppCmdboxDatabaseListUnit *p_matched_cmd = NULL;
+  size_t cursor = 0;
 
   while (1) {
     /* Skip escaping charactors */
-    while ( (cmd_copy[cursor]=='\n' || cmd_copy[cursor]=='\r' || cmd_copy[cursor]=='\0') && (&cmd_copy[cursor] != cmd_end)) {
-      ++cursor;
-    }
+    cursor += app_cmdbox_string_skip_until(&cmd_copy[cursor], app_cmdbox_string_is_enter, false, cmd_end);
+    
     if (&cmd_copy[cursor] == cmd_end) {
       break;
     }
 
-    /* Search if command was supported */
-    for( int i = 0; i < cmd_database_list->len; ++i){
-      ptr = strstr( &cmd_copy[cursor], cmd_database_list->database[i].keyword);
-      if (ptr) {
-        p_matched_cmd = &cmd_database_list->database[i];
-        TRACE_INFO("Received user command: [%s]", &cmd_copy[cursor]);
-        cursor = strlen(cmd_database_list->database[i].keyword) + (uint8_t)(ptr - &cmd_copy[cursor]);
-        break;
-      }
-    }
-    if (NULL == ptr) {
-      TRACE_WARNING("Unknown command: [%s]", &cmd_copy[cursor]);
-      return;
-    }
+    const tAppCmdboxDatabaseListUnit *p_matched_cmd = NULL;
 
+    cursor += app_cmdbox_parse_search(&cmd_copy[cursor], &p_matched_cmd);
+
+    if (NULL == p_matched_cmd) {
+      TRACE_WARNING("=> Unknown command: [%s]", &cmd_copy[cursor]);
+
+      /* Skip until the user enter reached */
+      cursor += app_cmdbox_string_skip_until(&cmd_copy[cursor], app_cmdbox_string_is_enter, true, cmd_end);
+      continue;
+    }
     /* Extract arguments */
     ASSERT(p_matched_cmd->nargs <= MAX_NUN_ARGS_SUPPORTED, "Too many arguments.");
     arg_t args[MAX_NUN_ARGS_SUPPORTED];
     for (int i = 0; i < p_matched_cmd->nargs; ++i) {
       
       /* Skip the space */
-      while (cmd_copy[cursor] == '\x20') {
-        ++cursor;
-      }
+      cursor += app_cmdbox_string_skip_until(&cmd_copy[cursor], app_cmdbox_string_is_SP, false, cmd_end);
 
       uint8_t cursor_arg_start = cursor;
-      while (isdigit(cmd_copy[cursor])) {
-        ++cursor;
-      }
+      /* Skip digits */
+      cursor += app_cmdbox_string_skip_until(&cmd_copy[cursor], app_cmdbox_string_is_digit, false, cmd_end);
+
       {
         char tmp = cmd_copy[cursor];
         cmd_copy[cursor] = '\0';

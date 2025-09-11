@@ -65,6 +65,7 @@ typedef union{
 
   /* QMI8658 FIFO Pattern Buffer */
   struct{
+    u8 fifo_padding[2];
     u8 fifo[12];
   };
 
@@ -74,10 +75,12 @@ typedef union{
      * @note: T = temp_H + temp_L /  [ TEMPERATURE_SENSOR_RESOLUTION:=256 ]
      */
     union{
-      u8  temp_L;
-      u8  temp_H;
-      i16 temperature;
-    };
+      struct{
+        u8  L;
+        u8  H;
+      };
+      i16 word;
+    }temperature;
 
 /**
  * @attention

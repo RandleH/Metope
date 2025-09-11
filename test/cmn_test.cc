@@ -156,12 +156,11 @@ public:
 };
 
 
-
 #include "bsp_gyro.h"
 
 namespace paramsTestCmnStructAlignment{
-typedef std::array<void*,6> Input;
-typedef std::array<void*,6> Output;
+typedef std::array<void*,8> Input;
+typedef std::array<void*,8> Output;
 }
 
 class TestCmnStructAlignment : public TestUnitWrapper<paramsTestCmnStructAlignment::Input,paramsTestCmnStructAlignment::Output>{
@@ -176,8 +175,10 @@ public:
     bool result = true;
     for(u8 x=0; x<i.size(); ++x){
       result &= (i[x]==o[x]);
-      // if(i[x]!=o[x])
-      std::cout<<"DUT: "<<i[x]<<" REF: "<<o[x]<<std::endl;
+      if(i[x]!=o[x]) {
+        this->_err_msg << "DUT: " << i[x] << " REF: " << o[x]<<endl;
+        result = false;
+      }
     }
 
     return result;
@@ -185,8 +186,6 @@ public:
 };
 
 void add_cmn_test(void){
-
-#if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
   tb_infra_local
     .insert( 
       TestCmnDummy(), 
@@ -252,14 +251,18 @@ void add_cmn_test(void){
     .insert(
       TestCmnStructAlignment(),
       paramsTestCmnStructAlignment::Input{{
-        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.x),\
-        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.y),\
-        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.z),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->temperature.L),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->temperature.H),\
         static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->gyro.x),\
         static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->gyro.y),\
-        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->gyro.z)
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->gyro.z),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.x),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.y),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->acc.z)
       }},
       paramsTestCmnStructAlignment::Output{{
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->raw[0]),\
+        static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->raw[1]),\
         static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[0]),\
         static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[2]),\
         static_cast<void*>(&static_cast<tBspGyroData*>(nullptr)->fifo[4]),\
@@ -269,6 +272,4 @@ void add_cmn_test(void){
       }}
     )
   ;
-#endif
-
 }

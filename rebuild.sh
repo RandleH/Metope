@@ -5,7 +5,7 @@
 DIR_CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd ${DIR_CWD}
-. clean.sh
+rm -rf build
 
 ################################################################
 # Create project compilation folder

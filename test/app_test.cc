@@ -143,11 +143,11 @@ public:
         &_handle[i]
       );
 
-      // if(ret!=pdPASS){
-      //   this->_err_msg<<"Failed to create Task 0"<<endl;
-      //   result = false;
-      //   break;
-      // }
+      if(ret!=pdPASS){
+        this->_err_msg<<"Failed to create Task 0"<<endl;
+        result = false;
+        break;
+      }
     }
     
     app_rtos_start();
@@ -179,7 +179,6 @@ void add_app_test( void){
   // );
 #endif
 
-#if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
   tb_infra_os.insert(
     TestAppTaskFreeRTOS(),
     paramsTestAppTaskFreeRTOS::Input{{
@@ -190,7 +189,4 @@ void add_app_test( void){
     }},
     '\0'
   );
-#endif
-
-
 }

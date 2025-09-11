@@ -115,8 +115,8 @@ void bsp_init(void){
   /**
    * @note: Module will be initialized during the test
    */
+  #endif
   bsp_qmi8658_init();
-#endif
   bsp_uart_init();
 }
 
@@ -131,7 +131,6 @@ void app_init(void){
 
 
 void os_init(void){
-  tRtosTask  *p_task  = &metope.app.rtos.task;
   tRtosEvent *p_event = &metope.app.rtos.event;
 
   p_event->_handle = xEventGroupCreateStatic( &p_event->_eg_buffer);
@@ -142,6 +141,7 @@ void os_init(void){
    *  Tasks were defined in the Test Bench 
    */
 #else
+  tRtosTask  *p_task  = &metope.app.rtos.task;
 
   p_task->screen_refresh._handle = xTaskCreateStatic(\
     bsp_screen_main,\

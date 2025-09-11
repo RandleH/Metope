@@ -222,21 +222,20 @@ int main(int argc, char *argv[]){
     std::cout << "\n\n";
   }
 
-  add_cmn_test();
-  add_bsp_test();
-  // add_app_test();
-
 #if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
+  add_cmn_test();
   cout<<"Local Project Test:"<<endl;
   tb_infra_local.verdict();
 #endif
 
 #if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
+  add_bsp_test();
   cout<<"BSP Test:"<<endl;
   tb_infra_bsp.verdict();
 #endif
   
 #if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
+  add_app_test();
   cout<<"RTOS Test:"<<endl;
   tb_infra_os.verdict();
 #endif

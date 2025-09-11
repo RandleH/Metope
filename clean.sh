@@ -7,7 +7,9 @@ echo "Clean working directory: ${DIR_CWD}"
 
 cd ${DIR_CWD}
 rm -rf build
-
+rm     main.cc
+rm     CMakeLists.txt
+rm -rf STM32CubeMX/*
 
 
 
