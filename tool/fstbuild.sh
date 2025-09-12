@@ -2,12 +2,16 @@
 ################################################################
 # Get current script directory
 ################################################################
-DIR_CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd ${DIR_CWD}
-cd ./build
+if [[ -n "$PRJ_TOP" ]]; then
+    echo "PRJ_TOP was set to ${PRJ_TOP}."
+else
+    echo "Have you sourced the setup.env already?"
+    exit 1
+fi
 
 
 ################################################################
 # Execution Zone
 ################################################################
+cd ${PRJ_TOP}/build
 make -j32

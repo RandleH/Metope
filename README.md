@@ -400,7 +400,7 @@ Sep 3rd, 2025
 ## Utility
 
 - [**Online GDB**](https://www.onlinegdb.com/)
-
+- [**Simulator**](https://wokwi.com)
 
 
 ## Reference
