@@ -24,7 +24,7 @@
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
   #include "arm_math.h"
   #include "stm32f4xx.h"
   #include "stm32f4xx_hal.h"

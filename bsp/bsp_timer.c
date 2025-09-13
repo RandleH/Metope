@@ -108,9 +108,12 @@ void bsp_timer_init( void){
    *  f_TIMx = f_APB/( ${psc}+1 )
    *  MaxDelay = [(1<<NUM_CNT_BITS)-1] / f_TIMx
    */
-#if (defined SYS_TARGET_STM32F411CEU6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined EMULATOR_STM32F411CEU6)
   bsp_timer_init_register( TIM2, 46875-1); /*!< APB1 = 96MHz; f_TIM2 = 2.048kHz; CNT[0:15]; MaxDelay = 32000ms  */
   bsp_timer_init_register( TIM9, 96-1);    /*!< APB1 = 96MHz; f_TIM9 = 1MHz;     CNT[0:15]; MaxDelay = 65.536ms */
+#elif (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F405RGT6)
+  bsp_timer_init_register( TIM2, 23437-1); /*!< APB1 = 48MHz; f_TIM2 = 2.048kHz; CNT[0:15]; MaxDelay = 32000ms  */
+  bsp_timer_init_register( TIM9, 48-1);    /*!< APB1 = 48MHz; f_TIM9 = 1MHz;     CNT[0:15]; MaxDelay = 65.536ms */
 #else
   #error "Unimplemented"
 #endif

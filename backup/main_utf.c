@@ -2,11 +2,11 @@
  ******************************************************************************
  * @file    main.cc
  * @author  RandleH
- * @brief   Main program entrance
+ * @brief   Unit Testing
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2022 RandleH.
+ * Copyright (c) 2025 RandleH.
  * All rights reserved.
  *
  * This software component is licensed by RandleH under BSD 3-Clause license,
@@ -21,20 +21,7 @@
 /* ************************************************************************** */
 /*                                  Includes                                  */
 /* ************************************************************************** */
-#include "init.h"
-#include "global.h"
-#include "assert.h"
-#include "trace.h"
-#include "cmn_type.h"
-#include "bsp_led.h"
-#include "app_rtos.h"
 
-#include "cmn_delay.h"
-#ifndef TEST_ONLY
-
-#ifdef __cplusplus
-extern "C"{
-#endif
 
 int main(int argc, char *argv[]){
   
@@ -51,9 +38,6 @@ int main(int argc, char *argv[]){
    * 
   */
   hw_init();
-  bsp_init();
-  app_init();
-  os_init();
 
   TRACE_INFO("System boot completed.");
 
@@ -156,92 +140,4 @@ int main(int argc, char *argv[]){
     TRACE_DEBUG("\n");
   }
 #endif
-
-  app_rtos_start();
-
-  while(1);
-  {
-    tBspUart *p_uart = &metope.bsp.uart;
-    cmn_timer_delay(1000);
-    
-    if (p_uart->rx_status.has_new_msg || p_uart->rx_status.is_overflowed) {
-      uint8_t cnt = 0;
-      char   *ptr = &metope.bsp.uart.rx_buf[cnt];
-
-      while ( *ptr != '\0') {
-        while( *ptr != '\n' && *ptr != '\r' && *ptr != '\0') {
-          TRACE_INFO("rx_buf[%d]='%c'", cnt++, *ptr++);
-        }
-        if (*ptr == '\0') {
-          break;
-        }else {
-          TRACE_DEBUG("rx_buf[%d]=%d", cnt++, *ptr++);
-        }
-      }
-      p_uart->rx_idx                  = 0;
-      p_uart->rx_status.has_new_msg   = 0;
-      p_uart->rx_status.is_overflowed = 0;
-
-      if (p_uart->rx_status.error_code) {
-        TRACE_WARNING("rx_error_code=0x%08X", p_uart->rx_status.error_code);
-        p_uart->rx_status.error_code = 0;
-      }
-    }
-  }
-
 }
-
-#ifdef __cplusplus
-}
-#endif
-
-#else
-
-#include "cmn_delay.h"
-
-#include "test.hh"
-#include "cmn_test.hh"
-#include "bsp_test.hh"
-#include "app_test.hh"
-#include "bsp_cpu.h"
-
-int main(int argc, char *argv[]){
-  return 1;
-  hw_init();
-  bsp_init();
-  // app_init();
-  os_init();
-  cout<<"Hardware Initialization Completed.\n\n"<<endl;
-  
-  {
-    size_t len = 0;
-    auto  *uuid = bsp_cpu_chip_uuid(&len);
-    std::cout << "Device Unique Serial ID: ";
-    for(size_t i=0; i<len; ++i){
-      std::cout << std::setfill('0')<<std::setw(2)<<(int)uuid[i]<< ((i==len-1)?'\n':'-');
-    }
-    std::cout << "\n\n";
-  }
-
-#if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
-  add_cmn_test();
-  cout<<"Local Project Test:"<<endl;
-  tb_infra_local.verdict();
-#endif
-
-#if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
-  add_bsp_test();
-  cout<<"BSP Test:"<<endl;
-  tb_infra_bsp.verdict();
-#endif
-  
-#if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
-  add_app_test();
-  cout<<"RTOS Test:"<<endl;
-  tb_infra_os.verdict();
-#endif
-  
-  while(1){}
-}
-
-#endif

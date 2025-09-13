@@ -18,7 +18,10 @@ set( SRC_STM32 "")
 set( DEF_STM32 "")
 set( LINK_FLAG_STM32 "")
 
-if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
+message(STATUS "[lib.cmake] CHIP=$ENV{METOPE_CHIP} EMULATOR=$ENV{METOPE_EMULATOR}")
+
+if($ENV{METOPE_CHIP} STREQUAL "STM32F411CEU6")
+    message(STATUS "[lib.cmake] Add source files of STM32F411CEU6.")
     list(APPEND DEF_STM32       "-DSTM32F411xE"
                                 "-DUSE_HAL_DRIVER" )
 
@@ -37,7 +40,8 @@ if((NOT CHIP) OR (CHIP STREQUAL "STM32F411CEU6"))
                                 
     list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32CubeMX/STM32F411CEU6/STM32F411CEUx_FLASH.ld")
 
-elseif((CHIP STREQUAL "STM32F405RGT6"))
+elseif(($ENV{METOPE_CHIP} STREQUAL "STM32F405RGT6"))
+    message(STATUS "[lib.cmake] Add source files of STM32F405RGT6.")
     list(APPEND DEF_STM32       "-DSTM32F405xx"
                                 "-DUSE_HAL_DRIVER" )
     aux_source_directory( ${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src  SRC_STM32)
@@ -52,6 +56,8 @@ elseif((CHIP STREQUAL "STM32F405RGT6"))
     list(APPEND INC_STM32       "${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/Core/Inc/")
     
     list(APPEND LINK_FLAG_STM32 "-T${PRJ_TOP}/STM32CubeMX/STM32F405RGT6/STM32F405RGTx_FLASH.ld")
+elseif(($ENV{METOPE_CHIP} STREQUAL "NATIVE"))
+    message(STATUS "[lib.cmake] Add source files of native.")
 else()
     message(FATAL_ERROR "Unknown system target")
 endif()

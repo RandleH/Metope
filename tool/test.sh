@@ -36,7 +36,14 @@ if [ ! -e "${PRJ_TOP}/build/model1.elf" ]; then
     exit 1
 fi
 
-qemu-system-arm -M stm32-f411ce -m 1024 -smp 4 -cpu cortex-m4 -kernel ${PRJ_TOP}/build/model1.elf
+source setup.env STM32F405RGT6 emulator
+
+
+# Run `qemu-system-arm -M help` for help
+qemu-system-arm -M netduinoplus2 -m 1024 -smp 1 -cpu cortex-m4 -nographic -semihosting-config enable=on,target=native -kernel ${PRJ_TOP}/build/model1.elf
+
+qemu-system-arm -M stm32-f411ce -semihosting -kernel ${PRJ_TOP}/build/model1.bin
+# qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -kernel your_program.elf
 
 sh pause.sh
 sh clean.sh

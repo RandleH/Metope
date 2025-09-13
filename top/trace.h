@@ -22,15 +22,15 @@
 
 
 
-#if defined (SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6)
   #include "bsp_uart.h"
   #define TRACE_PRINTF( fmt, ...) bsp_uart_printf( fmt, ##__VA_ARGS__)
 #elif defined (SYS_TARGET_NATIVE)
   #include <stdio.h>
   #define TRACE_PRINTF( fmt, ...) printf( fmt"\n", ##__VA_ARGS__)
 #else
-  
-#endif // SYS_TARGET
+  #define TRACE_PRINTF( fmt, ...) 
+#endif
 
 
 #define TRACE_UNUSED __attribute__((__unused__))

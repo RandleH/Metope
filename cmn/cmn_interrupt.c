@@ -119,7 +119,7 @@ STATIC INLINE uint32_t cmn_interrupt_top( void){
 
 
 
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 /**
  * @brief Disable the IRQn after few microseconds
  * @note  This function will enable the IRQn immediately

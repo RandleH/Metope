@@ -18,7 +18,7 @@
 */
 
 
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 #include "bsp_uart.h"
 #include "bsp_led.h"
 #elif defined (SYS_TARGET_NATIVE)
@@ -30,7 +30,7 @@
 
 
 #ifdef DEBUG
-  #if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+  #if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
     #define ASSERT( expr, msg, ...)                               \
       do{                                                         \
         if(!(expr)){                                              \

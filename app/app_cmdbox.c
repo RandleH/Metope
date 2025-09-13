@@ -27,7 +27,7 @@
 #include <ctype.h>
 #include "assert.h"
 #include "trace.h"
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
   #include "global.h"
   #include "FreeRTOS.h"
 #endif
@@ -310,7 +310,7 @@ void app_cmdbox_parse(const char *cmd) {
 /* ************************************************************************** */
 /*                        Public Command Box Function                         */
 /* ************************************************************************** */
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 void app_cmdbox_main(void *param) RTOSTHREAD {
   tRtosEvent *p_event = &metope.app.rtos.event;
   tBspUart   *p_uart  = ((tBspUart *)param);
@@ -337,7 +337,7 @@ void app_cmdbox_main(void *param) RTOSTHREAD {
 }
 #endif
 
-#if (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 void app_cmdbox_idle(void *param) RTOSIDLE {
 
 }

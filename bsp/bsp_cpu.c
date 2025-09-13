@@ -65,8 +65,10 @@ void bsp_cpu_clock_init( void){
   /* Wait till PLL is disabled (0=unlocked; 1=locked) */
   while(1==READ_BIT(RCC->CR, RCC_CR_PLLRDY)); 
 
-#if (defined SYS_TARGET_STM32F411CEU6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined EMULATOR_STM32F411CEU6)
   WRITE_REG(RCC->PLLCFGR, RCC_PLLSOURCE_HSE | (25<<RCC_PLLCFGR_PLLM_Pos) | (192<<RCC_PLLCFGR_PLLN_Pos) | (((RCC_PLLP_DIV2>>1)-1)<<RCC_PLLCFGR_PLLP_Pos) | (4<<RCC_PLLCFGR_PLLQ_Pos));
+#elif (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F405RGT6)
+  WRITE_REG(RCC->PLLCFGR, RCC_PLLSOURCE_HSE | (16<<RCC_PLLCFGR_PLLM_Pos) | (336<<RCC_PLLCFGR_PLLN_Pos) | (((RCC_PLLP_DIV2>>1)-1)<<RCC_PLLCFGR_PLLP_Pos) | (7<<RCC_PLLCFGR_PLLQ_Pos));
 #else
   #error "Unimplemented"
 #endif
@@ -105,12 +107,15 @@ void bsp_cpu_clock_init( void){
   MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, RCC_HCLK_DIV1);
 
   uwTickFreq = HAL_TICK_FREQ_1KHZ;
-#if (defined SYS_TARGET_STM32F411CEU6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined EMULATOR_STM32F411CEU6)
   SystemCoreClock = 96000000;
-  SysTick_Config(96000000/(1000/uwTickFreq));
+#elif (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F405RGT6)
+  SystemCoreClock = 84000000;  
 #else
   #error "Unimplemented"
 #endif
+  
+SysTick_Config(SystemCoreClock/(1000/uwTickFreq));
 
   if (uwTickPrio < (1UL << __NVIC_PRIO_BITS)){
     HAL_NVIC_SetPriority(SysTick_IRQn, uwTickPrio, 0U);
