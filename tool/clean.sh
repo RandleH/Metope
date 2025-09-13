@@ -13,10 +13,11 @@ cd ${PRJ_TOP}
 
 echo "Clean working directory: ${PRJ_TOP}"
 
-rm -rf ${PRJ_TOP}/build
-rm     ${PRJ_TOP}/main.cc
-rm     ${PRJ_TOP}/CMakeLists.txt
-rm     ${PRJ_TOP}/*.log
-rm -rf ${PRJ_TOP}/STM32CubeMX/
+rm -rf ${PRJ_TOP}/build;
+rm     ${PRJ_TOP}/main.cc;
+rm     ${PRJ_TOP}/CMakeLists.txt;
+rm     ${PRJ_TOP}/*.log;
+rm -rf ${PRJ_TOP}/STM32CubeMX/;
+rm -rf ${PRJ_TOP}/.vscode/;
 
 cd ${PRJ_TOP}
