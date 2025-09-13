@@ -596,6 +596,7 @@ void cmn_utility_timeinc( uint32_t *ms_rem, cmnDateTime_t *pTime, uint32_t ms){
   if(trace_triggered){
     cmnDateTime_t time = *pTime;
     TRACE_DEBUG("CMN - Time increased to %u/%u/%u %u:%u:%u", time.year + CMN_DATE_YEAR_OFFSET, time.month, time.day, time.hour, time.minute, time.second);
+    UNUSED(time);
   }
 }
 

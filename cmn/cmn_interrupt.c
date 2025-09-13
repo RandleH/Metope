@@ -335,7 +335,7 @@ void EXTI9_5_IRQHandler(void){
 }
 
 void TIM1_BRK_TIM9_IRQHandler(void){
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
   TIM9->SR = 0x00000000;
   CLEAR_BIT( TIM9->CR1, TIM_CR1_CEN);  // Disable timer
 #else
@@ -356,7 +356,7 @@ void TIM1_UP_TIM10_IRQHandler(void){}
 void TIM1_TRG_COM_TIM11_IRQHandler(void){}
 void TIM1_CC_IRQHandler(void){}           
 void TIM2_IRQHandler(void){
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
   TIM2->SR = 0x00000000;
   CLEAR_BIT( TIM2->CR1, TIM_CR1_CEN);  // Disable timer
 #else
@@ -471,7 +471,7 @@ void FLASH_IRQHandler( void){}
 void RCC_IRQHandler( void){}         
 
 void DEFAULT EXTI0_IRQHandler( void){
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
   if( READ_BIT(EXTI->PR, GPIO_PIN_0) ){
     EXTI->PR = GPIO_PIN_0;
   }
@@ -528,7 +528,7 @@ void DMA1_Stream3_IRQHandler( void){}
 
 void DEFAULT DMA1_Stream4_IRQHandler(void){
 
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
   u32 tmp = DMA1->HISR;
 
   ASSERT( 0==(tmp & (DMA_FLAG_TEIF0_4|DMA_FLAG_FEIF0_4|DMA_FLAG_DMEIF0_4)), "DMA1S4 Error");

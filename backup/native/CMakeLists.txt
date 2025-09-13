@@ -154,8 +154,6 @@ endif()
 #   @param INCLUDE_TB_CMN - Enable Common Test Bench (ie. Basic utility functional tests)
 #   @param INCLUDE_TB_OS  - Enable OS Test Bench (ie. RTOS related Test Bench)
 #
-# @param USE_REGISTER   - Bypass the HAL library support. Use bare register instruction. (Partially Supported)
-
 #########################################################################################################
 if( TEST_ONLY AND TEST_ONLY EQUAL 1)
     list(APPEND DEF_LIST "-DTEST_ONLY=1")
@@ -169,10 +167,6 @@ if( TEST_ONLY AND TEST_ONLY EQUAL 1)
         list(APPEND DEF_LIST "-DINCLUDE_TB_OS=1")
     endif()
     include( ${PRJ_TOP}/test/test.cmake)
-endif()
-
-if( USE_REGISTER AND USE_REGISTER EQUAL 1)
-    list(APPEND DEF_LIST "-DUSE_REGISTER=1")
 endif()
 
 

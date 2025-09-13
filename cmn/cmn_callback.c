@@ -51,9 +51,9 @@ extern "C"{
 /**
  * @addtogroup MachineDependent
  */
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
 void cmn_callback_screen_spi_completed(SPI_HandleTypeDef *hspi)
-#elif (USE_HAL_SPI_REGISTER_CALLBACKS == 1U)
+#else
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 #endif
 {

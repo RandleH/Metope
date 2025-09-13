@@ -62,6 +62,7 @@ static int app_cmdbox_callback_0args_GT(const char *cmd, ...) {
 #elif (defined SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || defined (EMULATOR_STM32F405RGT6)
   cmnDateTime_t time = bsp_rtc_get_time();
   TRACE_INFO("=> %02d:%02d:%02d %02d/%02d/%04d", time.hour, time.minute, time.second, time.month, time.day, time.year + CMN_DATE_YEAR_OFFSET);
+  UNUSED(time);
 #endif
   return 0;
 }

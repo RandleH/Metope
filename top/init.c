@@ -36,10 +36,9 @@
 #include "global.h"
 #include "cmn_interrupt.h"
 
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
-  #include "bsp_cpu.h"
-  #include "bsp_timer.h"
-#endif
+
+#include "bsp_cpu.h"
+#include "bsp_timer.h"
 #include "bsp_screen.h"
 #include "bsp_rtc.h"
 #include "bsp_gyro.h"
@@ -64,12 +63,8 @@ void hw_init(void){
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
-  bsp_cpu_clock_init();
-#else
   /* Configure the system clock */
-  SystemClock_Config();
-#endif
+  bsp_cpu_clock_init();
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
@@ -84,7 +79,7 @@ void hw_init(void){
 
   MX_I2C1_Init();
 
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
   bsp_timer_init();
 #else
   MX_TIM2_Init();

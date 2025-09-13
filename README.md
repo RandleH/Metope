@@ -96,7 +96,6 @@ Here are some typical configurations. Copy the command and replace the one in `r
 | Keyword \ Allowed Value | 0                 | 1                      | 2    | Debug | Release |
 | ----------------------- | ----------------- | ---------------------- | ---- | ----- | ------- |
 | CMAKE_BUILD_TYPE        |                   |                        |      | $√$   | $√$     |
-| USE_REGISTER            | $√$               | $√$                    |      |       |         |
 | LOG_LEVEL               | **$√$**           | $√$                    | $√$  |       |         |
 | QMI8658A                |                   | **$\color{green}(√)$** |      |       |         |
 | QMI8658C                |                   | $\color{green}(√)$     |      |       |         |

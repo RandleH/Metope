@@ -45,6 +45,7 @@ extern "C"{
  * @addtogroup MachineDependent
  */
 void bsp_cpu_clock_init( void){
+#if 1
   /* Set the new HSE configuration */
   SET_BIT(RCC->CR, RCC_CR_HSEON);
 
@@ -123,12 +124,14 @@ void bsp_cpu_clock_init( void){
   #error "Unimplemented"
 #endif
 
-SysTick_Config(SystemCoreClock/(1000/uwTickFreq));
+  SysTick_Config(SystemCoreClock/(1000/uwTickFreq));
 
   if (uwTickPrio < (1UL << __NVIC_PRIO_BITS)){
     HAL_NVIC_SetPriority(SysTick_IRQn, uwTickPrio, 0U);
   }
-  
+#else
+  SystemClock_Config();
+#endif
   return;
 }
 
