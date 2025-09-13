@@ -48,8 +48,10 @@ void bsp_cpu_clock_init( void){
   /* Set the new HSE configuration */
   SET_BIT(RCC->CR, RCC_CR_HSEON);
 
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6)
   /* Wait till HSE is ready */
-  while(0==READ_BIT(RCC->CR, RCC_CR_HSERDY)); 
+  while(0==READ_BIT(RCC->CR, RCC_CR_HSERDY));
+#endif
 
   /* Make sure HSI is NOT used as system clock or PLL source */
   // Skipped the checker for memory saving
@@ -61,9 +63,11 @@ void bsp_cpu_clock_init( void){
   
   /* Disable the main PLL. */
   CLEAR_BIT( RCC->CR, RCC_CR_PLLON ); /*!< Bit-Banding Feature: equivalent to `RCC_CR_PLLON_BB = 0;` */
-  
+
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6)
   /* Wait till PLL is disabled (0=unlocked; 1=locked) */
-  while(1==READ_BIT(RCC->CR, RCC_CR_PLLRDY)); 
+  while(1==READ_BIT(RCC->CR, RCC_CR_PLLRDY));
+#endif
 
 #if (defined SYS_TARGET_STM32F411CEU6) || (defined EMULATOR_STM32F411CEU6)
   WRITE_REG(RCC->PLLCFGR, RCC_PLLSOURCE_HSE | (25<<RCC_PLLCFGR_PLLM_Pos) | (192<<RCC_PLLCFGR_PLLN_Pos) | (((RCC_PLLP_DIV2>>1)-1)<<RCC_PLLCFGR_PLLP_Pos) | (4<<RCC_PLLCFGR_PLLQ_Pos));
@@ -75,8 +79,10 @@ void bsp_cpu_clock_init( void){
 
   SET_BIT( RCC->CR, RCC_CR_PLLON ); /*!< Bit-Banding Feature: equivalent to `RCC_CR_PLLON_BB = 1;` */
 
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6)
   /* Wait till PLL is enabled (0=unlocked; 1=locked) */
   while(0==READ_BIT(RCC->CR, RCC_CR_PLLRDY));
+#endif
   
   if(FLASH_LATENCY_3 > READ_BIT((FLASH->ACR), FLASH_ACR_LATENCY)){
     ((*(volatile u8 *)0x40023C00U) = (u8)(FLASH_ACR_LATENCY));
@@ -93,8 +99,10 @@ void bsp_cpu_clock_init( void){
   /* System Clock Source: PLLCLK */
   MODIFY_REG(RCC->CFGR, RCC_CFGR_SW, RCC_SYSCLKSOURCE_PLLCLK);
 
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6)
   /* Wait until the clock is stable */
   while( (RCC_SYSCLKSOURCE_PLLCLK<<RCC_CFGR_SWS_Pos) != READ_BIT( RCC->CFGR, RCC_CFGR_SWS) );
+#endif
 
   if(FLASH_LATENCY_3 < READ_BIT((FLASH->ACR), FLASH_ACR_LATENCY)){
     ((*(volatile u8 *)0x40023C00U) = (u8)(FLASH_ACR_LATENCY));
@@ -114,7 +122,7 @@ void bsp_cpu_clock_init( void){
 #else
   #error "Unimplemented"
 #endif
-  
+
 SysTick_Config(SystemCoreClock/(1000/uwTickFreq));
 
   if (uwTickPrio < (1UL << __NVIC_PRIO_BITS)){

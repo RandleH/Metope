@@ -32,7 +32,7 @@ if [ ! -e "${PRJ_TOP}/build/model1.elf" ]; then
     exit 1
 fi
 info
-pause
+# pause
 sh ${PRJ_TOP}/tool/clean.sh
 
 source setup.env && rebuild "-DCMAKE_BUILD_TYPE=Debug -DTEST_ONLY=1 -DUSE_REGISTER=1 -DINCLUDE_TB_CMN=1" > ${PRJ_TOP}/build.log 2>&1
@@ -41,7 +41,7 @@ if [ ! -e "${PRJ_TOP}/build/model1.elf" ]; then
     exit 1
 fi
 info
-pause
+# pause
 sh ${PRJ_TOP}/tool/clean.sh
 
 source setup.env STM32F405RGT6 emulator && rebuild "-DCMAKE_BUILD_TYPE=Debug -DTEST_ONLY=1 -DUSE_REGISTER=1 -DINCLUDE_TB_CMN=1" > ${PRJ_TOP}/build.log 2>&1
@@ -50,15 +50,17 @@ if [ ! -e "${PRJ_TOP}/build/model1.elf" ]; then
     exit 1
 fi
 info
-pause
+# pause
 sh ${PRJ_TOP}/tool/clean.sh
 
 
 # Run `qemu-system-arm -M help` for help
 # qemu-system-arm -M netduinoplus2 -m 1024 -smp 1 -cpu cortex-m4 -nographic -semihosting-config enable=on,target=native -kernel ${PRJ_TOP}/build/model1.elf
 
-# qemu-system-arm -M stm32-f411ce -semihosting -kernel ${PRJ_TOP}/build/model1.bin
-# qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -kernel your_program.elf
+
+# qemu-system-arm -M netduinoplus2 -cpu cortex-m4 -nographic -s -S --semihosting-config enable=on -kernel ${PRJ_TOP}/build/model1.elf
+
+# ${METOPE_ARM_TOOLCHAIN_REPO}/bin/arm-none-eabi-gdb -q --nh -ex 'file ./build/model1.elf' -ex 'target remote localhost:1234'
 
 echo "Success. Return 0"
 exit 0

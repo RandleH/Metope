@@ -9,10 +9,10 @@
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
             ],
-            "compilerPath": "/usr/bin/clang",
+            "compilerPath": "${workspaceFolder}/lib/arm-toolchain/macOS-AppleSilicon/bin/arm-none-eabi-gcc",
             "cStandard": "c99",
             "cppStandard": "c++11",
-            "intelliSenseMode": "macos-clang-arm64",
+            "intelliSenseMode": "macos-gcc-arm",
             "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],

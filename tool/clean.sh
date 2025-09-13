@@ -12,13 +12,11 @@ fi
 cd ${PRJ_TOP}
 
 echo "Clean working directory: ${PRJ_TOP}"
-sh "${PRJ_TOP}/tool/pause.sh"
 
-
-rm -rf build
-rm     main.cc
-rm     CMakeLists.txt
-rm     *.log
-rm -rf STM32CubeMX/
+rm -rf ${PRJ_TOP}/build
+rm     ${PRJ_TOP}/main.cc
+rm     ${PRJ_TOP}/CMakeLists.txt
+rm     ${PRJ_TOP}/*.log
+rm -rf ${PRJ_TOP}/STM32CubeMX/
 
 cd ${PRJ_TOP}

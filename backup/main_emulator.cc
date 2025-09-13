@@ -23,10 +23,21 @@
 /* ************************************************************************** */
 
 #include <stdio.h>
+#include "init.h"
+#include "trace.h"
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 
 int main(int argc, char *argv[]){
   hw_init();
   TRACE_INFO("System boot completed.");
-  _exit(0);
+  
   return 1;
 }
+
+#ifdef __cplusplus
+}
+#endif

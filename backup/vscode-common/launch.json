@@ -70,7 +70,6 @@
             "svdFile": "${workspaceFolder}/lib/stm32-svd/stm32f4/STM32F405.svd",
             "interface": "swd",
             "servertype": "jlink",
-            "preLaunchTask": "fstbuild_stm32f405rgt6",
             "swoConfig": {
                 "enabled": true,
                 "cpuFrequency": 168000000,
@@ -128,7 +127,6 @@
             "interface": "swd",
             "servertype": "stlink",
             "showDevDebugOutput":"raw",
-            "preLaunchTask": "fstbuild_stm32f411ceu6",
             "swoConfig": {
                 "enabled": false,
                 "cpuFrequency": 96000000,
@@ -184,7 +182,6 @@
             "svdFile": "${workspaceFolder}/lib/stm32-svd/stm32f4/STM32F405.svd",
             "interface": "swd",
             "servertype": "stutil",
-            "preLaunchTask": "fstbuild_stm32f405rgt6",
             "swoConfig": {
                 "enabled": true,
                 "cpuFrequency": 168000000,
@@ -228,6 +225,17 @@
                     }
                 ]
             }
+        },
+        {
+            "name": "QemuEmulator (STM32F405RGT6)",
+            "cwd": "${workspaceFolder}",
+            "type": "cppdbg",
+            "request":"launch",
+            "program": "${workspaceFolder}/build/model1.elf",
+            "miDebuggerPath": "/Users/randleh/GitHub/Metope_ci/lib/arm-toolchain/macOS-AppleSilicon/bin/arm-none-eabi-gdb",
+            "miDebuggerServerAddress": "localhost:1234",
+            "stopAtEntry": true,
+            "preLaunchTask": "run_emulator"
         },
         {
             "name": "Native",

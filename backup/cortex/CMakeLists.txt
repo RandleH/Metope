@@ -104,12 +104,18 @@ set( CPU_FLAG                       "-mthumb"
 #########################################################################################################
 # Target Linking Option Flag
 #########################################################################################################
-set( LINK_FLAG                      "-specs=nosys.specs"
-                                    "-lc"
+set( LINK_FLAG                      "-lc"
                                     "-lm"
                                     "-lnosys"
                                     "-Wl,-Map=${PROJECT_NAME}.map,--cref"
                                     "-Wl,--gc-sections,--print-memory-usage,--print-output-format")
+
+if($ENV{METOPE_EMULATOR} EQUAL 1)
+    list(APPEND LINK_FLAG "-specs=rdimon.specs")
+else()
+    list(APPEND LINK_FLAG "-specs=nosys.specs")
+endif()
+                                    
 
 
 if((NOT IMU) OR (IMU STREQUAL "QMI8658A") )
