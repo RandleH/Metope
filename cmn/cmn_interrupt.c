@@ -422,7 +422,11 @@ void USART2_IRQHandler(void) {
   volatile uint32_t REG_USART2_SR = USART2->SR;
   volatile uint32_t REG_USART2_DR = USART2->DR;
   
-  if (REG_USART2_SR & USART_SR_RXNE) {
+  if (REG_USART2_SR & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE)) {
+    p_uart->rx_status.error_code = (uint8_t)(REG_USART2_SR & 0x1F);
+    p_uart->rx_idx = BSP_CFG_UART_RX_BUF_SIZE;
+  }
+  else if (REG_USART2_SR & USART_SR_RXNE) {
     if (likely(!p_uart->rx_status.is_overflowed)) {
       p_uart->rx_buf[p_uart->rx_idx++] = (char)REG_USART2_DR;
       if (p_uart->rx_idx == BSP_CFG_UART_RX_BUF_SIZE) {
@@ -436,10 +440,6 @@ void USART2_IRQHandler(void) {
 
   /* Always set the '\0' after the string */
   p_uart->rx_buf[p_uart->rx_idx] = '\0';
-
-  if (REG_USART2_SR & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE)) {
-    p_uart->rx_status.error_code = (uint8_t)(REG_USART2_SR & 0x1F);
-  }
 
   if(metope.app.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
