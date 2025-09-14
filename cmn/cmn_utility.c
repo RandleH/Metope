@@ -55,6 +55,10 @@
 #define FMT_STR_STR                      4
 #define FMT_STR_CHAR                     5
 
+#if !defined(UNUSED)
+#define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
+#endif /* UNUSED */
+
 #ifdef __cplusplus
 extern "C"{
 #endif

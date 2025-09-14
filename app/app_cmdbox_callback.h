@@ -3,6 +3,10 @@
 #include "bsp_screen.h"
 #include "bsp_rtc.h"
 
+#if !defined(UNUSED)
+#define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
+#endif /* UNUSED */
+
 static int app_cmdbox_callback_1args_CCW(const char *cmd, ...) {
   va_list args;
   va_start(args, cmd);

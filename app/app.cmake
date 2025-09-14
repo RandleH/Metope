@@ -20,5 +20,5 @@ endif()
 set( INC_DIR__APP "")
 GET_SUBDIR( INC_DIR__APP ${PRJ_TOP}/app)
 
-list(APPEND INC_DIR_LIST ${PRJ_TOP}/app)
-list(APPEND INC_DIR_LIST ${INC_DIR__APP})
+list(APPEND INC_LIST ${PRJ_TOP}/app)
+list(APPEND INC_LIST ${INC_DIR__APP})

@@ -95,7 +95,7 @@ list( REMOVE_ITEM   SRC_LIST    "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HA
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_timebase_rtc_alarm_template.c"
                                 "${PRJ_TOP}/lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_timebase_rtc_wakeup_template.c" )
 
-list( APPEND        INC_DIR_LIST "${INC_STM32}" "${PRJ_TOP}/lib" "${INC_FREERTOS}")
+list( APPEND        INC_LIST "${INC_STM32}" "${PRJ_TOP}/lib" "${INC_FREERTOS}")
 
 list( APPEND        LINK_FLAG    ${LINK_FLAG_STM32})
 
@@ -123,12 +123,12 @@ add_definitions( ${LVGL_MISC_DEFINE})
 add_subdirectory( ${PRJ_TOP}/lib/lvgl ${PRJ_TOP}/build/lvgl/build )
 
 
-target_include_directories(lvgl PUBLIC ${INC_DIR_LIST})
+target_include_directories(lvgl PUBLIC ${INC_LIST})
 target_compile_options(lvgl  INTERFACE   ${CMAKE_CXX_FLAGS} ${CPU_FLAG} ${CXX_FLAG} )
 target_link_options(lvgl INTERFACE ${LINK_FLAG} ${CPU_FLAG})
 
 
-list( APPEND INC_DIR_LIST   ${PRJ_TOP}/lib/lvgl)
+list( APPEND INC_LIST   ${PRJ_TOP}/lib/lvgl)
 list( APPEND TARGET_LIST    lvgl)
 
 message( STATUS "LVGL library loaded")

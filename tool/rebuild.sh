@@ -19,7 +19,7 @@ cd ${PRJ_TOP}/build
 ################################################################
 # LOG_LEVEL: 0=Warning/Error; 1={Inherit}/Info; 2={Inherit}/Debug;
 
-# cmake -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=2 ${PRJ_TOP}
+cmake -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=2 ${PRJ_TOP}
 # cmake -DCMAKE_BUILD_TYPE=Release ..
 
 # cmake -DCMAKE_BUILD_TYPE=Debug ..
@@ -31,7 +31,7 @@ cd ${PRJ_TOP}/build
 # cmake -DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=1 -DINCLUDE_TB_OS=1  ..
 
 # cmake -DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=1 -DINCLUDE_TB_CMN=1 -DQMI8658A=1 ..
-cmake -DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=1 -DINCLUDE_TB_CMN=1 -DQMI8658A=1 ..
+# cmake -DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=1 -DINCLUDE_TB_CMN=1 -DQMI8658A=1 ..
 
 # cmake -DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=1 -DINCLUDE_TB_BSP=1 -DQMI8658A=1 ..
 
