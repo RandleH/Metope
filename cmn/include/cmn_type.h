@@ -64,7 +64,7 @@
 #define ERROR     (1U)
 
 
-#ifdef TEST_ONLY
+#ifdef UNIT_TEST
   #define STATIC
   #define INLINE
 #else

@@ -21,6 +21,7 @@
 /*                                  Includes                                  */
 /* ************************************************************************** */
 #include "device.h"
+#include "trace.h"
 #include "global.h"
 #include "assert.h"
 #include "bsp_gyro.h"
@@ -850,7 +851,14 @@ operates at 300 kHz.
  */
 STATIC cmnBoolean_t bsp_qmi8658_i2c_polling_send( u8 reg, const u8 *buf, u8 len){
   HAL_StatusTypeDef ret = HAL_I2C_Mem_Write( &hi2c1, QMI8658_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, (u8*)buf, len, QMI8658_TIMEOUT_DELAY);
-  ASSERT( ret!=HAL_OK, "QMI8658 TX error");
+
+  if (ret!=HAL_OK) {
+#if 0
+    ASSERT( false, "QMI8658 TX error");
+#else
+    TRACE_WARNING("QMI8658 TX error. ret=%d", ret);
+#endif
+  }
   if(HAL_OK!=ret){
     return ERROR;
   }
@@ -1105,7 +1113,7 @@ STATIC cmnBoolean_t bsp_qmi8658_ctrl9_protocol(u8 QMI8658_CTRL9_CMD_XXXX){
 /* ************************************************************************** */
 /*                            Debugging Functions                             */
 /* ************************************************************************** */
-#if (defined TEST_ONLY) && (TEST_ONLY==1)
+#if (defined UNIT_TEST) && (UNIT_TEST==1)
 u8 bsp_qmi8658_debug_read_reg(u8 reg){
   return bsp_qmi8658_i2c_polling_recv_1byte(reg);
 }

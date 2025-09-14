@@ -22,8 +22,8 @@ endif()
 set( INC_DIR__BSP "")
 GET_SUBDIR( INC_DIR__BSP ${PRJ_TOP}/bsp)
 
-list(APPEND INC_DIR_LIST ${PRJ_TOP}/bsp)
-list(APPEND INC_DIR_LIST ${INC_DIR__BSP})
+list(APPEND INC_LIST ${PRJ_TOP}/bsp)
+list(APPEND INC_LIST ${INC_DIR__BSP})
 
 if($ENV{METOPE_CHIP} STREQUAL "NATIVE")
     list( APPEND INC_LIST_TO_BE_REMOVED     "${PRJ_TOP}/bsp/include/bsp_battery.h"
@@ -36,5 +36,5 @@ if($ENV{METOPE_CHIP} STREQUAL "NATIVE")
                                             "${PRJ_TOP}/bsp/include/bsp_uart.h" )
 
     message( STATUS "Remove the bsp header files: ${INC_LIST_TO_BE_REMOVED}")
-    list( REMOVE_ITEM INC_DIR_LIST ${INC_LIST_TO_BE_REMOVED})
+    list( REMOVE_ITEM INC_LIST ${INC_LIST_TO_BE_REMOVED})
 endif()

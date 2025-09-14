@@ -255,16 +255,15 @@ extern DMA_HandleTypeDef   hdma_i2c2_tx;
 }
 #endif
 
-#if (defined TEST_ONLY) && (TEST_ONLY==1) && (defined __cplusplus)
+#if (defined UNIT_TEST) && (UNIT_TEST==1) && (defined __cplusplus)
+  #include "test.hh"
+  #include <stdlib.h>
+  #include "cmn_utility.h"
 
-#include "test.hh"
-#include <stdlib.h>
-#include "cmn_utility.h"
-
-
-extern LocalProjectTest     tb_infra_local;
-extern HumanInteractionTest tb_infra_bsp;
-extern Test                 tb_infra_os;
-
+  extern LocalProjectTest     tb_infra_local;
+  extern HumanInteractionTest tb_infra_bsp;
+  extern Test                 tb_infra_os;
 #endif
-#endif
+
+
+#endif // GLOBAL_H
