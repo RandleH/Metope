@@ -81,18 +81,17 @@ volatile u32 gDummy = 0;
 #endif
 
 
-#if (defined TEST_ONLY) && (TEST_ONLY==1) && (defined __cplusplus)
+#if (defined UNIT_TEST) && (UNIT_TEST==1) && (defined __cplusplus)
+  #if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
+    LocalProjectTest     tb_infra_local;
+  #endif
 
-#if (defined INCLUDE_TB_CMN) && (INCLUDE_TB_CMN==1)
-LocalProjectTest     tb_infra_local;
-#endif
+  #if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
+    HumanInteractionTest tb_infra_bsp;
+  #endif
 
-#if (defined INCLUDE_TB_BSP) && (INCLUDE_TB_BSP==1)
-HumanInteractionTest tb_infra_bsp;
-#endif
-
-#if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
-Test                 tb_infra_os;
-#endif
+  #if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
+    Test                 tb_infra_os;
+  #endif
 
 #endif

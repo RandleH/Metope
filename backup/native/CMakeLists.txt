@@ -149,14 +149,14 @@ endif()
 
 #########################################################################################################
 # Customized Project Macros
-# @param TEST_ONLY      - Test Bench Program was enabled. Escape the main program.
+# @param UNIT_TEST      - Test Bench Program was enabled. Escape the main program.
 #   @param INCLUDE_TB_BSP - Enable Human Interaction Test Bench (ie. Tests that need manual intervine)
 #   @param INCLUDE_TB_CMN - Enable Common Test Bench (ie. Basic utility functional tests)
 #   @param INCLUDE_TB_OS  - Enable OS Test Bench (ie. RTOS related Test Bench)
 #
 #########################################################################################################
-if( TEST_ONLY AND TEST_ONLY EQUAL 1)
-    list(APPEND DEF_LIST "-DTEST_ONLY=1")
+if( UNIT_TEST AND UNIT_TEST EQUAL 1)
+    list(APPEND DEF_LIST "-DUNIT_TEST=1")
     if(INCLUDE_TB_BSP AND INCLUDE_TB_BSP EQUAL 1)
         list(APPEND DEF_LIST "-DINCLUDE_TB_BSP=1")
     endif()

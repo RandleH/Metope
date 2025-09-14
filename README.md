@@ -100,7 +100,7 @@ Here are some typical configurations. Copy the command and replace the one in `r
 | QMI8658A                |                   | **$\color{green}(√)$** |      |       |         |
 | QMI8658C                |                   | $\color{green}(√)$     |      |       |         |
 | MPU6050                 |                   | $\color{green}(√)$     |      |       |         |
-| TEST_ONLY               |                   | $\color{cyan}(√)$      |      |       |         |
+| UNIT_TEST               |                   | $\color{cyan}(√)$      |      |       |         |
 | INCLUDE_TB_OS           | $\color{cyan}[√]$ | $\color{cyan}[√]$      |      |       |         |
 | INCLUDE_TB_BSP          | $\color{cyan}[√]$ | $\color{cyan}[√]$      |      |       |         |
 | INCLUDE_TB_CMN          | $\color{cyan}[√]$ | $\color{cyan}[√]$      |      |       |         |
@@ -183,7 +183,7 @@ cmake -DCMAKE_BUILD_TYPE=Release .. && make -j12
 ```bash
 mkdir build
 cd ./build
-cmake -DCMAKE_BUILD_TYPE=Debug -DTEST_ONLY=1 -DINCLUDE_TB_BSP=1 -DINCLUDE_TB_CMN=1 .. && make -j12
+cmake -DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=1 -DINCLUDE_TB_BSP=1 -DINCLUDE_TB_CMN=1 .. && make -j12
 ```
 
 

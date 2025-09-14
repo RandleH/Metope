@@ -145,7 +145,7 @@
  * and can't be drawn in chunks. */
 
 /** The target buffer size for simple layer chunks. */
-#if (defined TEST_ONLY) && (TEST_ONLY==1)
+#if (defined UNIT_TEST) && (UNIT_TEST==1)
 #define LV_DRAW_LAYER_SIMPLE_BUF_SIZE    (8 * 1024)    /**< [bytes]*/
 #else
 #define LV_DRAW_LAYER_SIMPLE_BUF_SIZE    (24 * 1024)    /**< [bytes]*/
@@ -379,7 +379,7 @@
 
 /** Add a custom handler when assert happens e.g. to restart MCU. */
 
-#ifndef TEST_ONLY
+#ifndef UNIT_TEST
 #define LV_ASSERT_HANDLER_INCLUDE <stdint.h>
 #define LV_ASSERT_HANDLER while(1);     /**< Halt by default */
 #else

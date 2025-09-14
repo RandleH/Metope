@@ -1,10 +1,34 @@
+/**
+ ******************************************************************************
+ * @file    main_native.cc
+ * @author  RandleH
+ * @brief   Main program entrance
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 RandleH.
+ * All rights reserved.
+ *
+ * This software component is licensed by RandleH under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+*/
 
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
 #include <stdio.h>
 #include "cmn_utility.h"
 #include "app_cmdbox.h"
-// #include "/Users/randleh/GitHub/Metope_cmdbox/app/app_cmdbox.c"
 #include "trace.h"
 
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 int main(int argc, char *argv[]){
   TRACE_INFO("Hello world");
@@ -95,3 +119,8 @@ int main_template_2(int argc, char *argv[]){
 
   return 0;
 }
+
+
+#ifdef __cplusplus
+}
+#endif

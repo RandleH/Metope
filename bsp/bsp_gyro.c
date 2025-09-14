@@ -1105,7 +1105,7 @@ STATIC cmnBoolean_t bsp_qmi8658_ctrl9_protocol(u8 QMI8658_CTRL9_CMD_XXXX){
 /* ************************************************************************** */
 /*                            Debugging Functions                             */
 /* ************************************************************************** */
-#if (defined TEST_ONLY) && (TEST_ONLY==1)
+#if (defined UNIT_TEST) && (UNIT_TEST==1)
 u8 bsp_qmi8658_debug_read_reg(u8 reg){
   return bsp_qmi8658_i2c_polling_recv_1byte(reg);
 }

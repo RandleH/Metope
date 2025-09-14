@@ -147,7 +147,7 @@ cmnBoolean_t bsp_qmi8658_dma_update   ( tBspGyroData *data);
 /* ************************************************************************** */
 /*                            Debugging Functions                             */
 /* ************************************************************************** */
-#if (defined TEST_ONLY) && (TEST_ONLY==1)
+#if (defined UNIT_TEST) && (UNIT_TEST==1)
 u8   bsp_qmi8658_debug_read_reg  ( u8 reg);
 void bsp_qmi8658_debug_write_reg ( u8 reg, u8 val);
 #endif

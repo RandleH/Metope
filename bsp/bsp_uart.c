@@ -44,7 +44,7 @@ extern "C"{
 void bsp_uart_init(void) {
   tBspUart *p_uart = &metope.bsp.uart;
 
-#ifndef TEST_ONLY
+#ifndef UNIT_TEST
   /* Use RX interrupt for main program */
   USART2->CR1 |= USART_CR1_RXNEIE;
   USART2->CR3 |= USART_CR3_EIE;

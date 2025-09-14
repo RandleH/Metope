@@ -39,7 +39,7 @@ extern "C"{
 void app_clock_main(void *param) RTOSTHREAD;
 void app_clock_idle(void *param) RTOSIDLE;
 
-#ifdef TEST_ONLY
+#if (defined UNIT_TEST) && (UNIT_TEST==1)
 extern void         app_clock_gui_switch         (AppGuiClockEnum_t x);
 extern void         app_clock_idle_timer_callback(xTimerHandle xTimer);
 extern xTimerHandle app_clock_idle_timer_regist  (void);

@@ -101,16 +101,6 @@ void hw_init(void){
 
 void bsp_init(void){
   bsp_screen_init();
-#if (defined TEST_ONLY) && (TEST_ONLY==1)
-  /**
-   * @note: Module need to initialize ONLY in test mode
-   */
-  bsp_rtc_init();
-#else
-  /**
-   * @note: Module will be initialized during the test
-   */
-  #endif
   bsp_qmi8658_init();
   bsp_uart_init();
 }
@@ -118,7 +108,12 @@ void bsp_init(void){
 
 void app_init(void){
 
-#if ((!(defined TEST_ONLY)) || (TEST_ONLY==0)) || ((defined TEST_ONLY) && (TEST_ONLY==1) && (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1))
+#if (defined UNIT_TEST)
+#elif (defined MANUAL_TEST)
+#elif (defined EMULATOR_TEST)
+#endif
+
+#if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
   app_lvgl_init();
 #endif
 }
@@ -130,7 +125,7 @@ void os_init(void){
 
   p_event->_handle = xEventGroupCreateStatic( &p_event->_eg_buffer);
 
-#if (defined TEST_ONLY) && (TEST_ONLY==1)
+#if (defined UNIT_TEST) && (UNIT_TEST==1)
   /**
    * @note
    *  Tasks were defined in the Test Bench 

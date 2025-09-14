@@ -46,7 +46,7 @@
 #define DEFAULT_IDLE_TASK_PERIOD       (3000) // ms
 #define DEFAULT_CLOCK_REFREASH_PERIOD  (64)   // ticks
 
-#ifndef TEST_ONLY
+#ifndef UNIT_TEST
   #define STATIC static
 #else
   #define STATIC
@@ -69,7 +69,7 @@
 extern "C"{
 #endif
 
-#ifndef TEST_ONLY
+#ifndef UNIT_TEST
 STATIC void         app_clock_gui_switch         (AppGuiClockEnum_t x);
 STATIC void         app_clock_idle_timer_callback(xTimerHandle xTimer);
 STATIC xTimerHandle app_clock_idle_timer_regist  (void);
@@ -932,7 +932,7 @@ static void ui_clockmodern_deinit(tAppGuiClockParam *pClient) APP_CLOCK_API {
 /* ************************************************************************** */
 /*                   Private Clock UI Function - clock_nana                   */
 /* ************************************************************************** */
-#ifndef TEST_ONLY
+#ifndef UNIT_TEST
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -1293,14 +1293,14 @@ static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
 #ifdef __cplusplus
 }
 #endif
-#endif  // #ifndef TEST_ONLY
+#endif  // #ifndef UNIT_TEST
 
 
 
 /* ************************************************************************** */
 /*                  Private Clock UI Function - clock_lvvvw                   */
 /* ************************************************************************** */
-#ifndef TEST_ONLY
+#ifndef UNIT_TEST
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -1646,7 +1646,7 @@ static void ui_clocklvvvw_deinit(tAppGuiClockParam *pClient){
 #ifdef __cplusplus
 }
 #endif
-#endif  // #ifndef TEST_ONLY
+#endif  // #ifndef UNIT_TEST
 
 
 
@@ -1694,7 +1694,7 @@ STATIC void app_clock_gui_switch( AppGuiClockEnum_t x){
       ASSERT( false, "Unknown clock theme");
       break;
     }
-#ifndef TEST_ONLY
+#ifndef UNIT_TEST
     /**
      * @note: The rest of UI is ONLY for main program because of the memory usage
      */

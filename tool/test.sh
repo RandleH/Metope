@@ -35,7 +35,7 @@ info
 # pause
 sh ${PRJ_TOP}/tool/clean.sh
 
-source setup.env && rebuild "-DCMAKE_BUILD_TYPE=Debug -DTEST_ONLY=1 -DINCLUDE_TB_CMN=1" > ${PRJ_TOP}/build.log 2>&1
+source setup.env && rebuild "-DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=1 -DINCLUDE_TB_CMN=1" > ${PRJ_TOP}/build.log 2>&1
 if [ ! -e "${PRJ_TOP}/build/model1.elf" ]; then
     echo ".elf file was NOT found!"
     exit 1
@@ -44,7 +44,7 @@ info
 # pause
 sh ${PRJ_TOP}/tool/clean.sh
 
-source setup.env STM32F405RGT6 emulator && rebuild "-DCMAKE_BUILD_TYPE=Debug -DTEST_ONLY=1 -DINCLUDE_TB_CMN=1" > ${PRJ_TOP}/build.log 2>&1
+source setup.env STM32F405RGT6 emulator && rebuild "-DCMAKE_BUILD_TYPE=Debug -DUNIT_TEST=1 -DINCLUDE_TB_CMN=1" > ${PRJ_TOP}/build.log 2>&1
 if [ ! -e "${PRJ_TOP}/build/model1.elf" ]; then
     echo ".elf file was NOT found!"
     exit 1
