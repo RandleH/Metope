@@ -206,6 +206,7 @@ int main(int argc, char *argv[]){
 #include "bsp_cpu.h"
 
 int main(int argc, char *argv[]){
+  return 1;
   hw_init();
   bsp_init();
   // app_init();

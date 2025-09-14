@@ -98,7 +98,7 @@ typedef volatile u16 vu16;
 typedef volatile u32 vu32;
 typedef volatile u64 vu64;
 
-#if defined (SYS_TARGET_STM32F411CEU6) || defined (SYS_TARGET_STM32F405RGT6)
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 typedef IRQn_Type cmnIRQn_t;
 #endif
 

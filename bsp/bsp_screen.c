@@ -80,8 +80,7 @@ STATIC cmnBoolean_t bsp_screen_spi_polling_send( const uint8_t *buf, size_t nIte
   }
 
   while(nTimes--){
-
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
     CLEAR_BIT( SPI2->CR1, SPI_CR1_DFF);
     SET_BIT( SPI2->CR1, SPI_CR1_BIDIOE);
     if( !READ_BIT( SPI2->CR1, SPI_CR1_SPE) ){
@@ -119,7 +118,7 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
   while(nTimes--){
     metope.dev.status.spi2 = BUSY;
 
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
     metope.dev.pHspi2->State       = HAL_SPI_STATE_BUSY_TX;
     metope.dev.pHspi2->ErrorCode   = HAL_SPI_ERROR_NONE;
     /* Clear DBM bit */
@@ -276,7 +275,7 @@ void inline bsp_screen_set_bright( bspScreenBrightness_t value){
    * By default, we make timer input clk source divided to 2.048 MHz which is easier for later use
    * 
   */
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
   TIM3->CCR1 = value;
 #else
   __HAL_TIM_SET_COMPARE( &htim3, TIM_CHANNEL_1, value);
@@ -312,7 +311,7 @@ void bsp_screen_rotate( bspScreenRotate_t delta, uint8_t cw_ccw) {
  * @addtogroup MachineDependent
  */
 void inline bsp_screen_on(void){
-#if (defined USE_REGISTER) && (USE_REGISTER==1)
+#if 1
   htim3.ChannelState[TIM_CHANNEL_1] = HAL_TIM_CHANNEL_STATE_BUSY;
   TIM3->CCER &= ~(TIM_CCER_CC1E << (TIM_CHANNEL_1 & 0x1FU));
   TIM3->CCER |= 1<<(TIM_CHANNEL_1& 0x1FU);

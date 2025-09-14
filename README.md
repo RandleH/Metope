@@ -96,7 +96,6 @@ Here are some typical configurations. Copy the command and replace the one in `r
 | Keyword \ Allowed Value | 0                 | 1                      | 2    | Debug | Release |
 | ----------------------- | ----------------- | ---------------------- | ---- | ----- | ------- |
 | CMAKE_BUILD_TYPE        |                   |                        |      | $√$   | $√$     |
-| USE_REGISTER            | $√$               | $√$                    |      |       |         |
 | LOG_LEVEL               | **$√$**           | $√$                    | $√$  |       |         |
 | QMI8658A                |                   | **$\color{green}(√)$** |      |       |         |
 | QMI8658C                |                   | $\color{green}(√)$     |      |       |         |
@@ -154,17 +153,17 @@ Note that the main entrance of native program is different than others.
 ```bash
 mkdir build
 cd ./build
-cmake -DCMAKE_BUILD_TYPE=<value> [-DUSE_REGISTER=<value>] [-DLOG_LEVEL=<value>] .. && make -j12
+cmake -DCMAKE_BUILD_TYPE=<value> [-DLOG_LEVEL=<value>] .. && make -j12
 ```
 
 > Example:
 >
 > ```
-> cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_REGISTER=1 -DLOG_LEVEL=2 .. && make -j12
+> cmake -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=2 .. && make -j12
 > ```
 >
 > ```
-> cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_REGISTER=1 -DLOG_LEVEL=0 .. && make -j12
+> cmake -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=0 .. && make -j12
 > ```
 
 
@@ -400,7 +399,7 @@ Sep 3rd, 2025
 ## Utility
 
 - [**Online GDB**](https://www.onlinegdb.com/)
-
+- [**Simulator**](https://wokwi.com)
 
 
 ## Reference

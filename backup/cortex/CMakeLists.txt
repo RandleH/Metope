@@ -104,12 +104,18 @@ set( CPU_FLAG                       "-mthumb"
 #########################################################################################################
 # Target Linking Option Flag
 #########################################################################################################
-set( LINK_FLAG                      "-specs=nosys.specs"
-                                    "-lc"
+set( LINK_FLAG                      "-lc"
                                     "-lm"
                                     "-lnosys"
                                     "-Wl,-Map=${PROJECT_NAME}.map,--cref"
                                     "-Wl,--gc-sections,--print-memory-usage,--print-output-format")
+
+if($ENV{METOPE_EMULATOR} EQUAL 1)
+    list(APPEND LINK_FLAG "-specs=rdimon.specs")
+else()
+    list(APPEND LINK_FLAG "-specs=nosys.specs")
+endif()
+                                    
 
 
 if((NOT IMU) OR (IMU STREQUAL "QMI8658A") )
@@ -144,18 +150,20 @@ endif()
 message( STATUS "Deploying project modules...")
 
 
-if( DEFINED $ENV{METOPE_CHIP})
+if( DEFINED ENV{METOPE_CHIP})
+    if($ENV{METOPE_EMULATOR} EQUAL 1)
+        message(STATUS "[lib.cmake] Emulator was set.")
+        list(APPEND DEF_LIST "-DEMULATOR_$ENV{METOPE_CHIP}")
+    else()
+        list(APPEND DEF_LIST "-DSYS_TARGET_$ENV{METOPE_CHIP}")
+    endif()
+else()
     message( FATAL_ERROR "METOPE_CHIP was NOT defined. Have you sourced the setup.env?")
 endif()
 
 
-if ($ENV{METOPE_CHIP} STREQUAL "STM32F405RGT6")
-    list(APPEND DEF_LIST "-DSYS_TARGET_STM32F405RGT6")
-elseif ($ENV{METOPE_CHIP} STREQUAL "STM32F411CEU6")
-    list(APPEND DEF_LIST "-DSYS_TARGET_STM32F411CEU6")
-else()
-    message( FATAL_ERROR "Unknown chip: $ENV{METOPE_CHIP}")
-endif()
+
+
 
 
 #########################################################################################################
@@ -164,9 +172,6 @@ endif()
 #   @param INCLUDE_TB_BSP - Enable Human Interaction Test Bench (ie. Tests that need manual intervine)
 #   @param INCLUDE_TB_CMN - Enable Common Test Bench (ie. Basic utility functional tests)
 #   @param INCLUDE_TB_OS  - Enable OS Test Bench (ie. RTOS related Test Bench)
-#
-# @param USE_REGISTER   - Bypass the HAL library support. Use bare register instruction. (Partially Supported)
-
 #########################################################################################################
 if( TEST_ONLY AND TEST_ONLY EQUAL 1)
     list(APPEND DEF_LIST "-DTEST_ONLY=1")
@@ -181,11 +186,6 @@ if( TEST_ONLY AND TEST_ONLY EQUAL 1)
     endif()
     include( ${PRJ_TOP}/test/test.cmake)
 endif()
-
-if( USE_REGISTER AND USE_REGISTER EQUAL 1)
-    list(APPEND DEF_LIST "-DUSE_REGISTER=1")
-endif()
-
 
 include( ${PRJ_TOP}/cmn/cmn.cmake)
 include( ${PRJ_TOP}/app/app.cmake)

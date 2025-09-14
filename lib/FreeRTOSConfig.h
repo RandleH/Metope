@@ -159,9 +159,9 @@
   #define configCHECK_FOR_STACK_OVERFLOW          1
 #endif
 
-#if (defined SYS_TARGET_STM32F411CEU6) 
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined EMULATOR_STM32F411CEU6)
   #define configCPU_CLOCK_HZ                (96000000U)
-#elif defined (SYS_TARGET_STM32F405RGT6)
+#elif (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F405RGT6)
   #define configCPU_CLOCK_HZ                (84000000U)
 #endif
 

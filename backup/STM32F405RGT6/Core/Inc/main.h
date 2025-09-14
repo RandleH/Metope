@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2024 STMicroelectronics.
+  * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -59,12 +59,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define LED_Pin GPIO_PIN_13
+#define LED_GPIO_Port GPIOC
+#define KEY_M_Pin GPIO_PIN_0
+#define KEY_M_GPIO_Port GPIOA
+#define KEY_R_Pin GPIO_PIN_1
+#define KEY_R_GPIO_Port GPIOA
 #define DBG_TX_Pin GPIO_PIN_2
 #define DBG_TX_GPIO_Port GPIOA
 #define DBG_RX_Pin GPIO_PIN_3
 #define DBG_RX_GPIO_Port GPIOA
-#define FLASH_NSS_Pin GPIO_PIN_4
-#define FLASH_NSS_GPIO_Port GPIOA
+#define FLASH_CS_Pin GPIO_PIN_4
+#define FLASH_CS_GPIO_Port GPIOA
 #define FLASH_SCK_Pin GPIO_PIN_5
 #define FLASH_SCK_GPIO_Port GPIOA
 #define FLASH_MOSI_Pin GPIO_PIN_7
@@ -81,10 +87,12 @@ void Error_Handler(void);
 #define TP_INT_GPIO_Port GPIOA
 #define KEY_L_Pin GPIO_PIN_15
 #define KEY_L_GPIO_Port GPIOA
-#define LED_Pin GPIO_PIN_12
-#define LED_GPIO_Port GPIOC
 #define FLASH_MISO_Pin GPIO_PIN_4
 #define FLASH_MISO_GPIO_Port GPIOB
+#define GYRO_SCK_Pin GPIO_PIN_8
+#define GYRO_SCK_GPIO_Port GPIOB
+#define GYRO_SDA_Pin GPIO_PIN_9
+#define GYRO_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
