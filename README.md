@@ -153,17 +153,17 @@ Note that the main entrance of native program is different than others.
 ```bash
 mkdir build
 cd ./build
-cmake -DCMAKE_BUILD_TYPE=<value> [-DUSE_REGISTER=<value>] [-DLOG_LEVEL=<value>] .. && make -j12
+cmake -DCMAKE_BUILD_TYPE=<value> [-DLOG_LEVEL=<value>] .. && make -j12
 ```
 
 > Example:
 >
 > ```
-> cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_REGISTER=1 -DLOG_LEVEL=2 .. && make -j12
+> cmake -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=2 .. && make -j12
 > ```
 >
 > ```
-> cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_REGISTER=1 -DLOG_LEVEL=0 .. && make -j12
+> cmake -DCMAKE_BUILD_TYPE=Debug -DLOG_LEVEL=0 .. && make -j12
 > ```
 
 
