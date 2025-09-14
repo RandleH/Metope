@@ -107,13 +107,7 @@ void bsp_init(void){
 
 
 void app_init(void){
-
-#if (defined UNIT_TEST)
-#elif (defined MANUAL_TEST)
-#elif (defined EMULATOR_TEST)
-#endif
-
-#if (defined INCLUDE_TB_OS) && (INCLUDE_TB_OS==1)
+#if !(defined EMULATOR_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6)
   app_lvgl_init();
 #endif
 }
