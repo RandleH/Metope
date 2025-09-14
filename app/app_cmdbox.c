@@ -320,8 +320,8 @@ void app_cmdbox_main(void *param) RTOSTHREAD {
     EventBits_t uxBits = xEventGroupWaitBits( p_event->_handle, CMN_EVENT_UART_INPUT, pdFALSE, pdFALSE, portMAX_DELAY);
 
     if(uxBits & CMN_EVENT_UART_INPUT){
-      if (p_uart->rx_statue.error_code) {
-        TRACE_WARNING("Can NOT parse the command due to a RX error. Data will be flushed: error_code=0x%02X rawstr=%s rd_idx=%d", p_uart->rx_statue.error_code, p_uart->rx_buf, p_uart->rx_idx);
+      if (p_uart->rx_status.error_code) {
+        TRACE_WARNING("Can NOT parse the command due to a RX error. Data will be flushed: error_code=0x%02X rawstr=%s rd_idx=%d", p_uart->rx_status.error_code, p_uart->rx_buf, p_uart->rx_idx);
       }
       else if (p_uart->rx_status.has_new_msg || p_uart->rx_status.is_overflowed) {
         /**
