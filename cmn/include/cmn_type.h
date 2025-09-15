@@ -119,6 +119,12 @@ typedef uint16_t cmnEventBitmap_t;
 #define CMN_EVENT_UPDATE_RTC          (1<<13) /*!< System update RTC time */
 #define CMN_EVENT_UART_INPUT          (1<<14) /*!< Received a new message from uart port */
 
+#if (configUSE_16_BIT_TICKS == 1)
+  #define CMN_EVENT_SYSTEM_INIT         (1<<7) /*!< System reboot/reset/boot completed */
+#else
+  #define CMN_EVENT_SYSTEM_INIT         (1<<15) /*!< System reboot/reset/boot completed */
+#endif
+
 #define CMN_DATE_YEAR_OFFSET          2022
 typedef union cmnDateTime_t{
   struct{

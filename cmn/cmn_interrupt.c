@@ -422,7 +422,7 @@ void USART2_IRQHandler(void) {
   volatile uint32_t REG_USART2_SR = USART2->SR;
   volatile uint32_t REG_USART2_DR = USART2->DR;
   
-  if (REG_USART2_SR & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE)) {
+  if (REG_USART2_SR & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_NE)) {
     p_uart->rx_status.error_code = (uint8_t)(REG_USART2_SR & 0x1F);
     p_uart->rx_idx = BSP_CFG_UART_RX_BUF_SIZE;
   }

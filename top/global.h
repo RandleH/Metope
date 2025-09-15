@@ -84,7 +84,7 @@ typedef struct stAppClock{
   struct{
     tAppGuiClockParam param;
     void (*init)(tAppGuiClockParam *);
-    void (*set_time)(tAppGuiClockParam *, cmnDateTime_t);
+    void (*set_time)(tAppGuiClockParam *, uint32_t);
     void (*inc_time)(tAppGuiClockParam *, uint32_t);
     void (*idle)(tAppGuiClockParam *);
     void (*deinit)(tAppGuiClockParam *);
