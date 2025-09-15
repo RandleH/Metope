@@ -239,6 +239,44 @@ static void analogclk_idle(tAppGuiClockParam *pClient, tAnalogClockInternalParam
 }
 #endif
 
+/* ************************************************************************** */
+/*                  Private Clock UI Function - Clock General                 */
+/* ************************************************************************** */
+static void ui_clockxxxx_init    (tAppGuiClockParam *pClient) APP_CLOCK_API;
+static void ui_clockxxxx_deinit  (tAppGuiClockParam *pClient, size_t internal_params_size) APP_CLOCK_API;
+
+static void ui_clockxxxx_deinit  (tAppGuiClockParam *pClient, size_t internal_params_size) {
+  SemaphoreHandle_t _semphr = pClient->customized._semphr;
+  BaseType_t            ret = xSemaphoreTake( _semphr, portMAX_DELAY);
+  ASSERT(ret==pdTRUE, "Data was NOT obtained");
+
+  ///////////////////////////////////////////////////////////////
+  /////////////////////// Safe Zone Start ///////////////////////
+  // lv_obj_del(pClient->pScreen);
+  {
+    memset(pClient->customized.p_anything, 0, internal_params_size);
+    vPortFree(pClient->customized.p_anything);
+    pClient->customized.p_anything = NULL;
+  }
+  
+  app_clock_idle_timer_unregist(pClient->_idle_task_timer);
+
+  // memset(pClient, 0, sizeof(tAppGuiClockParam));
+
+  //////////////////////// Safe Zone End ////////////////////////
+  ///////////////////////////////////////////////////////////////
+  /**
+   * @warning
+   *  Directly delete the mutex may cause concurrency bugs.
+   * @note
+   *  FreeRTOS does not delete a semaphore that has tasks blocked on it 
+   *  (tasks that are in the Blocked state waiting for the semaphore to 
+   *  become available).
+   */
+  xSemaphoreGive(_semphr);
+  vSemaphoreDelete(_semphr);
+}
+
 
 
 /* ************************************************************************** */
@@ -286,8 +324,8 @@ static void ui_clockmodern_init(tAppGuiClockParam *pClient) APP_CLOCK_API {
   /////////////////////// Safe Zone Start ///////////////////////
   ASSERT(ret==pdTRUE, "Data was NOT obtained");
 
-  // pClient->pScreen = lv_scr_act();
-  pClient->pScreen = lv_obj_create(NULL);
+  pClient->pScreen = lv_scr_act();
+  // pClient->pScreen = lv_obj_create(NULL);
 
   lv_obj_clear_flag(pClient->pScreen, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
   lv_obj_set_style_bg_color(pClient->pScreen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -890,36 +928,7 @@ static void ui_clockmodern_idle(tAppGuiClockParam *pClient) APP_CLOCK_API {
  * @addtogroup ThreadSafe
  */
 static void ui_clockmodern_deinit(tAppGuiClockParam *pClient) APP_CLOCK_API {
-  SemaphoreHandle_t _semphr = pClient->customized._semphr;
-  BaseType_t            ret = xSemaphoreTake( _semphr, portMAX_DELAY);
-  ASSERT(ret==pdTRUE, "Data was NOT obtained");
-
-  ///////////////////////////////////////////////////////////////
-  /////////////////////// Safe Zone Start ///////////////////////
-  app_lvgl_load_default_screen();
-  lv_obj_del(pClient->pScreen);
-  {
-    tClockModernInternalParam *pClientPrivateParams = (tClockModernInternalParam *)pClient->customized.p_anything;
-    memset(pClientPrivateParams, 0, sizeof(tClockModernInternalParam));
-    vPortFree(pClientPrivateParams);
-    pClient->customized.p_anything = NULL;
-  }
-
-  app_clock_idle_timer_unregist(pClient->_idle_task_timer);
-
-  memset(pClient, 0, sizeof(tAppGuiClockParam));
-  //////////////////////// Safe Zone End ////////////////////////
-  ///////////////////////////////////////////////////////////////
-  /**
-   * @warning
-   *  Directly delete the mutex may cause concurrency bugs.
-   * @note
-   *  FreeRTOS does not delete a semaphore that has tasks blocked on it 
-   *  (tasks that are in the Blocked state waiting for the semaphore to 
-   *  become available).
-   */
-  xSemaphoreGive(_semphr);
-  vSemaphoreDelete(_semphr);
+  ui_clockxxxx_deinit(pClient, sizeof(tClockModernInternalParam));
 }
 
 
@@ -1259,35 +1268,7 @@ static void ui_clocknana_idle(tAppGuiClockParam *pClient){
  * @addtogroup ThreadSafe
  */
 static void ui_clocknana_deinit(tAppGuiClockParam *pClient){
-  SemaphoreHandle_t _semphr = pClient->customized._semphr;
-  BaseType_t            ret = xSemaphoreTake( _semphr, portMAX_DELAY);
-  ASSERT(ret==pdTRUE, "Data was NOT obtained");
-
-  ///////////////////////////////////////////////////////////////
-  /////////////////////// Safe Zone Start ///////////////////////
-  lv_obj_del(pClient->pScreen);
-  {
-    tClockNanaInternalParam *pClientPrivateParams = (tClockNanaInternalParam *)pClient->customized.p_anything;
-    memset(pClientPrivateParams, 0, sizeof(tClockNanaInternalParam));
-    vPortFree(pClientPrivateParams);
-    pClient->customized.p_anything = NULL;
-  }
-  
-  app_clock_idle_timer_unregist(pClient->_idle_task_timer);
-
-  memset(pClient, 0, sizeof(tAppGuiClockParam));
-  //////////////////////// Safe Zone End ////////////////////////
-  ///////////////////////////////////////////////////////////////
-  /**
-   * @warning
-   *  Directly delete the mutex may cause concurrency bugs.
-   * @note
-   *  FreeRTOS does not delete a semaphore that has tasks blocked on it 
-   *  (tasks that are in the Blocked state waiting for the semaphore to 
-   *  become available).
-   */
-  xSemaphoreGive(_semphr);
-  vSemaphoreDelete(_semphr);
+  ui_clockxxxx_deinit(pClient, sizeof(tClockNanaInternalParam));
 }
 
 #ifdef __cplusplus
@@ -1568,6 +1549,9 @@ static void ui_clocklvvvw_init(tAppGuiClockParam *pClient){
     pClient->pPinMinute = ui_pinMinute;
   }
 
+  pClient->_idle_task_timer = app_clock_idle_timer_regist();
+  xTimerStart(pClient->_idle_task_timer, 0);
+
   pClient->customized.p_anything = pClientPrivateParams;
   ret = xSemaphoreGive(pClient->customized._semphr);
   ASSERT(ret==pdTRUE, "Data was NOT released");
@@ -1640,7 +1624,7 @@ static void ui_clocklvvvw_idle(tAppGuiClockParam *pClient){
  * @addtogroup ThreadSafe
  */
 static void ui_clocklvvvw_deinit(tAppGuiClockParam *pClient){
-  ui_clockmodern_deinit(pClient);
+  ui_clockxxxx_deinit(pClient, sizeof(tClockLvvvwInternalParam));
 }
 
 #ifdef __cplusplus
@@ -1722,6 +1706,7 @@ STATIC void app_clock_gui_switch( AppGuiClockEnum_t x){
   xTaskResumeAll();
 
   metope.app.clock.gui.init( &metope.app.clock.gui.param );
+  lv_obj_invalidate(metope.app.clock.gui.param.pScreen);
 }
 
 /**
@@ -1791,6 +1776,16 @@ extern "C"{
 void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
   tAppClock *parsed_param = (tAppClock *)param;
 
+  const AppGuiClockEnum_t clock_style[NUM_OF_AppGuiClock] = {
+      kAppGuiClock_ClockModern,
+      kAppGuiClock_NANA,
+      kAppGuiClock_LVVVW
+  };
+
+  uint8_t clock_style_idx = 2;
+
+  parsed_param->style = clock_style[clock_style_idx];
+
   app_clock_gui_switch(parsed_param->style);
   
   xEventGroupSetBits(metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
@@ -1809,8 +1804,9 @@ void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
     TickType_t tmp = xTaskGetTickCount();
     TickType_t ms_delta = tmp - old_tick;
     old_tick = tmp;
-
-    EventBits_t uxBits = xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC, pdFALSE, pdFALSE, DEFAULT_CLOCK_REFREASH_PERIOD);
+    
+    EventBits_t interestedBits = CMN_EVENT_UPDATE_RTC | CMN_EVENT_USER_KEY_L | CMN_EVENT_USER_KEY_R;
+    EventBits_t uxBits         = xEventGroupWaitBits( metope.app.rtos.event._handle, interestedBits, pdFALSE, pdFALSE, DEFAULT_CLOCK_REFREASH_PERIOD);
 
     if(uxBits & CMN_EVENT_UPDATE_RTC){
       vTaskSuspendAll();
@@ -1831,6 +1827,27 @@ void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
        */
       parsed_param->gui.inc_time( &parsed_param->gui.param, ms_delta);
     }
+
+    if (uxBits & (CMN_EVENT_USER_KEY_L | CMN_EVENT_USER_KEY_R)) {
+      if (uxBits & CMN_EVENT_USER_KEY_L) {
+        clock_style_idx = (clock_style_idx + NUM_OF_AppGuiClock - 1) % NUM_OF_AppGuiClock;
+        parsed_param->style = clock_style[clock_style_idx];
+        app_clock_gui_switch(parsed_param->style);
+        xEventGroupClearBits(metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_L);
+      }
+      if (uxBits & CMN_EVENT_USER_KEY_R) {
+        clock_style_idx = (clock_style_idx + NUM_OF_AppGuiClock + 1) % NUM_OF_AppGuiClock;
+        parsed_param->style = clock_style[clock_style_idx];
+        app_clock_gui_switch(parsed_param->style);
+        xEventGroupClearBits(metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_R);
+      }
+      vTaskSuspendAll();
+      cmnDateTime_t rtc_time = bsp_rtc_get_time();
+      xTaskResumeAll();
+      parsed_param->gui.set_time( &parsed_param->gui.param, rtc_time);
+      lv_obj_invalidate(parsed_param->gui.param.pScreen);
+    }
+    
   }
 }
 

@@ -166,7 +166,7 @@ void app_lvgl_flush_all( void){
 
 
 void app_lvgl_load_default_screen(void){
-  lv_scr_load(THIS->lvgl.default_scr);
+  // lv_scr_load(THIS->lvgl.default_scr);
 }
 
 

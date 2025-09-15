@@ -6,6 +6,9 @@
 /* ************************************************************************** */
 #include "device.h"
 #include "global.h"
+#include "trace.h"
+#include "FreeRTOS.h"
+#include "event_groups.h"
 
 
 #ifdef __cplusplus
@@ -82,7 +85,36 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 }
 
 
+void cmn_callback_user_key_detected(uint16_t key) {
+#if 1
+  if( READ_BIT(EXTI->PR, key) ){
+    EXTI->PR = key;
+  }
+#else
+  HAL_GPIO_EXTI_IRQHandler(key);
+#endif
 
+  cmnEventBitmap_t cmn_event_bitmap = 0;
+  if (key == KEY_M_Pin) {
+    cmn_event_bitmap = CMN_EVENT_USER_KEY_M | CMN_EVENT_UPDATE_RTC;
+  }else if (key == KEY_L_Pin) {
+    cmn_event_bitmap = CMN_EVENT_USER_KEY_L;
+  }else if (key == KEY_R_Pin) {
+    cmn_event_bitmap = CMN_EVENT_USER_KEY_R;
+  }
+
+  TRACE_DEBUG("CMN - Received user key pressed: %d", key);
+
+  tRtos *p_rtos = &metope.app.rtos;
+  if(p_rtos->status.running){
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+    xHigherPriorityTaskWoken = pdFALSE;
+    xResult = xEventGroupSetBitsFromISR( p_rtos->event._handle, cmn_event_bitmap, &xHigherPriorityTaskWoken );
+    if( xResult != pdFAIL ){
+      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
+  }
+}
 
 
 
