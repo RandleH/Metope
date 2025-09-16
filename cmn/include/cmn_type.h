@@ -41,8 +41,6 @@
 #define CMN_TYPE_H
 
 
-
-
 #define DISABLE   (0U)
 #define ENABLE    (1U)
 
@@ -118,12 +116,7 @@ typedef uint16_t cmnEventBitmap_t;
 #define CMN_EVENT_QMI8658_INT2        (1<<12) /*!< FIFO Watermark Reached */
 #define CMN_EVENT_UPDATE_RTC          (1<<13) /*!< System update RTC time */
 #define CMN_EVENT_UART_INPUT          (1<<14) /*!< Received a new message from uart port */
-
-#if (configUSE_16_BIT_TICKS == 1)
-  #define CMN_EVENT_SYSTEM_INIT         (1<<7) /*!< System reboot/reset/boot completed */
-#else
-  #define CMN_EVENT_SYSTEM_INIT         (1<<15) /*!< System reboot/reset/boot completed */
-#endif
+#define CMN_EVENT_SYSTEM_INIT         (1<<(configMAX_NUM_OF_EVENT_GROUP_BITS-1)) /*!< System reboot/reset/boot completed */
 
 #define CMN_DATE_YEAR_OFFSET          2022
 typedef union cmnDateTime_t{

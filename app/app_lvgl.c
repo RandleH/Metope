@@ -178,11 +178,13 @@ void app_lvgl_load_default_screen(void){
 // LVGL version: 8.3.6
 // Project name: ModernClock
 
+#if (LV_USE_BAR == 1)
 void _ui_bar_set_property( lv_obj_t *target, int id, int val) 
 {
    if (id == _UI_BAR_PROPERTY_VALUE_WITH_ANIM) lv_bar_set_value(target, val, LV_ANIM_ON);
    if (id == _UI_BAR_PROPERTY_VALUE) lv_bar_set_value(target, val, LV_ANIM_OFF);
 }
+#endif
 
 void _ui_basic_set_property( lv_obj_t *target, int id, int val) 
 {
@@ -192,10 +194,12 @@ void _ui_basic_set_property( lv_obj_t *target, int id, int val)
    if (id == _UI_BASIC_PROPERTY_HEIGHT) lv_obj_set_height(target, val);
 }
 
+#if (LV_USE_DROPDOWN == 1)
 void _ui_dropdown_set_property( lv_obj_t *target, int id, int val) 
 {
    if (id == _UI_DROPDOWN_PROPERTY_SELECTED) lv_dropdown_set_selected(target, val);
 }
+#endif
 
 void _ui_image_set_property( lv_obj_t *target, int id, uint8_t *val) 
 {
@@ -213,11 +217,13 @@ void _ui_roller_set_property( lv_obj_t *target, int id, int val)
    if (id == _UI_ROLLER_PROPERTY_SELECTED) lv_roller_set_selected(target, val, LV_ANIM_OFF);
 }
 
+#if(LV_USE_SLIDER == 1)
 void _ui_slider_set_property( lv_obj_t *target, int id, int val) 
 {
    if (id == _UI_SLIDER_PROPERTY_VALUE_WITH_ANIM) lv_slider_set_value(target, val, LV_ANIM_ON);
    if (id == _UI_SLIDER_PROPERTY_VALUE) lv_slider_set_value(target, val, LV_ANIM_OFF);
 }
+#endif
 
 void _ui_screen_change( lv_obj_t ** target, lv_scr_load_anim_t fademode, int spd, int delay, void (*target_init)(void)) 
 {
@@ -242,23 +248,29 @@ void _ui_arc_increment( lv_obj_t *target, int val)
    lv_event_send(target,LV_EVENT_VALUE_CHANGED, 0);
 }
 
+#if (LV_USE_BAR == 1)
 void _ui_bar_increment( lv_obj_t *target, int val, int anm) 
 {
    int old = lv_bar_get_value(target);
    lv_bar_set_value(target, old+val, anm);
 }
+#endif
 
+#if (LV_USE_SLIDER == 1)
 void _ui_slider_increment( lv_obj_t *target, int val, int anm) 
 {
    int old = lv_slider_get_value(target);
    lv_slider_set_value(target, old+val, anm);
    lv_event_send(target,LV_EVENT_VALUE_CHANGED, 0);
 }
+#endif
 
+#if (LV_USE_KEYBOARD == 1)
 void _ui_keyboard_set_target( lv_obj_t *keyboard, lv_obj_t *textarea) 
 {
    lv_keyboard_set_textarea(keyboard, textarea);
 }
+#endif
 
 void _ui_flag_modify( lv_obj_t *target, int32_t flag, int value)
 {
@@ -414,18 +426,22 @@ void _ui_arc_set_text_value( lv_obj_t *trg, lv_obj_t *src, const char *prefix, c
    lv_label_set_text(trg, buf);
 }
 
+#if (LV_USE_SLIDER == 1)
 void _ui_slider_set_text_value( lv_obj_t *trg, lv_obj_t *src, const char *prefix, const char *postfix) 
 {
    char buf[_UI_TEMPORARY_STRING_BUFFER_SIZE];
    lv_snprintf(buf, sizeof(buf), "%s%d%s", prefix, (int)lv_slider_get_value(src), postfix);
    lv_label_set_text(trg, buf);
 }
+#endif
+
 void _ui_checked_set_text_value( lv_obj_t *trg, lv_obj_t *src, const char *txt_on, const char *txt_off) 
 {
     if (lv_obj_has_state(src,LV_STATE_CHECKED)) lv_label_set_text(trg,txt_on);
     else lv_label_set_text(trg,txt_off);
 }
 
+#if (LV_USE_SPINBOX == 1)
 void _ui_spinbox_step(lv_obj_t * target, int val)
 {
 	if(val > 0) lv_spinbox_increment(target);
@@ -433,6 +449,7 @@ void _ui_spinbox_step(lv_obj_t * target, int val)
 
 	lv_event_send(target,LV_EVENT_VALUE_CHANGED, 0);
 }
+#endif
 
 void _ui_switch_theme(int val)
 {

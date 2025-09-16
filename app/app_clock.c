@@ -1801,6 +1801,7 @@ void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
 
         /**
          * @bug: Branch task shall NOT clear the global event bits.
+         *       However this bit needs to be cleared now otherwise the scheduler will NOT block the task.
          */
         xEventGroupClearBits(metope.app.rtos.event._handle, CMN_EVENT_SYSTEM_INIT);
       }
