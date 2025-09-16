@@ -41,8 +41,6 @@
 #define CMN_TYPE_H
 
 
-
-
 #define DISABLE   (0U)
 #define ENABLE    (1U)
 
@@ -102,20 +100,23 @@ typedef volatile u64 vu64;
 typedef IRQn_Type cmnIRQn_t;
 #endif
 
-
+typedef uint16_t cmnEventBitmap_t;
 #define CMN_EVENT_TIM2                (1<<0)
 #define CMN_EVENT_TIM9                (1<<1)
 #define CMN_EVENT_SCREEN_REFRESH_CPLT (1<<2)
 #define CMN_EVENT_USER_KEY_M          (1<<3)  /*!< Use click the power button */
-#define CMN_EVENT_SCREEN_DISPOFF      (1<<4)  /*!< Screen has been inactive for a while */
-#define CMN_EVENT_SCREEN_DISPON       (1<<5)  /*!< Screen activated (NOT used) */
-#define CMN_EVENT_SCREEN_DISPBR       (1<<6)
-#define CMN_EVENT_QMI8658_TX_CPLT     (1<<7)  /*!< QMI8658 DMA TX completed on I2C1 */
-#define CMN_EVENT_QMI8658_RX_CPLT     (1<<8)  /*!< QMI8658 DMA RX completed on I2C1 */
-#define CMN_EVENT_QMI8658_INT1        (1<<9)  /*!< CTRL9 Command Done */
-#define CMN_EVENT_QMI8658_INT2        (1<<10) /*!< FIFO Watermark Reached */
-#define CMN_EVENT_UPDATE_RTC          (1<<11) /*!< System update RTC time */
-#define CMN_EVENT_UART_INPUT          (1<<12) /*!< Received a new message from uart port */
+#define CMN_EVENT_USER_KEY_L          (1<<4)  /*!< Use click the power button */
+#define CMN_EVENT_USER_KEY_R          (1<<5)  /*!< Use click the power button */
+#define CMN_EVENT_SCREEN_DISPOFF      (1<<6)  /*!< Screen has been inactive for a while or turn off the display */
+#define CMN_EVENT_SCREEN_DISPON       (1<<7)  /*!< Screen activated or turn on the display */
+#define CMN_EVENT_SCREEN_DISPBR       (1<<8)  /*!< Screen brightness setting */
+#define CMN_EVENT_QMI8658_TX_CPLT     (1<<9)  /*!< QMI8658 DMA TX completed on I2C1 */
+#define CMN_EVENT_QMI8658_RX_CPLT     (1<<10) /*!< QMI8658 DMA RX completed on I2C1 */
+#define CMN_EVENT_QMI8658_INT1        (1<<11) /*!< CTRL9 Command Done */
+#define CMN_EVENT_QMI8658_INT2        (1<<12) /*!< FIFO Watermark Reached */
+#define CMN_EVENT_UPDATE_RTC          (1<<13) /*!< System update RTC time */
+#define CMN_EVENT_UART_INPUT          (1<<14) /*!< Received a new message from uart port */
+#define CMN_EVENT_SYSTEM_INIT         (1<<(configMAX_NUM_OF_EVENT_GROUP_BITS-1)) /*!< System reboot/reset/boot completed */
 
 #define CMN_DATE_YEAR_OFFSET          2022
 typedef union cmnDateTime_t{

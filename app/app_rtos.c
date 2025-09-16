@@ -22,6 +22,7 @@
 /*                                  Includes                                  */
 /* ************************************************************************** */
 #include "FreeRTOS.h"
+#include "task.h"
 #include "global.h"
 #include "trace.h"
 #include "assert.h"
@@ -56,6 +57,26 @@ void app_rtos_idle_callback(void) {
 
 }
 
+
+void app_rtos_checkpoint(void *param) RTOSTHREAD {
+  tRtosEvent *p_event = &metope.app.rtos.event;
+  tRtosTask  *p_task  = &metope.app.rtos.task;
+
+  while (eBlocked != eTaskGetState(p_task->cmd_box._handle)) {
+    vTaskDelay(10);
+  }
+
+  while (eBlocked != eTaskGetState(p_task->clock_ui._handle)) {
+    vTaskDelay(10);
+  }
+
+  while (eBlocked != eTaskGetState(p_task->screen_onoff._handle)) {
+    vTaskDelay(10);
+  }
+  
+  xEventGroupSetBits( p_event->_handle, CMN_EVENT_SYSTEM_INIT);
+  vTaskDelete(NULL);
+}
 
 
 /**

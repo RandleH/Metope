@@ -21,6 +21,7 @@
 #ifndef APP_RTOS_H
 #define APP_RTOS_H
 
+#include "app_type.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -28,6 +29,7 @@ extern "C"{
 
 void app_rtos_start( void);
 void app_rtos_stop( void);
+void app_rtos_checkpoint(void *param) RTOSTHREAD;
 
 #ifdef __cplusplus
 }

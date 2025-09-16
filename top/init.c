@@ -44,6 +44,7 @@
 #include "bsp_gyro.h"
 #include "app_type.h"
 #include "app_task.h"
+#include "app_rtos.h"
 #include "app_lvgl.h"
 #include "app_clock.h"
 #include "app_cmdbox.h"
@@ -166,6 +167,10 @@ void os_init(void){
     &p_task->cmd_box._stack[0],\
     &p_task->cmd_box._tcb\
   );
+
+  TaskHandle_t _handle;
+  xTaskCreate( app_rtos_checkpoint, "app_rtos_checkpoint", 256U, NULL, kAppPriority_NORMAL, &_handle);
+  
 #endif
 
 }

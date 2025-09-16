@@ -82,7 +82,8 @@ typedef enum{
   kAppGuiClock_None   = 255,
   kAppGuiClock_ClockModern = 0,
   kAppGuiClock_NANA   = 1,
-  kAppGuiClock_LVVVW  = 2
+  kAppGuiClock_LVVVW  = 2,
+  NUM_OF_AppGuiClock
 } AppGuiClockEnum_t;
 
 

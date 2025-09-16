@@ -79,6 +79,11 @@
 #define configUSE_IDLE_HOOK                  1
 #define configUSE_TICK_HOOK                  0
 #define configUSE_16_BIT_TICKS               0
+#if (configUSE_16_BIT_TICKS == 1)
+  #define configMAX_NUM_OF_EVENT_GROUP_BITS  24
+#else
+  #define configMAX_NUM_OF_EVENT_GROUP_BITS  8
+#endif
 #define configUSE_MUTEXES                    1
 #define configUSE_TIMERS                     1
 #if defined (configUSE_TIMERS) && (configUSE_TIMERS==1)

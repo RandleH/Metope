@@ -422,7 +422,7 @@ void USART2_IRQHandler(void) {
   volatile uint32_t REG_USART2_SR = USART2->SR;
   volatile uint32_t REG_USART2_DR = USART2->DR;
   
-  if (REG_USART2_SR & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE)) {
+  if (REG_USART2_SR & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_NE)) {
     p_uart->rx_status.error_code = (uint8_t)(REG_USART2_SR & 0x1F);
     p_uart->rx_idx = BSP_CFG_UART_RX_BUF_SIZE;
   }
@@ -451,10 +451,6 @@ void USART2_IRQHandler(void) {
   }
 }
 
-void DEFAULT EXTI15_10_IRQHandler( void){
-  HAL_GPIO_EXTI_IRQHandler(KEY_L_Pin);
-}
-
 void RTC_Alarm_IRQHandler( void){}
 void OTG_FS_WKUP_IRQHandler( void){}
 void SDIO_IRQHandler( void){}
@@ -470,26 +466,18 @@ void RTC_WKUP_IRQHandler( void){}
 void FLASH_IRQHandler( void){}       
 void RCC_IRQHandler( void){}         
 
+
+
 void DEFAULT EXTI0_IRQHandler( void){
-#if 1
-  if( READ_BIT(EXTI->PR, GPIO_PIN_0) ){
-    EXTI->PR = GPIO_PIN_0;
-  }
-#else
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
-#endif
-  if(metope.app.rtos.status.running){
-    BaseType_t xHigherPriorityTaskWoken, xResult;
-    xHigherPriorityTaskWoken = pdFALSE;
-    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_M | CMN_EVENT_UPDATE_RTC, &xHigherPriorityTaskWoken );
-    if( xResult != pdFAIL ){
-      portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-    }
-  }
+  cmn_callback_user_key_detected(KEY_M_Pin);
 }
 
 void DEFAULT EXTI1_IRQHandler( void){
-  HAL_GPIO_EXTI_IRQHandler(KEY_R_Pin);
+  cmn_callback_user_key_detected(KEY_R_Pin);
+}
+
+void DEFAULT EXTI15_10_IRQHandler( void){
+  cmn_callback_user_key_detected(KEY_L_Pin);
 }
 
 
