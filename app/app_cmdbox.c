@@ -44,7 +44,7 @@ extern "C" {
 /*                              Private Macros                                */
 /* ************************************************************************** */
 #define MAX_NUN_ARGS_SUPPORTED      8
-
+#define MAX_NUM_PENDING             2
 
 /* ************************************************************************** */
 /*                              Private Objects                               */
@@ -61,6 +61,11 @@ typedef struct stAppCmdboxDatabaseList{
   const tAppCmdboxDatabaseListUnit *database;
   const size_t                     len;
 } tAppCmdboxDatabaseList;
+
+typedef struct stAppCmdBoxPendingExe {
+  arg_t                      args[MAX_NUN_ARGS_SUPPORTED];
+  tAppCmdboxDatabaseListUnit *p_matched_cmd;
+} tAppCmdBoxPendingExe;
 
 
 /* ************************************************************************** */
@@ -143,6 +148,8 @@ static const tAppCmdboxDatabaseList *CMD_TABLE[] = {
 };
 
 static char rx_buf_copy[BSP_CFG_UART_RX_BUF_SIZE];
+
+static tAppCmdBoxPendingExe pending_exe[MAX_NUM_PENDING] = {0};
 
 
 int app_cmdbox_callback_wrapper_0args(const char *cmd, int(*callback)(const char *, ...), int *args) {
@@ -302,9 +309,35 @@ void app_cmdbox_parse(const char *cmd) {
       }
     }
     /* Execute */
+#if 0    
     app_cmdbox_callback_wrapper[p_matched_cmd->nargs]( p_matched_cmd->keyword, p_matched_cmd->callback, args);
+#else
+    int i = 0;
+    for ( ; i < MAX_NUM_PENDING; ++i) {
+      tAppCmdBoxPendingExe *p_pending_exe = &pending_exe[i];
+      if (p_pending_exe->p_matched_cmd == NULL) {
+        p_pending_exe->p_matched_cmd = p_matched_cmd;
+        memcpy(p_pending_exe->args, args, MAX_NUN_ARGS_SUPPORTED);
+        break;
+      }
+    }
+    ASSERT( i != MAX_NUM_PENDING, "Pending execution list is full.");
+#endif
   }
 
+}
+
+void app_cmdbox_exe(uint32_t escape_ms) {
+  for ( int i = 0; i < MAX_NUM_PENDING; ++i) {
+    tAppCmdBoxPendingExe *p_pending_exe = &pending_exe[i];
+    if (p_pending_exe->p_matched_cmd != NULL) {
+      app_cmdbox_callback_wrapper[p_pending_exe->p_matched_cmd->nargs]( p_pending_exe->p_matched_cmd->keyword, p_pending_exe->p_matched_cmd->callback, p_pending_exe->args);
+      p_pending_exe->p_matched_cmd = NULL;
+      if (escape_ms != 0) {
+        vTaskDelay(escape_ms);
+      }
+    }
+  }
 }
 
 /* ************************************************************************** */
@@ -320,6 +353,7 @@ void app_cmdbox_main(void *param) RTOSTHREAD {
     EventBits_t uxBits = xEventGroupWaitBits( p_event->_handle, CMN_EVENT_UART_INPUT, pdFALSE, pdFALSE, portMAX_DELAY);
 
     if(uxBits & CMN_EVENT_UART_INPUT){
+      taskENTER_CRITICAL();
       if (p_uart->rx_status.error_code) {
         TRACE_WARNING("Can NOT parse the command due to a RX error. Data will be flushed: error_code=0x%02X rawstr=%s rd_idx=%d", p_uart->rx_status.error_code, p_uart->rx_buf, p_uart->rx_idx);
         p_uart->rx_status.error_code = 0;
@@ -330,13 +364,15 @@ void app_cmdbox_main(void *param) RTOSTHREAD {
          */
         p_uart->rx_status.is_locked     = 1;
         app_cmdbox_parse(p_uart->rx_buf);
+        p_uart->rx_idx                  = 0;
+        p_uart->rx_status.has_new_msg   = 0;
+        p_uart->rx_status.is_overflowed = 0;
+        p_uart->rx_status.is_locked     = 0;
       }
-
-      p_uart->rx_idx                  = 0;
-      p_uart->rx_status.has_new_msg   = 0;
-      p_uart->rx_status.is_overflowed = 0;
-      p_uart->rx_status.is_locked     = 0;
+      taskEXIT_CRITICAL();
       xEventGroupClearBits(p_event->_handle, CMN_EVENT_UART_INPUT);
+      
+      app_cmdbox_exe(0);
     }
   }
 }
