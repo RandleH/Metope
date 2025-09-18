@@ -47,7 +47,15 @@ typedef struct stBspScreen{
 /* ////////////////////////////////////////////////////////////////////////// */
 /*                              BSP Uart Objects                              */
 /* ////////////////////////////////////////////////////////////////////////// */
-typedef union stBspUartStatus {
+typedef union stBspUartTxStatus {
+  struct {
+    uint16_t escape_ticks : 8;
+    uint16_t msg_len      : 8;
+  };
+  uint16_t word;
+} tBspUartTxStatus;
+
+typedef union stBspUartRxStatus {
   struct {
     uint8_t is_locked     : 1;
     uint8_t is_overflowed : 1;
@@ -55,13 +63,14 @@ typedef union stBspUartStatus {
     uint8_t error_code    : 5;
   };
   uint8_t word;
-} tBspUartStatus;
+} tBspUartRxStatus;
 
 typedef struct stBspUart{
-  char           tx_buf[BSP_CFG_UART_TX_BUF_SIZE+1];
-  char           rx_buf[BSP_CFG_UART_RX_BUF_SIZE+1];
-  uint8_t        rx_idx;
-  tBspUartStatus rx_status;
+  char             tx_buf[BSP_CFG_UART_TX_BUF_SIZE+1];
+  tBspUartTxStatus tx_status;
+  char             rx_buf[BSP_CFG_UART_RX_BUF_SIZE+1];
+  uint8_t          rx_idx;
+  tBspUartRxStatus rx_status;
   //...//
 } tBspUart;
 

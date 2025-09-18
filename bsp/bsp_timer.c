@@ -67,6 +67,8 @@ static void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
     case TIM9_BASE:{
       while( metope.dev.status.tim9==0 && --cnt!=0);
       metope.dev.status.tim9 = 0;
+      extern uint32_t TIM9_FLAG;
+      TIM9_FLAG = 0;
       break;
     }
     default:{

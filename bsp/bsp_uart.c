@@ -26,6 +26,7 @@
 #include "global.h"
 #include "cmn_type.h"
 #include "cmn_utility.h"
+#include "cmn_delay.h"
 
 
 /* ************************************************************************** */
@@ -80,12 +81,76 @@ int bsp_uart_printf( const char *format, ...){
   }
 
 #if 1
-  HAL_StatusTypeDef hstatus;
-  hstatus  = HAL_UART_Transmit( metope.dev.pHuart2, p_uart->tx_buf, num_c_inserted, HAL_MAX_DELAY);
+  int ret = SUCCESS;
+  {
+    uint32_t tmpreg = 0x00U;
+    tmpreg = USART2->CR1;
+    tmpreg &= ~(USART_CR1_TCIE | USART_CR1_TXEIE);
+    tmpreg |= USART_CR1_TE;
+    USART2->CR1 = tmpreg;
+    while( 0 == READ_BIT(USART2->CR1, USART_CR1_TE));
+  }
+
+  for( int i = 0; i < num_c_inserted; ++i) {
+    p_uart->tx_status.escape_ticks = 0;
+
+    /* Wait until DR can accept new data */
+    while( (0 == (USART2->SR & USART_SR_TXE)) && (p_uart->tx_status.escape_ticks != 0xFF) ) {
+      // if(metope.app.rtos.status.running) {
+      //   vTaskDelay(1);
+      // }else{
+      //   cmnBoolean_t async_mode = false;
+      //   cmn_tim9_sleep(30000, async_mode);
+      // }
+      // p_uart->tx_status.escape_ticks++;
+    }
+
+    USART2->DR = (uint8_t)(p_uart->tx_buf[i] & (uint8_t)0xFF);
+    
+    if (p_uart->tx_status.escape_ticks == 0xFF) {
+      ret = ERROR;
+    }
+  }
+
   p_uart->tx_buf[0] = '\n';
   p_uart->tx_buf[1] = '\0';
-  hstatus |= HAL_UART_Transmit( metope.dev.pHuart2, p_uart->tx_buf, 2, HAL_MAX_DELAY);
-  return hstatus==HAL_OK ? SUCCESS : ERROR;
+
+  for( int i = 0; i < 2; ++i) {
+    p_uart->tx_status.escape_ticks = 0;
+
+    /**
+     * the TXE (Transmit Empty) flag indicates that the Data Register (DR) can accept a new byte of data, allowing you to load the next byte into the transmit holding register. The TC (Transmission Complete) flag indicates that the entire last transmission, including the stop bit, has been fully sent out of the shift register and onto the TX line. 
+     */
+    while( (0 == (USART2->SR & USART_SR_TXE)) && (p_uart->tx_status.escape_ticks != 0xFF) ) {
+      // if(metope.app.rtos.status.running) {
+      //   vTaskDelay(1);
+      // }else{
+      //   cmnBoolean_t async_mode = false;
+      //   cmn_tim9_sleep(3000, async_mode);
+      // }
+      // p_uart->tx_status.escape_ticks++;
+    }
+
+    USART2->DR = (uint8_t)(p_uart->tx_buf[i] & (uint8_t)0xFF);
+    
+    if (p_uart->tx_status.escape_ticks == 0xFF) {
+      ret = ERROR;
+    }
+  }
+
+  while((0 == (USART2->SR & USART_SR_TC))) {
+    /* Wait until the datafram was completed */
+  }
+
+  {
+    USART2->SR  &= ~USART_SR_TC;
+    uint32_t tmpreg = 0x00U;
+    tmpreg = USART2->CR1;
+    tmpreg &= ~USART_CR1_TE;
+    USART2->CR1 = tmpreg;
+    while( (0 == READ_BIT(USART2->CR1, USART_CR1_TE)) && (0 != READ_BIT(USART2->SR, USART_SR_TC)));
+  }
+  return ret;
 #else
 #ifdef __cplusplus
   std::cout << buf << std::endl;

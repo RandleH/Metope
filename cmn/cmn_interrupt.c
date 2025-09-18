@@ -334,6 +334,8 @@ void EXTI9_5_IRQHandler(void){
   HAL_GPIO_EXTI_IRQHandler(TP_INT_Pin);
 }
 
+
+uint32_t TIM9_FLAG = 0;
 void TIM1_BRK_TIM9_IRQHandler(void){
 #if 1
   TIM9->SR = 0x00000000;
@@ -342,6 +344,7 @@ void TIM1_BRK_TIM9_IRQHandler(void){
   HAL_TIM_IRQHandler(&htim9);
 #endif
   metope.dev.status.tim9 = 1;
+  TIM9_FLAG = 1;
   if(metope.app.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;

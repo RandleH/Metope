@@ -76,19 +76,19 @@ cmnBoolean_t cmn_tim2_sleep(u16 ms, cmnBoolean_t async_mode){
  *          Return `SUCCESS` when finished.
  */
 cmnBoolean_t cmn_tim9_sleep(u16 us, cmnBoolean_t async_mode){
-  if(metope.dev.status.tim9==1){
+  extern uint32_t TIM9_FLAG;
+  if(TIM9_FLAG==1){
     return BUSY;
   }
   /* Config Timer Register */
   bsp_tim9_delay(us);
-  
   /* Wait until event was called */
   if(async_mode){
     xEventGroupWaitBits( metope.app.rtos.event._handle, CMN_EVENT_TIM9, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
-    while(metope.dev.status.tim9==0);
+    while(TIM9_FLAG==0);
   }
-  metope.dev.status.tim9 = 0;
+  TIM9_FLAG = 0;
   return SUCCESS;
 }
 
