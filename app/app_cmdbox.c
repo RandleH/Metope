@@ -30,6 +30,8 @@
 #if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
   #include "global.h"
   #include "FreeRTOS.h"
+#else
+  #include <unistd.h>
 #endif
 #include "bsp_type.h"
 #include "app_cmdbox.h"
@@ -64,7 +66,7 @@ typedef struct stAppCmdboxDatabaseList{
 
 typedef struct stAppCmdBoxPendingExe {
   arg_t                      args[MAX_NUN_ARGS_SUPPORTED];
-  tAppCmdboxDatabaseListUnit *p_matched_cmd;
+  const tAppCmdboxDatabaseListUnit *p_matched_cmd;
 } tAppCmdBoxPendingExe;
 
 
@@ -308,10 +310,7 @@ void app_cmdbox_parse(const char *cmd) {
 #endif
       }
     }
-    /* Execute */
-#if 0    
-    app_cmdbox_callback_wrapper[p_matched_cmd->nargs]( p_matched_cmd->keyword, p_matched_cmd->callback, args);
-#else
+    /* Add it to Pending Execution */
     int i = 0;
     for ( ; i < MAX_NUM_PENDING; ++i) {
       tAppCmdBoxPendingExe *p_pending_exe = &pending_exe[i];
@@ -322,7 +321,6 @@ void app_cmdbox_parse(const char *cmd) {
       }
     }
     ASSERT( i != MAX_NUM_PENDING, "Pending execution list is full.");
-#endif
   }
 
 }
@@ -334,7 +332,11 @@ void app_cmdbox_exe(uint32_t escape_ms) {
       app_cmdbox_callback_wrapper[p_pending_exe->p_matched_cmd->nargs]( p_pending_exe->p_matched_cmd->keyword, p_pending_exe->p_matched_cmd->callback, p_pending_exe->args);
       p_pending_exe->p_matched_cmd = NULL;
       if (escape_ms != 0) {
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
         vTaskDelay(escape_ms);
+#elif (defined SYS_TARGET_NATIVE)
+        usleep(escape_ms*1000);
+#endif
       }
     }
   }
