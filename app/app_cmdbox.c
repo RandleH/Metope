@@ -347,7 +347,7 @@ void app_cmdbox_exe(uint32_t escape_ms) {
 /* ************************************************************************** */
 #if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 void app_cmdbox_main(void *param) RTOSTHREAD {
-  tRtosEvent *p_event = &metope.app.rtos.event;
+  tRtosEvent *p_event = &metope.rtos.event;
   tBspUart   *p_uart  = ((tBspUart *)param);
 
   xEventGroupClearBits(p_event->_handle, CMN_EVENT_UART_INPUT);

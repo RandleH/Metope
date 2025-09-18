@@ -84,7 +84,7 @@ public:
     while(1){
       if(!get_user_input(result, datetime)){
 
-        metope.app.clock.gui.set_time( &metope.app.clock.gui.param, datetime.word);
+        metope.app.clock.func.set_time( &metope.app.clock.param, datetime.word);
 
         lv_disp_load_scr( client.pScreen);
         app_lvgl_flush_all();

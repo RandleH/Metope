@@ -36,12 +36,12 @@ extern "C"{
 #endif
 
 void app_rtos_start(void){
-  metope.app.rtos.status.running = true;
+  metope.rtos.status.running = true;
   vTaskStartScheduler();
 }
 
 void app_rtos_stop(void){
-  metope.app.rtos.status.running = false;
+  metope.rtos.status.running = false;
   vTaskEndScheduler();
 }
 
@@ -50,17 +50,17 @@ void app_rtos_stop(void){
  * @note All function marked `RTOSIDLE` within the app domain will be called here
  */
 void app_rtos_idle_callback(void) {
-  if( 0!=metope.app.rtos.task.bitmap_idle.clock ){
+  if( 0!=metope.rtos.task.bitmap_idle.clock ){
     app_clock_idle(&metope.app.clock);
-    metope.app.rtos.task.bitmap_idle.clock = 0;
+    metope.rtos.task.bitmap_idle.clock = 0;
   }
 
 }
 
 
 void app_rtos_checkpoint(void *param) RTOSTHREAD {
-  tRtosEvent *p_event = &metope.app.rtos.event;
-  tRtosTask  *p_task  = &metope.app.rtos.task;
+  tRtosEvent *p_event = &metope.rtos.event;
+  tRtosTask  *p_task  = &metope.rtos.task;
 
   while (eBlocked != eTaskGetState(p_task->cmd_box._handle)) {
     vTaskDelay(10);

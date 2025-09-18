@@ -116,7 +116,7 @@ void app_init(void){
 
 
 void os_init(void){
-  tRtosEvent *p_event = &metope.app.rtos.event;
+  tRtosEvent *p_event = &metope.rtos.event;
 
   p_event->_handle = xEventGroupCreateStatic( &p_event->_eg_buffer);
 
@@ -126,7 +126,7 @@ void os_init(void){
    *  Tasks were defined in the Test Bench 
    */
 #else
-  tRtosTask  *p_task  = &metope.app.rtos.task;
+  tRtosTask  *p_task  = &metope.rtos.task;
 
   p_task->screen_refresh._handle = xTaskCreateStatic(\
     bsp_screen_main,\

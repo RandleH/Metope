@@ -160,8 +160,8 @@ int main(int argc, char *argv[]){
   TRACE_DEBUG("Application Size in bytes:");
   TRACE_DEBUG("\tmetope         %d bytes", sizeof(metope));
   TRACE_DEBUG("\tmetope.bsp     %d bytes", sizeof(metope.bsp));
-  TRACE_DEBUG("\tmetope.dev     %d bytes", sizeof(metope.dev));
   TRACE_DEBUG("\tmetope.app     %d bytes", sizeof(metope.app));
+  TRACE_DEBUG("\tmetope.rtos    %d bytes", sizeof(metope.rtos));
   TRACE_DEBUG("\tmetope.info    %d bytes", sizeof(metope.info));
 #endif
 

@@ -75,8 +75,8 @@ int bsp_uart_printf( const char *format, ...){
 
   if(num_c_inserted==0){
     const char *msg = "Unable to print the message => ";
-    HAL_UART_Transmit( metope.dev.pHuart2, msg, strlen(msg), HAL_MAX_DELAY);
-    HAL_UART_Transmit( metope.dev.pHuart2, format, strlen(format), HAL_MAX_DELAY);
+    HAL_UART_Transmit( metope.bsp.pHuart2, msg, strlen(msg), HAL_MAX_DELAY);
+    HAL_UART_Transmit( metope.bsp.pHuart2, format, strlen(format), HAL_MAX_DELAY);
     return ERROR;
   }
 
@@ -96,7 +96,7 @@ int bsp_uart_printf( const char *format, ...){
 
     /* Wait until DR can accept new data */
     while( (0 == (USART2->SR & USART_SR_TXE)) && (p_uart->tx_status.escape_ticks != 0xFF) ) {
-      // if(metope.app.rtos.status.running) {
+      // if(metope.rtos.status.running) {
       //   vTaskDelay(1);
       // }else{
       //   cmnBoolean_t async_mode = false;
@@ -122,7 +122,7 @@ int bsp_uart_printf( const char *format, ...){
      * the TXE (Transmit Empty) flag indicates that the Data Register (DR) can accept a new byte of data, allowing you to load the next byte into the transmit holding register. The TC (Transmission Complete) flag indicates that the entire last transmission, including the stop bit, has been fully sent out of the shift register and onto the TX line. 
      */
     while( (0 == (USART2->SR & USART_SR_TXE)) && (p_uart->tx_status.escape_ticks != 0xFF) ) {
-      // if(metope.app.rtos.status.running) {
+      // if(metope.rtos.status.running) {
       //   vTaskDelay(1);
       // }else{
       //   cmnBoolean_t async_mode = false;
