@@ -26,7 +26,7 @@
   #include "STM32CubeMX/STM32F411CEU6/Core/Inc/main.h"
   #include "STM32CubeMX/STM32F411CEU6/Core/Src/main.c"
   #include "STM32CubeMX/STM32F411CEU6/Core/Src/stm32f4xx_hal_msp.c"
-#elif defined (SYS_TARGET_STM32F405RGT6) || defined (EMULATOR_STM32F405RGT6)
+#elif (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F405RGT6)
   #include "STM32CubeMX/STM32F405RGT6/Core/Inc/main.h"
   #include "STM32CubeMX/STM32F405RGT6/Core/Src/main.c"
   #include "STM32CubeMX/STM32F405RGT6/Core/Src/stm32f4xx_hal_msp.c"
@@ -51,6 +51,13 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6)
+//ARM Cortex BitBand access macros
+  #define BITBAND_SRAM_REF   0x20000000
+  #define BITBAND_SRAM_BASE  0x22000000
+// Convert SRAM address
+  #define BITBAND_SRAM(addr, bit) ((volatile uint32_t *)((BITBAND_SRAM_BASE + ((uint32_t)(addr)-BITBAND_SRAM_REF)*32 + (bit*4))))
+#endif
 
 /**
  * @brief
@@ -97,6 +104,10 @@ void hw_init(void){
 }
 
 
+void data_init(void) {
+  metope.bsp.status  = (tBspStatusBitbandmap*)BITBAND_SRAM(&metope.bsp._status, 0);
+  metope.rtos.status = (tRtosStatusBitbandmap*)BITBAND_SRAM(&metope.rtos._status, 0);
+}
 
 
 void bsp_init(void){

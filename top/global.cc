@@ -39,7 +39,8 @@ tMetope  metope = {
       .brightness      = BSP_SCREEN_DEFAULT_BRIGHTNESS,
       .refresh_rate_ms = BSP_SCREEN_DEFAULT_REFREASHRATE
     },
-    .status  = {.word=0}
+    ._status  = {.word=0},
+    .status   = NULL
   },
   .app = {
     .lvgl = {

@@ -12,6 +12,7 @@ extern "C"{
 #endif
 
 void hw_init(void);
+void data_init(void);
 void bsp_init(void);
 void app_init(void);
 void os_init(void);

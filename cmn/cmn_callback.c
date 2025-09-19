@@ -108,7 +108,7 @@ void cmn_callback_user_key_detected(uint16_t key) {
   TRACE_DEBUG("CMN - Received user key pressed: %d", key);
 
   tRtos *p_rtos = &metope.rtos;
-  if(p_rtos->status.running){
+  if(p_rtos->status->running[0]){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
     xResult = xEventGroupSetBitsFromISR( p_rtos->event._handle, cmn_event_bitmap, &xHigherPriorityTaskWoken );

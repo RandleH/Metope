@@ -50,6 +50,7 @@ int main(int argc, char *argv[]){
    * 
   */
   hw_init();
+  data_init();
   bsp_init();
   app_init();
   os_init();
@@ -151,6 +152,22 @@ int main(int argc, char *argv[]){
     TRACE_DEBUG("\tAHB clk freq        %d MHz", f_ahb / 1000000);
     TRACE_DEBUG("\tAPB1 clk freq       %d MHz", f_apb1 / 1000000);
     TRACE_DEBUG("\tAPB2 clk freq       %d MHz", f_apb2 / 1000000);
+    TRACE_DEBUG("\n");
+  }
+#endif
+
+#if 1
+  {
+    const volatile uint32_t REG_SYSCFG_MEMRMP = SYSCFG->MEMRMP;
+    TRACE_DEBUG("System Configuration Ctrl:");
+    TRACE_DEBUG("\tmemory mode         %d", ((REG_SYSCFG_MEMRMP & SYSCFG_MEMRMP_MEM_MODE_Msk) >> SYSCFG_MEMRMP_MEM_MODE_Pos));
+
+    metope.bsp._status.tim9 = 1;
+    metope.bsp._status.tim2 = 1;
+    metope.bsp._status.i2c1 = 1;
+    metope.bsp._status.A9   = 1;
+    metope.rtos.status->running[0] = 1;
+
     TRACE_DEBUG("\n");
   }
 #endif

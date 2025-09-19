@@ -116,7 +116,7 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
   cmnBoolean_t ret = SUCCESS;
 
   while(nTimes--){
-    metope.bsp.status.spi2 = BUSY;
+    metope.bsp.status->spi2[0] = BUSY;
 
 #if 1
     metope.bsp.pHspi2->State       = HAL_SPI_STATE_BUSY_TX;
@@ -172,10 +172,10 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
      *  Phase 5: `HAL_SPI_TxCpltCallback()` will be called if no error. This is a weak function.
      *  Phase 6: The escape function shall be notified to come back.
      */
-    if(metope.rtos.status.running){
+    if(metope.rtos.status->running[0]){
       xEventGroupWaitBits( metope.rtos.event._handle, CMN_EVENT_SCREEN_REFRESH_CPLT, pdTRUE, pdFALSE, portMAX_DELAY);
     }else{
-      while(IDLE!=metope.bsp.status.spi2);
+      while(IDLE!=metope.bsp.status->spi2[0]);
     }
   }
   return ret;
@@ -335,7 +335,7 @@ void bsp_screen_smooth_off(void){
   do{
     brightness >>= 1;
     bsp_screen_set_bright(brightness);
-    cmn_tim9_sleep(20000, metope.rtos.status.running==true); // 20ms
+    cmn_tim9_sleep(20000, metope.rtos.status->running[0]==true); // 20ms
   }while(brightness);
 }
 
@@ -344,7 +344,7 @@ void bsp_screen_smooth_on(void){
   while(brightness < THIS->brightness){
     brightness <<= 1;
     bsp_screen_set_bright(brightness);
-    cmn_tim9_sleep(20000, metope.rtos.status.running==true); // 20ms
+    cmn_tim9_sleep(20000, metope.rtos.status->running[0]==true); // 20ms
   }
   bsp_screen_set_bright(THIS->brightness);
 }
