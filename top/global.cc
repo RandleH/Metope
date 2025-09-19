@@ -60,15 +60,7 @@ tMetope  metope = {
       .style   = kAppGuiClock_ClockModern
     }
   },
-  .rtos = {.status = {0}},
-  .info = {
-    .status = {
-      {
-        .scroff   = 0,
-        .reserved = 0
-      }
-    }
-  }
+  .rtos = {.status = {0}}
 };
 
 volatile u32 gDummy = 0;

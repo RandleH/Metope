@@ -238,19 +238,6 @@ typedef struct{
   tBsp  bsp;
   tApp  app;
   tRtos rtos;
-
-  struct {
-    const cmnDateTime_t system_initial_time;
-    union{
-      struct{
-        u8 scroff      : 1;
-        u8 debugging   : 1;
-        u8 reserved    : 6;
-      };
-      u8 word;
-    }status;
-  }info;
-
 } tMetope;
 
 

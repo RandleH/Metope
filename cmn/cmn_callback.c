@@ -84,7 +84,9 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
   // SPI_DMATransmitCplt(&hdma_spi2_tx);
 }
 
-
+/**
+ * @addtogroup MachineDependent
+ */
 void cmn_callback_user_key_detected(uint16_t key) {
 #if 1
   if( READ_BIT(EXTI->PR, key) ){

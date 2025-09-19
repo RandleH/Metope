@@ -43,7 +43,6 @@
 #include "bsp_rtc.h"
 #include "bsp_gyro.h"
 #include "app_type.h"
-#include "app_task.h"
 #include "app_rtos.h"
 #include "app_lvgl.h"
 #include "app_clock.h"
