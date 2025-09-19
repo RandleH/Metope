@@ -161,7 +161,7 @@ void os_init(void){
     app_cmdbox_main,\
     "app_cmdbox_main",\
     sizeof(p_task->cmd_box._stack) / sizeof(p_task->cmd_box._stack[0]),\
-    &metope.bsp.uart ,\
+    &metope.app.cmdbox ,\
     kAppPriority_NORMAL,\
     &p_task->cmd_box._stack[0],\
     &p_task->cmd_box._tcb\

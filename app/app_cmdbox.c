@@ -42,32 +42,10 @@ extern "C" {
 #endif
 
 
-/* ************************************************************************** */
-/*                              Private Macros                                */
-/* ************************************************************************** */
-#define MAX_NUN_ARGS_SUPPORTED      8
-#define MAX_NUM_PENDING             2
 
-/* ************************************************************************** */
-/*                              Private Objects                               */
-/* ************************************************************************** */
-typedef int arg_t;
 
-typedef struct stAppCmdboxDatabaseListUnit {
-  const char *keyword;
-  int       (*callback)(const char *, ...);
-  size_t     nargs;
-} tAppCmdboxDatabaseListUnit;
 
-typedef struct stAppCmdboxDatabaseList{
-  const tAppCmdboxDatabaseListUnit *database;
-  const size_t                     len;
-} tAppCmdboxDatabaseList;
 
-typedef struct stAppCmdBoxPendingExe {
-  arg_t                      args[MAX_NUN_ARGS_SUPPORTED];
-  const tAppCmdboxDatabaseListUnit *p_matched_cmd;
-} tAppCmdBoxPendingExe;
 
 
 /* ************************************************************************** */
@@ -149,9 +127,9 @@ static const tAppCmdboxDatabaseList *CMD_TABLE[] = {
   [('T'-'A') ... ('Z'-'A')] = &CMD_DUMMY
 };
 
-static char rx_buf_copy[BSP_CFG_UART_RX_BUF_SIZE];
+// static char rx_buf_copy[BSP_CFG_UART_RX_BUF_SIZE];
 
-static tAppCmdBoxPendingExe pending_exe[MAX_NUM_PENDING] = {0};
+// static tAppCmdBoxPendingExe pending_exe[MAX_NUM_PENDING] = {0};
 
 
 int app_cmdbox_callback_wrapper_0args(const char *cmd, int(*callback)(const char *, ...), int *args) {
@@ -247,12 +225,12 @@ static size_t app_cmdbox_parse_search(const char *cmd, const tAppCmdboxDatabaseL
  *  - `cmd` MUST follow this pattern: {<str> [int1] ... <\r|\n>  <\0>}
  * @param [in] cmd - User Command
  */
-void app_cmdbox_parse(const char *cmd) {
+void app_cmdbox_parse(tAppCmdBox *p_cmdbox, const char *cmd) {
   if (cmd==NULL) {
     return;
   }
 
-  char        *cmd_copy = rx_buf_copy;
+  char        *cmd_copy = p_cmdbox->cmd_buf;
   char * const cmd_end  = stpncpy(cmd_copy, cmd, BSP_CFG_UART_RX_BUF_SIZE);
 
   ASSERT( (*cmd_end == '\0'), "Command string must be null terminated!!");
@@ -313,7 +291,7 @@ void app_cmdbox_parse(const char *cmd) {
     /* Add it to Pending Execution */
     int i = 0;
     for ( ; i < MAX_NUM_PENDING; ++i) {
-      tAppCmdBoxPendingExe *p_pending_exe = &pending_exe[i];
+      tAppCmdBoxPendingExe *p_pending_exe = &p_cmdbox->pending_exe[i];
       if (p_pending_exe->p_matched_cmd == NULL) {
         p_pending_exe->p_matched_cmd = p_matched_cmd;
         memcpy(p_pending_exe->args, args, MAX_NUN_ARGS_SUPPORTED);
@@ -325,9 +303,9 @@ void app_cmdbox_parse(const char *cmd) {
 
 }
 
-void app_cmdbox_exe(uint32_t escape_ms) {
+void app_cmdbox_exe(tAppCmdBox *p_cmdbox, uint32_t escape_ms) {
   for ( int i = 0; i < MAX_NUM_PENDING; ++i) {
-    tAppCmdBoxPendingExe *p_pending_exe = &pending_exe[i];
+    tAppCmdBoxPendingExe *p_pending_exe = &p_cmdbox->pending_exe[i];
     if (p_pending_exe->p_matched_cmd != NULL) {
       app_cmdbox_callback_wrapper[p_pending_exe->p_matched_cmd->nargs]( p_pending_exe->p_matched_cmd->keyword, p_pending_exe->p_matched_cmd->callback, p_pending_exe->args);
       p_pending_exe->p_matched_cmd = NULL;
@@ -346,9 +324,16 @@ void app_cmdbox_exe(uint32_t escape_ms) {
 /*                        Public Command Box Function                         */
 /* ************************************************************************** */
 #if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
+
+/**
+ * @brief Application Command Box
+ * @note  Recommanded stack depth: 512 Bytes
+ * @param [in] param  - Type: `tAppCmdBox *`
+ */
 void app_cmdbox_main(void *param) RTOSTHREAD {
+#define CAST(x) ((tAppCmdBox *)(x))
   tRtosEvent *p_event = &metope.rtos.event;
-  tBspUart   *p_uart  = ((tBspUart *)param);
+  tBspUart   *p_uart  = &metope.bsp.uart;
 
   xEventGroupClearBits(p_event->_handle, CMN_EVENT_UART_INPUT);
   while(1){
@@ -365,7 +350,7 @@ void app_cmdbox_main(void *param) RTOSTHREAD {
          * @bug `is_locked` was NOT safe enough.
          */
         p_uart->rx_status.is_locked     = 1;
-        app_cmdbox_parse(p_uart->rx_buf);
+        app_cmdbox_parse(CAST(param), p_uart->rx_buf);
         p_uart->rx_idx                  = 0;
         p_uart->rx_status.has_new_msg   = 0;
         p_uart->rx_status.is_overflowed = 0;
@@ -374,9 +359,10 @@ void app_cmdbox_main(void *param) RTOSTHREAD {
       taskEXIT_CRITICAL();
       xEventGroupClearBits(p_event->_handle, CMN_EVENT_UART_INPUT);
       
-      app_cmdbox_exe(0);
+      app_cmdbox_exe(CAST(param), 0);
     }
   }
+#undef CAST
 }
 #endif
 

@@ -148,6 +148,11 @@ typedef struct stAppLvgl{
   lv_obj_t *default_scr;
 } tAppLvgl;
 
+/* ========================================================================== */
+/*                             APP CmdBox Objects                             */
+/* ========================================================================== */
+#include "app_cmdbox.h"
+
 /* ************************************************************************** */
 /*                             RTOS Task Objects                              */
 /* ************************************************************************** */
@@ -223,8 +228,9 @@ typedef struct stRtos {
 
 
 typedef struct stApp {
-    tAppLvgl  lvgl;
-    tAppClock clock;
+    tAppLvgl   lvgl;
+    tAppClock  clock;
+    tAppCmdBox cmdbox;
 } tApp;
 
 /**

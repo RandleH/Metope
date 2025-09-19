@@ -25,19 +25,18 @@
 #include "app_cmdbox.h"
 #include "trace.h"
 
-
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 int main(int argc, char *argv[]){
   TRACE_INFO("Hello world");
-
-  app_cmdbox_parse("DISPOFF\r");
-  app_cmdbox_parse("DISPON\r");
-  app_cmdbox_parse("CCW 1\r");
-  app_cmdbox_parse("CW  3\r");
-  app_cmdbox_parse("HEL 1\r");
+  tAppCmdBox metope_app_cmdbox = {{0}};
+  app_cmdbox_parse(&metope_app_cmdbox, "DISPOFF\r");
+  app_cmdbox_parse(&metope_app_cmdbox, "DISPON\r");
+  app_cmdbox_parse(&metope_app_cmdbox, "CCW 1\r");
+  app_cmdbox_parse(&metope_app_cmdbox, "CW  3\r");
+  app_cmdbox_parse(&metope_app_cmdbox, "HEL 1\r");
   
   return 0;
 }
@@ -70,6 +69,9 @@ int main_template_1(int argc, char *argv[]){
 
   TRACE_INFO("TimeA - TimeB = %d\n", cmn_utility_timediff(timeA, timeB));
 
+  UNUSED(timeA);
+  UNUSED(timeB);
+  
   return 0;
 }
 
@@ -117,6 +119,7 @@ int main_template_2(int argc, char *argv[]){
     }
   }
 
+  UNUSED(time);
   return 0;
 }
 
