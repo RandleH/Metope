@@ -141,8 +141,8 @@ This native mode will use your local compiler to partially build the project. Th
 
 Note that the main entrance of native program is different than others.
 
-- Native Program: `${PRJ_TOP}/backup/main_native.cc`
-- Target Program: `${PRJ_TOP}/backup/main_program.cc`
+- Native Program: `${PRJ_TOP}/artifacts/main_native.cc`
+- Target Program: `${PRJ_TOP}/artifacts/main_program.cc`
 
 
 
