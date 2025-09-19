@@ -58,6 +58,9 @@ tMetope  metope = {
     .clock = {
       ._handle = NULL,
       .style   = kAppGuiClock_ClockModern
+    },
+    .cmdbox = {
+      0
     }
   },
   .rtos = {.status = {0}}

@@ -22,6 +22,7 @@
 /* ************************************************************************** */
 #include "cmn_type.h"
 #include "app_type.h"
+#include "bsp_type.h"
 
 /* ************************************************************************** */
 /*                              Headfile Guards                               */
@@ -29,14 +30,46 @@
 #ifndef APP_CMDBOX_H
 #define APP_CMDBOX_H
 
+/* ************************************************************************** */
+/*                              Public Macros                                 */
+/* ************************************************************************** */
+#define MAX_NUN_ARGS_SUPPORTED      8
+#define MAX_NUM_PENDING             2
+#define MAX_CMD_STRING_LEN          BSP_CFG_UART_RX_BUF_SIZE
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
+/* ************************************************************************** */
+/*                              Private Objects                               */
+/* ************************************************************************** */
+typedef int arg_t;
+
+typedef struct stAppCmdboxDatabaseListUnit {
+  const char *keyword;
+  int       (*callback)(const char *, ...);
+  size_t     nargs;
+} tAppCmdboxDatabaseListUnit;
+
+typedef struct stAppCmdboxDatabaseList{
+  const tAppCmdboxDatabaseListUnit *database;
+  const size_t                     len;
+} tAppCmdboxDatabaseList;
+
+typedef struct stAppCmdBoxPendingExe {
+  arg_t                      args[MAX_NUN_ARGS_SUPPORTED];
+  const tAppCmdboxDatabaseListUnit *p_matched_cmd;
+} tAppCmdBoxPendingExe;
+
+typedef struct stAppCmdBox {
+  char                 cmd_buf[BSP_CFG_UART_RX_BUF_SIZE];
+  tAppCmdBoxPendingExe pending_exe[MAX_NUM_PENDING];
+} tAppCmdBox;
+
 void app_cmdbox_main(void *param) RTOSTHREAD;
 void app_cmdbox_idle(void *param) RTOSIDLE;
-void app_cmdbox_parse(const char *cmd);
+void app_cmdbox_parse(tAppCmdBox *p_cmdbox, const char *cmd);
 
 #ifdef __cplusplus
 }
