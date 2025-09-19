@@ -116,7 +116,7 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
   cmnBoolean_t ret = SUCCESS;
 
   while(nTimes--){
-    metope.bsp.status.spi2 = BUSY;
+    metope.bsp.status->spi2[0] = BUSY;
 
 #if 1
     metope.bsp.pHspi2->State       = HAL_SPI_STATE_BUSY_TX;
@@ -172,10 +172,10 @@ STATIC cmnBoolean_t bsp_screen_spi_dma_send( const uint8_t *buf, size_t nItems, 
      *  Phase 5: `HAL_SPI_TxCpltCallback()` will be called if no error. This is a weak function.
      *  Phase 6: The escape function shall be notified to come back.
      */
-    if(metope.rtos.status.running){
+    if(metope.rtos.status->running[0]){
       xEventGroupWaitBits( metope.rtos.event._handle, CMN_EVENT_SCREEN_REFRESH_CPLT, pdTRUE, pdFALSE, portMAX_DELAY);
     }else{
-      while(IDLE!=metope.bsp.status.spi2);
+      while(IDLE!=metope.bsp.status->spi2[0]);
     }
   }
   return ret;
@@ -335,7 +335,7 @@ void bsp_screen_smooth_off(void){
   do{
     brightness >>= 1;
     bsp_screen_set_bright(brightness);
-    cmn_tim9_sleep(20000, metope.rtos.status.running==true); // 20ms
+    cmn_tim9_sleep(20000, metope.rtos.status->running[0]==true); // 20ms
   }while(brightness);
 }
 
@@ -344,7 +344,7 @@ void bsp_screen_smooth_on(void){
   while(brightness < THIS->brightness){
     brightness <<= 1;
     bsp_screen_set_bright(brightness);
-    cmn_tim9_sleep(20000, metope.rtos.status.running==true); // 20ms
+    cmn_tim9_sleep(20000, metope.rtos.status->running[0]==true); // 20ms
   }
   bsp_screen_set_bright(THIS->brightness);
 }
@@ -518,32 +518,34 @@ void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScr
 /**
  * @brief Screen Circular Refresh Function
  * @note  Recommanded stack depth: 512 Bytes
- * @param [in] param  - will be cast to `tBspScreen *`
+ * @param [in] param  - type: `tBspScreen *`
  */
 void bsp_screen_main(void *param) RTOSTHREAD{
-  tBspScreen *parsed_param = (tBspScreen *)(param);
+#define CAST(x) ((tBspScreen*)(x))
   TickType_t  xLastWakeTime = xTaskGetTickCount();
   while(1){
-    vTaskDelayUntil( &xLastWakeTime, parsed_param->refresh_rate_ms);
-    lv_tick_inc(parsed_param->refresh_rate_ms);
+    vTaskDelayUntil( &xLastWakeTime, CAST(param)->refresh_rate_ms);
+    lv_tick_inc(CAST(param)->refresh_rate_ms);
     lv_timer_handler();
   }
+#undef CAST
 }
 
 /**
  * @brief Screen ON/OFF switch
  * @note  Recommanded stack depth: 128 Bytes
- * @param [in] param  - NOT used
+ * @param [in] param - type: `tBspScreen *`
  */
-void bsp_screen_onoff(void *param) RTOSTHREAD{
-  UNUSED(param);
-  
-  metope.bsp.screen.status.is_disp_off = false;
+void bsp_screen_onoff(void *param) RTOSTHREAD {
+#define CAST(x) ((tBspScreen*)(x))
+  tRtosEvent *p_event = &metope.rtos.event;
+
+  CAST(param)->status->is_disp_off[0] = false;
   bsp_screen_smooth_on();
-  xEventGroupClearBits( metope.rtos.event._handle, CMN_EVENT_USER_KEY_M);
+  xEventGroupClearBits( p_event->_handle, CMN_EVENT_USER_KEY_M);
   
   while(1){
-    EventBits_t uxBits = xEventGroupWaitBits( metope.rtos.event._handle, 
+    EventBits_t uxBits = xEventGroupWaitBits( p_event->_handle, 
       CMN_EVENT_USER_KEY_M    |
       CMN_EVENT_SCREEN_DISPOFF|
       CMN_EVENT_SCREEN_DISPON |
@@ -551,27 +553,28 @@ void bsp_screen_onoff(void *param) RTOSTHREAD{
     
     /* Always process the user button clicking first */
     if(uxBits & CMN_EVENT_USER_KEY_M){
-      if(metope.bsp.screen.status.is_disp_off==true){
+      if (CAST(param)->status->is_disp_off[0] == true) {
         bsp_screen_smooth_on();
       }else{
         bsp_screen_smooth_off();
       }
-      metope.bsp.screen.status.is_disp_off = !metope.bsp.screen.status.is_disp_off;
+      CAST(param)->status->is_disp_off[0] = !CAST(param)->status->is_disp_off[0];
     }
     /* Now it's time to process the long time inactive screen */
     else if(uxBits & CMN_EVENT_SCREEN_DISPOFF) {
       bsp_screen_smooth_off();
-      metope.bsp.screen.status.is_disp_off = 1;
+      CAST(param)->status->is_disp_off[0] = 1;
     }
     else if(uxBits & CMN_EVENT_SCREEN_DISPON) {
       bsp_screen_smooth_on();
-      metope.bsp.screen.status.is_disp_off = 0;
+      CAST(param)->status->is_disp_off[0] = 0;
     }
     
     if(uxBits & CMN_EVENT_SCREEN_DISPBR) {
-      bsp_screen_set_bright(THIS->brightness);
+      bsp_screen_set_bright(CAST(param)->brightness);
     }
   }
+#undef CAST
 }
 
 

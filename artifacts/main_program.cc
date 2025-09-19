@@ -50,6 +50,7 @@ int main(int argc, char *argv[]){
    * 
   */
   hw_init();
+  data_init();
   bsp_init();
   app_init();
   os_init();
@@ -157,11 +158,32 @@ int main(int argc, char *argv[]){
 
 #if 1
   {
+    const volatile uint32_t REG_SYSCFG_MEMRMP = SYSCFG->MEMRMP;
+    TRACE_DEBUG("System Configuration Ctrl:");
+    TRACE_DEBUG("\tmemory mode         %d", ((REG_SYSCFG_MEMRMP & SYSCFG_MEMRMP_MEM_MODE_Msk) >> SYSCFG_MEMRMP_MEM_MODE_Pos));
+
+    metope.bsp._status.tim9 = 1;
+    metope.bsp._status.tim2 = 1;
+    metope.bsp._status.i2c1 = 1;
+    metope.bsp._status.A9   = 1;
+    metope.rtos.status->running[0] = 1;
+    metope.rtos.status->running[0] = 0;
+    metope.bsp.status->tim9[0] = 0;
+    metope.bsp.status->tim2[0] = 0;
+    metope.bsp.status->i2c1[0] = 0;
+    metope.bsp.status->A9[0]   = 0;
+    TRACE_DEBUG("\n");
+  }
+#endif
+
+#if 1
+  {
     TRACE_DEBUG("Application Size in bytes:");
     TRACE_DEBUG("\tmetope         %d bytes", sizeof(metope));
     TRACE_DEBUG("\tmetope.bsp     %d bytes", sizeof(metope.bsp));
     TRACE_DEBUG("\tmetope.app     %d bytes", sizeof(metope.app));
     TRACE_DEBUG("\tmetope.rtos    %d bytes", sizeof(metope.rtos));
+    TRACE_DEBUG("\n");
   }
 #endif
 

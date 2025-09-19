@@ -46,11 +46,17 @@ typedef union stBspScreenStatusBitmap {
   uint16_t word;
 } tBspScreenStatusBitmap;
 
+typedef union stBspScreenStatusBitbandmap {
+  uint16_t is_disp_off [1];
+  uint16_t reserved    [15];
+} tBspScreenStatusBitbandmap;
+
 typedef struct stBspScreen{
   bspScreenBrightness_t  brightness;
   bspScreenRotate_t      rotation;
   TickType_t             refresh_rate_ms;
-  tBspScreenStatusBitmap status;
+  tBspScreenStatusBitmap     _status;
+  tBspScreenStatusBitbandmap *status;
 } tBspScreen;
 
 /* ////////////////////////////////////////////////////////////////////////// */
@@ -88,18 +94,30 @@ typedef struct stBspUart{
 /* ////////////////////////////////////////////////////////////////////////// */
 typedef union stBspStatusBitmap {
   struct{
-    u16 spi2  : 1; /*!< Display Screen */
-    u16 uart2 : 1; /*!< Uart Debugging Message */
-    u16 tim2  : 1; /*!< System Delay Timer 2 */
-    u16 tim9  : 1; /*!< System Delay Timer 9 */
-    u16 i2c1  : 1; /*!< QMI8658C - I2C Bus */
-    u16 B5    : 1; /*!< QMI8658C - INT1 CTRL9 Command Done */
-    u16 B6    : 1; /*!< QMI8658C - INT2 FIFO Watermark */
-    u16 A9    : 1; /*!< TP_INT - Touch Screen */
-    u16 reserved : 8;
+    uint16_t spi2     : 1; /*!< Display Screen */
+    uint16_t uart2    : 1; /*!< Uart Debugging Message */
+    uint16_t tim2     : 1; /*!< System Delay Timer 2 */
+    uint16_t tim9     : 1; /*!< System Delay Timer 9 */
+    uint16_t i2c1     : 1; /*!< QMI8658C - I2C Bus */
+    uint16_t B5       : 1; /*!< QMI8658C - INT1 CTRL9 Command Done */
+    uint16_t B6       : 1; /*!< QMI8658C - INT2 FIFO Watermark */
+    uint16_t A9       : 1; /*!< TP_INT - Touch Screen */
+    uint16_t reserved : 8;
   };
-  volatile u16 word;
+  volatile uint16_t word;
 } tBspStatusBitmap;
+
+typedef struct stBspStatusBitbandmap {
+  uint32_t spi2       [1];
+  uint32_t uart2      [1];
+  uint32_t tim2       [1];
+  uint32_t tim9       [1];
+  uint32_t i2c1       [1];
+  uint32_t B5         [1];
+  uint32_t B6         [1];
+  uint32_t A9         [1];
+  uint32_t reserved   [8];
+} tBspStatusBitbandmap;
 
 
 typedef struct stBsp {
@@ -112,7 +130,8 @@ typedef struct stBsp {
   tBspScreen screen;
   tBspUart   uart;
 
-  tBspStatusBitmap status;
+  tBspStatusBitmap     _status;
+  tBspStatusBitbandmap *status;
 } tBsp;
 
 
@@ -217,13 +236,21 @@ typedef union stRtosStatusBitmap {
   uint8_t word;
 } tRtosStatusBitmap;
 
+typedef struct stRtosStatusBitbandmap {
+  uint32_t running    [1]; /*!< `ON` | `OFF` */
+  uint32_t stkovfl    [1]; /*!< Stack Overflow */
+  uint32_t nomem      [1]; /*!< Out of memory */
+  uint32_t reserved   [5];
+} tRtosStatusBitbandmap;
+
 /* ************************************************************************** */
 /*                                 RTOS Objects                               */
 /* ************************************************************************** */
 typedef struct stRtos {
-  tRtosTask         task;
-  tRtosEvent        event;
-  tRtosStatusBitmap status;
+  tRtosTask             task;
+  tRtosEvent            event;
+  tRtosStatusBitmap     _status;
+  tRtosStatusBitbandmap *status;
 } tRtos;
 
 

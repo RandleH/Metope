@@ -1769,7 +1769,7 @@ extern "C"{
  * @param [in] param - will cast to `tAppClock*`
  */
 void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
-  tAppClock *parsed_param = (tAppClock *)param;
+#define CAST(x) ((tAppClock*)(x))
 
   const AppGuiClockEnum_t clock_style[NUM_OF_AppGuiClock] = {
       kAppGuiClock_ClockModern,
@@ -1817,20 +1817,20 @@ void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
           xEventGroupClearBits(metope.rtos.event._handle, CMN_EVENT_USER_KEY_R);
         }
 
-        app_clock_gui_ctrl_deinit( &parsed_param->param, parsed_param->func.deinit);
+        app_clock_gui_ctrl_deinit( &CAST(param)->param, CAST(param)->func.deinit);
       }
 
-      parsed_param->style = clock_style[clock_style_idx];
+      CAST(param)->style = clock_style[clock_style_idx];
 
-      app_clock_gui_ctrl_switch(parsed_param, parsed_param->style);
-      app_clock_gui_ctrl_init(&parsed_param->param, parsed_param->func.init);
-      app_clock_gui_ctrl_flush(&parsed_param->param, NULL);
-      app_clock_gui_data_flush(&parsed_param->param, parsed_param->func.set_time);
+      app_clock_gui_ctrl_switch(CAST(param), CAST(param)->style);
+      app_clock_gui_ctrl_init(&CAST(param)->param, CAST(param)->func.init);
+      app_clock_gui_ctrl_flush(&CAST(param)->param, NULL);
+      app_clock_gui_data_flush(&CAST(param)->param, CAST(param)->func.set_time);
     }
 
     else if(uxBits & CMN_EVENT_UPDATE_RTC){
-      app_clock_gui_data_flush(&parsed_param->param, parsed_param->func.set_time);
-      app_clock_gui_ctrl_flush(&parsed_param->param, NULL);
+      app_clock_gui_data_flush(&CAST(param)->param, CAST(param)->func.set_time);
+      app_clock_gui_ctrl_flush(&CAST(param)->param, NULL);
       xEventGroupClearBits(metope.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
     }else{
       /**
@@ -1838,10 +1838,10 @@ void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
        *  View Part:
        *    1) Update the increased ms.
        */
-      app_clock_gui_data_update( &parsed_param->param, ms_delta, parsed_param->func.inc_time);
+      app_clock_gui_data_update( &CAST(param)->param, ms_delta, CAST(param)->func.inc_time);
     }
-
   }
+#undef CAST
 }
 
 

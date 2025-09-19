@@ -324,7 +324,6 @@ void app_cmdbox_exe(tAppCmdBox *p_cmdbox, uint32_t escape_ms) {
 /*                        Public Command Box Function                         */
 /* ************************************************************************** */
 #if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
-
 /**
  * @brief Application Command Box
  * @note  Recommanded stack depth: 512 Bytes

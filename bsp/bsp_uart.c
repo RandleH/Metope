@@ -96,7 +96,7 @@ int bsp_uart_printf( const char *format, ...){
 
     /* Wait until DR can accept new data */
     while( (0 == (USART2->SR & USART_SR_TXE)) && (p_uart->tx_status.escape_ticks != 0xFF) ) {
-      // if(metope.rtos.status.running) {
+      // if(metope.rtos.status->running[0]) {
       //   vTaskDelay(1);
       // }else{
       //   cmnBoolean_t async_mode = false;
@@ -122,7 +122,7 @@ int bsp_uart_printf( const char *format, ...){
      * the TXE (Transmit Empty) flag indicates that the Data Register (DR) can accept a new byte of data, allowing you to load the next byte into the transmit holding register. The TC (Transmission Complete) flag indicates that the entire last transmission, including the stop bit, has been fully sent out of the shift register and onto the TX line. 
      */
     while( (0 == (USART2->SR & USART_SR_TXE)) && (p_uart->tx_status.escape_ticks != 0xFF) ) {
-      // if(metope.rtos.status.running) {
+      // if(metope.rtos.status->running[0]) {
       //   vTaskDelay(1);
       // }else{
       //   cmnBoolean_t async_mode = false;

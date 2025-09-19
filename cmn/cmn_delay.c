@@ -49,7 +49,7 @@ void cmn_timer_delay(u32 ms){
  *          Return `SUCCESS` when finished.
  */
 cmnBoolean_t cmn_tim2_sleep(u16 ms, cmnBoolean_t async_mode){
-  if(metope.bsp.status.tim2==1){
+  if(metope.bsp.status->tim2[0]==1){
     return BUSY;
   }
   /* Config Timer Register */
@@ -58,9 +58,9 @@ cmnBoolean_t cmn_tim2_sleep(u16 ms, cmnBoolean_t async_mode){
   if(async_mode){
     xEventGroupWaitBits( metope.rtos.event._handle, CMN_EVENT_TIM2, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
-    while(metope.bsp.status.tim2==0);
+    while(metope.bsp.status->tim2[0]==0);
   }
-  metope.bsp.status.tim2 = 0;
+  metope.bsp.status->tim2[0] = 0;
   return SUCCESS;
 }
 

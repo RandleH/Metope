@@ -533,10 +533,10 @@ void bsp_qmi8658_reset( void){
   bsp_qmi8658_i2c_polling_send( QMI8658_REG_RESET, &data, sizeof(data));
 
   /* Wait until an interrupt occurred */
-  while(metope.bsp.status.B5==0);
+  while(metope.bsp.status->B5[0]==0);
   tQmi8658RegSTATUS1 reg_status1 = {0};
   bsp_qmi8658_i2c_polling_recv( QMI8658_REG_STATUS1, &reg_status1.reg, 1);
-  metope.bsp.status.B5 = 0;
+  metope.bsp.status->B5[0] = 0;
 }
 
 
@@ -549,7 +549,7 @@ void bsp_qmi8658_reset( void){
  * @return `SUCCESS` | `ERROR`
  */
 cmnBoolean_t bsp_qmi8658_init(void){
-  cmnBoolean_t async_mode = metope.rtos.status.running==true;
+  cmnBoolean_t async_mode = metope.rtos.status->running[0]==true;
   bsp_qmi8658_switch(OFF);
   cmn_tim2_sleep(2000, async_mode);
   bsp_qmi8658_switch(ON);
@@ -769,8 +769,8 @@ cmnBoolean_t bsp_qmi8658_fifo_enable(void){
   reg_ctrl8.CTRL9_HandShake_Type = 0;
   reg_ctrl8.ACTIVITY_INT_SEL     = 0;
   bsp_qmi8658_i2c_polling_send( QMI8658_REG_CTRL8, &reg_ctrl8.reg, 1);
-  metope.bsp.status.B5 = 0; // Clear system interrupt bit
-  metope.bsp.status.B6 = 0; // Clear system interrupt bit
+  metope.bsp.status->B5[0] = 0; // Clear system interrupt bit
+  metope.bsp.status->B6[0] = 0; // Clear system interrupt bit
 
   /* Enable the sensor */
   reg_ctrl7.aEN = 1;
@@ -808,7 +808,7 @@ cmnBoolean_t bsp_qmi8658_dma_update( tBspGyroData *data){
   data->acc_sensitivity = bsp_qmi8658_acc_scale_2_sensitivity(QMI8658_DEFAULT_ACC_SCALE);
   data->deg_sensitivity = bsp_qmi8658_gyro_scale_2_sensitivity(QMI8658_DEFAULT_GYRO_SCALE);
 
-  if(metope.rtos.status.running){
+  if(metope.rtos.status->running[0]){
     //...//
   }
 
@@ -858,8 +858,6 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_polling_send( u8 reg, const u8 *buf, u8 len)
 #else
     TRACE_WARNING("QMI8658 TX error. ret=%d", ret);
 #endif
-  }
-  if(HAL_OK!=ret){
     return ERROR;
   }
   return SUCCESS;
@@ -875,8 +873,13 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_polling_send( u8 reg, const u8 *buf, u8 len)
  */
 STATIC cmnBoolean_t bsp_qmi8658_i2c_polling_recv( u8 reg, u8 *buf, u8 len){
   HAL_StatusTypeDef ret = HAL_I2C_Mem_Read( &hi2c1, QMI8658_SLAVE_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT, buf, len, QMI8658_TIMEOUT_DELAY);
-  ASSERT( ret!=HAL_OK, "QMI8658 RX error");
+  
   if(HAL_OK!=ret){
+#if 0
+    ASSERT( false, "QMI8658 RX error");
+#else
+    TRACE_WARNING("QMI8658 RX error. ret=%d", ret);
+#endif
     return ERROR;
   }
   return SUCCESS;
@@ -907,11 +910,11 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_dma_send( u8 reg, const u8 *buf, u8 len){
    *  Phase 5: `HAL_I2C_SlaveTxCpltCallback()` will be called if no error. This is a weak function.
    *  Phase 6: The escape function shall be notified to come back.
    */
-  metope.bsp.status.i2c1 = BUSY;
-  if(metope.rtos.status.running){
+  metope.bsp.status->i2c1[0] = BUSY;
+  if(metope.rtos.status->running[0]){
     xEventGroupWaitBits( metope.rtos.event._handle, CMN_EVENT_QMI8658_TX_CPLT, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
-    while(IDLE!=metope.bsp.status.i2c1);
+    while(IDLE!=metope.bsp.status->i2c1[0]);
   }
 
   return SUCCESS;
@@ -943,10 +946,10 @@ STATIC cmnBoolean_t bsp_qmi8658_i2c_dma_recv( u8 reg, u8 *buf, u8 len){
    *  Phase 6: The escape function shall be notified to come back.
    */
   
-  // if(metope.rtos.status.running){
+  // if(metope.rtos.status->running[0]){
   //   xEventGroupWaitBits( metope.rtos.event._handle, CMN_EVENT_QMI8658_TX_CPLT, pdTRUE, pdFALSE, portMAX_DELAY);
   // }else{
-  //   while(IDLE!=metope.bsp.status.i2c1);
+  //   while(IDLE!=metope.bsp.status->i2c1[0]);
   // }
 
   return SUCCESS;
@@ -1055,7 +1058,7 @@ STATIC INLINE cmnBoolean_t bsp_qmi8658_ctrl9_cmddone_ack(void){
  * @return `SUCCESS` | `ERROR`
  */
 STATIC cmnBoolean_t bsp_qmi8658_ctrl9_protocol(u8 QMI8658_CTRL9_CMD_XXXX){
-  metope.bsp.status.B5 = 0;
+  metope.bsp.status->B5[0] = 0;
   switch(QMI8658_CTRL9_CMD_XXXX){
     /* No data transaction is required prior to or following the Ctrl9 protocol. */
     case QMI8658_CTRL9_CMD_RST_FIFO:{
@@ -1076,12 +1079,12 @@ STATIC cmnBoolean_t bsp_qmi8658_ctrl9_protocol(u8 QMI8658_CTRL9_CMD_XXXX){
     }
   }
   
-  if(metope.rtos.status.running){
+  if(metope.rtos.status->running[0]){
     /* Process Blocked */
     xEventGroupWaitBits( metope.rtos.event._handle, CMN_EVENT_QMI8658_INT1, pdTRUE, pdFALSE, portMAX_DELAY);
   }else{
     /* Loop Checking */
-    while(metope.bsp.status.B5==0);
+    while(metope.bsp.status->B5[0]==0);
   }
 
   bsp_qmi8658_i2c_polling_send_1byte( QMI8658_REG_CTRL9, QMI8658_CTRL9_CMD_ACK);
@@ -1094,7 +1097,7 @@ STATIC cmnBoolean_t bsp_qmi8658_ctrl9_protocol(u8 QMI8658_CTRL9_CMD_XXXX){
     if(reg_statusint.CmdDone==0){
       break;
     }
-    cmnBoolean_t async_mode = metope.rtos.status.running==true;
+    cmnBoolean_t async_mode = metope.rtos.status->running[0]==true;
     cmn_tim2_sleep( 1, async_mode);
   }
   if(0==timeout){
