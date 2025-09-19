@@ -167,7 +167,11 @@ int main(int argc, char *argv[]){
     metope.bsp._status.i2c1 = 1;
     metope.bsp._status.A9   = 1;
     metope.rtos.status->running[0] = 1;
-
+    metope.rtos.status->running[0] = 0;
+    metope.bsp.status->tim9[0] = 0;
+    metope.bsp.status->tim2[0] = 0;
+    metope.bsp.status->i2c1[0] = 0;
+    metope.bsp.status->A9[0]   = 0;
     TRACE_DEBUG("\n");
   }
 #endif
@@ -179,6 +183,7 @@ int main(int argc, char *argv[]){
     TRACE_DEBUG("\tmetope.bsp     %d bytes", sizeof(metope.bsp));
     TRACE_DEBUG("\tmetope.app     %d bytes", sizeof(metope.app));
     TRACE_DEBUG("\tmetope.rtos    %d bytes", sizeof(metope.rtos));
+    TRACE_DEBUG("\n");
   }
 #endif
 

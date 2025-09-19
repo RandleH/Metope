@@ -46,11 +46,17 @@ typedef union stBspScreenStatusBitmap {
   uint16_t word;
 } tBspScreenStatusBitmap;
 
+typedef union stBspScreenStatusBitbandmap {
+  uint16_t is_disp_off [1];
+  uint16_t reserved    [15];
+} tBspScreenStatusBitbandmap;
+
 typedef struct stBspScreen{
   bspScreenBrightness_t  brightness;
   bspScreenRotate_t      rotation;
   TickType_t             refresh_rate_ms;
-  tBspScreenStatusBitmap status;
+  tBspScreenStatusBitmap     _status;
+  tBspScreenStatusBitbandmap *status;
 } tBspScreen;
 
 /* ////////////////////////////////////////////////////////////////////////// */

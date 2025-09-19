@@ -52,11 +52,7 @@
 #include "task.h"
 
 #if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6)
-//ARM Cortex BitBand access macros
-  #define BITBAND_SRAM_REF   0x20000000
-  #define BITBAND_SRAM_BASE  0x22000000
-// Convert SRAM address
-  #define BITBAND_SRAM(addr, bit) ((volatile uint32_t *)((BITBAND_SRAM_BASE + ((uint32_t)(addr)-BITBAND_SRAM_REF)*32 + (bit*4))))
+  #define BITBAND_SRAM(addr, bit) ((volatile uint32_t *)((SRAM_BB_BASE + ((uint32_t)(addr)-SRAM_BASE)*32 + (bit*4))))
 #endif
 
 /**
@@ -105,8 +101,9 @@ void hw_init(void){
 
 
 void data_init(void) {
-  metope.bsp.status  = (tBspStatusBitbandmap*)BITBAND_SRAM(&metope.bsp._status, 0);
-  metope.rtos.status = (tRtosStatusBitbandmap*)BITBAND_SRAM(&metope.rtos._status, 0);
+  metope.bsp.status        = (tBspStatusBitbandmap*)BITBAND_SRAM(&metope.bsp._status, 0);
+  metope.bsp.screen.status = (tBspScreenStatusBitbandmap*)BITBAND_SRAM(&metope.bsp.screen._status, 0);
+  metope.rtos.status       = (tRtosStatusBitbandmap*)BITBAND_SRAM(&metope.rtos._status, 0);
 }
 
 
@@ -142,7 +139,7 @@ void os_init(void){
     bsp_screen_main,\
     "bsp_screen_main",\
     sizeof(p_task->screen_refresh._stack) / sizeof(p_task->screen_refresh._stack[0]),\
-    &metope.bsp.screen,\
+    &metope.bsp.screen ,\
     kAppPriority_VERY_IMPORTANT,\
     &p_task->screen_refresh._stack[0],\
     &p_task->screen_refresh._tcb\
@@ -162,7 +159,7 @@ void os_init(void){
     bsp_screen_onoff,\
     "bsp_screen_onoff",\
     sizeof(p_task->screen_onoff._stack) / sizeof(p_task->screen_onoff._stack[0]),\
-    NULL ,\
+    &metope.bsp.screen ,\
     kAppPriority_VERY_IMPORTANT,\
     &p_task->screen_onoff._stack[0],\
     &p_task->screen_onoff._tcb\
