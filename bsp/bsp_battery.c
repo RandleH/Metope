@@ -51,7 +51,7 @@ extern "C"{
 uint8_t bsp_battery_measure(void){
   uint32_t raw = 0;
   {
-    HAL_ADC_Start(metope.dev.pHadc1);
+    HAL_ADC_Start(metope.bsp.pHadc1);
 
   /**
    * @todo
@@ -59,16 +59,16 @@ uint8_t bsp_battery_measure(void){
    */
 #if 0
     for(int i=0; i<ADC_REPETITION; ++i){
-      HAL_ADC_PollForConversion(metope.dev.pHadc1, HAL_MAX_DELAY);
-      raw += HAL_ADC_GetValue(metope.dev.pHadc1);
+      HAL_ADC_PollForConversion(metope.bsp.pHadc1, HAL_MAX_DELAY);
+      raw += HAL_ADC_GetValue(metope.bsp.pHadc1);
     }
     raw >>= ADC_REPETITION_POW2;
 #else
-    HAL_ADC_PollForConversion(metope.dev.pHadc1, HAL_MAX_DELAY);
-    raw = HAL_ADC_GetValue(metope.dev.pHadc1);
+    HAL_ADC_PollForConversion(metope.bsp.pHadc1, HAL_MAX_DELAY);
+    raw = HAL_ADC_GetValue(metope.bsp.pHadc1);
 #endif
 
-    HAL_ADC_Stop(metope.dev.pHadc1);
+    HAL_ADC_Stop(metope.bsp.pHadc1);
   }
 
   uint32_t raw_copy = raw;

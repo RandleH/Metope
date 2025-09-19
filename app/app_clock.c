@@ -944,13 +944,13 @@ static void ui_clockmodern_idle(tAppGuiClockParam *pClient) APP_CLOCK_API {
   ///////////////////////////////////////////////////////////////
   xTaskResumeAll();
 
-  cmnBoolean_t is_rtc_being_updated = CMN_EVENT_UPDATE_RTC & xEventGroupGetBits(metope.app.rtos.event._handle);
+  cmnBoolean_t is_rtc_being_updated = CMN_EVENT_UPDATE_RTC & xEventGroupGetBits(metope.rtos.event._handle);
   if( !is_rtc_being_updated && is_time_expired( rtc_time, clk_time)){
     /**
      * @todo: Check the return type
      */
     TRACE_WARNING("Time offset reaches the max allowed value.");
-    xEventGroupSetBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
+    xEventGroupSetBits( metope.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
   }
 }
 
@@ -1266,13 +1266,13 @@ static void ui_clocknana_idle(tAppGuiClockParam *pClient){
   ///////////////////////////////////////////////////////////////
   xTaskResumeAll();
 
-  cmnBoolean_t is_rtc_being_updated = CMN_EVENT_UPDATE_RTC & xEventGroupGetBits(metope.app.rtos.event._handle);
+  cmnBoolean_t is_rtc_being_updated = CMN_EVENT_UPDATE_RTC & xEventGroupGetBits(metope.rtos.event._handle);
   if( !is_rtc_being_updated && is_time_expired( rtc_time, clk_time)){
     /**
      * @todo: Check the return type
      */
     TRACE_WARNING("Time offset reaches the max allowed value.");
-    xEventGroupSetBits( metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
+    xEventGroupSetBits( metope.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
   }
 }
 
@@ -1657,19 +1657,19 @@ STATIC void app_clock_gui_ctrl_switch( tAppClock *p_app_clock, AppGuiClockEnum_t
       /**
        * @todo: Can't be NULL. Too dangerous.
        */
-      p_app_clock->gui.init     = NULL;
-      p_app_clock->gui.set_time = NULL;
-      p_app_clock->gui.inc_time = NULL;
-      p_app_clock->gui.idle     = NULL;
-      p_app_clock->gui.deinit   = NULL;
+      p_app_clock->func.init     = NULL;
+      p_app_clock->func.set_time = NULL;
+      p_app_clock->func.inc_time = NULL;
+      p_app_clock->func.idle     = NULL;
+      p_app_clock->func.deinit   = NULL;
       break;
     }
     case kAppGuiClock_ClockModern:{
-      p_app_clock->gui.init     = ui_clockmodern_init;
-      p_app_clock->gui.set_time = ui_clockmodern_set_time;
-      p_app_clock->gui.inc_time = ui_clockmodern_inc_time;
-      p_app_clock->gui.idle     = ui_clockmodern_idle;
-      p_app_clock->gui.deinit   = ui_clockmodern_deinit;
+      p_app_clock->func.init     = ui_clockmodern_init;
+      p_app_clock->func.set_time = ui_clockmodern_set_time;
+      p_app_clock->func.inc_time = ui_clockmodern_inc_time;
+      p_app_clock->func.idle     = ui_clockmodern_idle;
+      p_app_clock->func.deinit   = ui_clockmodern_deinit;
       break;
     }
     default:{
@@ -1681,19 +1681,19 @@ STATIC void app_clock_gui_ctrl_switch( tAppClock *p_app_clock, AppGuiClockEnum_t
      * @note: The rest of UI is ONLY for main program because of the memory usage
      */
     case kAppGuiClock_NANA:{
-      p_app_clock->gui.init     = ui_clocknana_init;
-      p_app_clock->gui.set_time = ui_clocknana_set_time;
-      p_app_clock->gui.inc_time = ui_clocknana_inc_time;
-      p_app_clock->gui.idle     = ui_clocknana_idle;
-      p_app_clock->gui.deinit   = ui_clocknana_deinit;
+      p_app_clock->func.init     = ui_clocknana_init;
+      p_app_clock->func.set_time = ui_clocknana_set_time;
+      p_app_clock->func.inc_time = ui_clocknana_inc_time;
+      p_app_clock->func.idle     = ui_clocknana_idle;
+      p_app_clock->func.deinit   = ui_clocknana_deinit;
       break;
     }
     case kAppGuiClock_LVVVW:{
-      p_app_clock->gui.init     = ui_clocklvvvw_init;
-      p_app_clock->gui.set_time = ui_clocklvvvw_set_time;
-      p_app_clock->gui.inc_time = ui_clocklvvvw_inc_time;
-      p_app_clock->gui.idle     = ui_clocklvvvw_idle;
-      p_app_clock->gui.deinit   = ui_clocklvvvw_deinit;
+      p_app_clock->func.init     = ui_clocklvvvw_init;
+      p_app_clock->func.set_time = ui_clocklvvvw_set_time;
+      p_app_clock->func.inc_time = ui_clocklvvvw_inc_time;
+      p_app_clock->func.idle     = ui_clocklvvvw_idle;
+      p_app_clock->func.deinit   = ui_clocklvvvw_deinit;
       break;
     }
 
@@ -1719,7 +1719,7 @@ STATIC void app_clock_gui_ctrl_switch( tAppClock *p_app_clock, AppGuiClockEnum_t
  */
 STATIC void app_clock_idle_timer_callback(xTimerHandle xTimer){
   if(xTimer && !xTimerIsTimerActive(xTimer)){
-    metope.app.rtos.task.bitmap_idle.clock = 1;
+    metope.rtos.task.bitmap_idle.clock = 1;
   }
 }
 
@@ -1791,7 +1791,7 @@ void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
      *    2) Calculate the increased ms.
      */
     TickType_t old_tick = xTaskGetTickCount();
-    EventBits_t uxBits  = xEventGroupWaitBits( metope.app.rtos.event._handle, interestedBits, pdFALSE, pdFALSE, DEFAULT_CLOCK_REFREASH_PERIOD);
+    EventBits_t uxBits  = xEventGroupWaitBits( metope.rtos.event._handle, interestedBits, pdFALSE, pdFALSE, DEFAULT_CLOCK_REFREASH_PERIOD);
     TickType_t ms_delta = xTaskGetTickCount() - old_tick;
     
     
@@ -1803,42 +1803,42 @@ void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
          * @bug: Branch task shall NOT clear the global event bits.
          *       However this bit needs to be cleared now otherwise the scheduler will NOT block the task.
          */
-        xEventGroupClearBits(metope.app.rtos.event._handle, CMN_EVENT_SYSTEM_INIT);
+        xEventGroupClearBits(metope.rtos.event._handle, CMN_EVENT_SYSTEM_INIT);
       }
 
       if (uxBits & (CMN_EVENT_USER_KEY_L | CMN_EVENT_USER_KEY_R)) {
         if (uxBits & CMN_EVENT_USER_KEY_L) {
           clock_style_idx = (clock_style_idx + NUM_OF_AppGuiClock - 1) % NUM_OF_AppGuiClock;
-          xEventGroupClearBits(metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_L);
+          xEventGroupClearBits(metope.rtos.event._handle, CMN_EVENT_USER_KEY_L);
         }
         if (uxBits & CMN_EVENT_USER_KEY_R) {
           clock_style_idx = (clock_style_idx + NUM_OF_AppGuiClock + 1) % NUM_OF_AppGuiClock;
           
-          xEventGroupClearBits(metope.app.rtos.event._handle, CMN_EVENT_USER_KEY_R);
+          xEventGroupClearBits(metope.rtos.event._handle, CMN_EVENT_USER_KEY_R);
         }
 
-        app_clock_gui_ctrl_deinit( &parsed_param->gui.param, parsed_param->gui.deinit);
+        app_clock_gui_ctrl_deinit( &parsed_param->param, parsed_param->func.deinit);
       }
 
       parsed_param->style = clock_style[clock_style_idx];
 
       app_clock_gui_ctrl_switch(parsed_param, parsed_param->style);
-      app_clock_gui_ctrl_init(&parsed_param->gui.param, parsed_param->gui.init);
-      app_clock_gui_ctrl_flush(&parsed_param->gui.param, NULL);
-      app_clock_gui_data_flush(&parsed_param->gui.param, parsed_param->gui.set_time);
+      app_clock_gui_ctrl_init(&parsed_param->param, parsed_param->func.init);
+      app_clock_gui_ctrl_flush(&parsed_param->param, NULL);
+      app_clock_gui_data_flush(&parsed_param->param, parsed_param->func.set_time);
     }
 
     else if(uxBits & CMN_EVENT_UPDATE_RTC){
-      app_clock_gui_data_flush(&parsed_param->gui.param, parsed_param->gui.set_time);
-      app_clock_gui_ctrl_flush(&parsed_param->gui.param, NULL);
-      xEventGroupClearBits(metope.app.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
+      app_clock_gui_data_flush(&parsed_param->param, parsed_param->func.set_time);
+      app_clock_gui_ctrl_flush(&parsed_param->param, NULL);
+      xEventGroupClearBits(metope.rtos.event._handle, CMN_EVENT_UPDATE_RTC);
     }else{
       /**
        * @note
        *  View Part:
        *    1) Update the increased ms.
        */
-      app_clock_gui_data_update( &parsed_param->gui.param, ms_delta, parsed_param->gui.inc_time);
+      app_clock_gui_data_update( &parsed_param->param, ms_delta, parsed_param->func.inc_time);
     }
 
   }
@@ -1857,9 +1857,9 @@ void app_clock_main(void *param) RTOSTHREAD APP_CLOCK_GLOBAL{
  */
 void app_clock_idle(void *param) RTOSIDLE APP_CLOCK_GLOBAL{
   tAppClock *parsed_param = (tAppClock *)param;
-  if(NULL!=parsed_param->gui.idle){
-    parsed_param->gui.idle(&parsed_param->gui.param);
-    xTimerReset(parsed_param->gui.param._idle_task_timer, 0);
+  if(NULL!=parsed_param->func.idle){
+    parsed_param->func.idle(&parsed_param->param);
+    xTimerReset(parsed_param->param._idle_task_timer, 0);
   }
 }
 

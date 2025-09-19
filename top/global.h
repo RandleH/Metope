@@ -37,11 +37,20 @@ extern "C"{
 /* ////////////////////////////////////////////////////////////////////////// */
 /*                             BSP Screen Objects                             */
 /* ////////////////////////////////////////////////////////////////////////// */
+
+typedef union stBspScreenStatusBitmap {
+  struct {
+    uint16_t is_disp_off : 1;
+    uint16_t reserved    : 15;
+  };
+  uint16_t word;
+} tBspScreenStatusBitmap;
+
 typedef struct stBspScreen{
-  bspScreenBrightness_t brightness;
-  bspScreenRotate_t     rotation;
-  TickType_t            refresh_rate_ms;
-  //...//
+  bspScreenBrightness_t  brightness;
+  bspScreenRotate_t      rotation;
+  TickType_t             refresh_rate_ms;
+  tBspScreenStatusBitmap status;
 } tBspScreen;
 
 /* ////////////////////////////////////////////////////////////////////////// */
@@ -77,28 +86,67 @@ typedef struct stBspUart{
 /* ////////////////////////////////////////////////////////////////////////// */
 /*                                 BSP Objects                                */
 /* ////////////////////////////////////////////////////////////////////////// */
+typedef union stBspStatusBitmap {
+  struct{
+    u16 spi2  : 1; /*!< Display Screen */
+    u16 uart2 : 1; /*!< Uart Debugging Message */
+    u16 tim2  : 1; /*!< System Delay Timer 2 */
+    u16 tim9  : 1; /*!< System Delay Timer 9 */
+    u16 i2c1  : 1; /*!< QMI8658C - I2C Bus */
+    u16 B5    : 1; /*!< QMI8658C - INT1 CTRL9 Command Done */
+    u16 B6    : 1; /*!< QMI8658C - INT2 FIFO Watermark */
+    u16 A9    : 1; /*!< TP_INT - Touch Screen */
+    u16 reserved : 8;
+  };
+  volatile u16 word;
+} tBspStatusBitmap;
+
+
 typedef struct stBsp {
+  SPI_HandleTypeDef  * const pHspi2;
+  UART_HandleTypeDef * const pHuart2;
+  TIM_HandleTypeDef  * const pHtim3;
+  I2C_HandleTypeDef  * const pHi2c1;
+  ADC_HandleTypeDef  * const pHadc1;
+  
   tBspScreen screen;
   tBspUart   uart;
+
+  tBspStatusBitmap status;
 } tBsp;
 
 
 /* ========================================================================== */
 /*                                 APP Objects                                */
 /* ========================================================================== */
+typedef struct stAppClockFunc {
+  void (*init)(tAppGuiClockParam *);
+  void (*set_time)(tAppGuiClockParam *, uint32_t);
+  void (*inc_time)(tAppGuiClockParam *, uint32_t);
+  void (*idle)(tAppGuiClockParam *);
+  void (*deinit)(tAppGuiClockParam *);
+} tAppClockFunc;
+
 typedef struct stAppClock{
-  TaskHandle_t  _handle;
-  
+  TaskHandle_t      _handle;
   AppGuiClockEnum_t style;
-  struct{
-    tAppGuiClockParam param;
-    void (*init)(tAppGuiClockParam *);
-    void (*set_time)(tAppGuiClockParam *, uint32_t);
-    void (*inc_time)(tAppGuiClockParam *, uint32_t);
-    void (*idle)(tAppGuiClockParam *);
-    void (*deinit)(tAppGuiClockParam *);
-  } gui;
+  tAppGuiClockParam param;
+  tAppClockFunc     func;
 } tAppClock;
+
+typedef struct stAppLvgl{
+#if LVGL_VERSION==836
+  lv_disp_drv_t      disp_drv;
+  lv_disp_t         *disp;
+  lv_disp_draw_buf_t disp_draw_buf;
+  lv_color_t         gram[2][BSP_SCREEN_WIDTH*6];
+  cmnBoolean_t       isFlushDone;
+#elif LVGL_VERSION==922
+  lv_display_t *pDisplayHandle;
+  lv_theme_t   *pLvglTheme;
+#endif
+  lv_obj_t *default_scr;
+} tAppLvgl;
 
 /* ************************************************************************** */
 /*                             RTOS Task Objects                              */
@@ -154,7 +202,7 @@ typedef struct stRtosEvent {
 /* ************************************************************************** */
 /*                             RTOS Status Objects                            */
 /* ************************************************************************** */
-typedef union stRtosStatus {
+typedef union stRtosStatusBitmap {
   struct {
     uint8_t running  : 1; /*!< `ON` | `OFF` */
     uint8_t stkovfl  : 1; /*!< Stack Overflow */
@@ -162,17 +210,22 @@ typedef union stRtosStatus {
     uint8_t reserved : 5;
   };
   uint8_t word;
-} tRtosStatus;
+} tRtosStatusBitmap;
 
 /* ************************************************************************** */
 /*                                 RTOS Objects                               */
 /* ************************************************************************** */
 typedef struct stRtos {
-  tRtosTask   task;
-  tRtosEvent  event;
-  tRtosStatus status;
+  tRtosTask         task;
+  tRtosEvent        event;
+  tRtosStatusBitmap status;
 } tRtos;
 
+
+typedef struct stApp {
+    tAppLvgl  lvgl;
+    tAppClock clock;
+} tApp;
 
 /**
  * @note
@@ -182,69 +235,13 @@ typedef struct stRtos {
  * @todo: Clean up unused terms
  */
 typedef struct{
-  tBsp bsp;
-
-  struct{
-    SPI_HandleTypeDef  * const pHspi2;
-    UART_HandleTypeDef * const pHuart2;
-    TIM_HandleTypeDef  * const pHtim3;
-    I2C_HandleTypeDef  * const pHi2c1;
-    ADC_HandleTypeDef  * const pHadc1;
-    
-    union{
-      struct{
-        u16 spi2  : 1; /*!< Display Screen */
-        u16 uart2 : 1; /*!< Uart Debugging Message */
-        u16 tim2  : 1; /*!< System Delay Timer 2 */
-        u16 tim9  : 1; /*!< System Delay Timer 9 */
-        u16 i2c1  : 1; /*!< QMI8658C - I2C Bus */
-        u16 B5    : 1; /*!< QMI8658C - INT1 CTRL9 Command Done */
-        u16 B6    : 1; /*!< QMI8658C - INT2 FIFO Watermark */
-        u16 A9    : 1; /*!< TP_INT - Touch Screen */
-        u16 reserved : 8;
-      };
-      volatile u16 word;
-    }status;
-    //...//
-  }dev;
-  
-  struct{
-    struct{
-#if LVGL_VERSION==836
-      lv_disp_drv_t      disp_drv;
-      lv_disp_t         *disp;
-      lv_disp_draw_buf_t disp_draw_buf;
-      lv_color_t         gram[2][BSP_SCREEN_WIDTH*6];
-      cmnBoolean_t       isFlushDone;
-#elif LVGL_VERSION==922
-      lv_display_t *pDisplayHandle;
-      lv_theme_t   *pLvglTheme;
-#endif
-      lv_obj_t          *default_scr;
-    }lvgl;
-
-    tRtos rtos;
-
-    tAppClock clock;
-
-  }app;
-
-  struct {
-    const cmnDateTime_t system_initial_time;
-    union{
-      struct{
-        u8 scroff      : 1;
-        u8 debugging   : 1;
-        u8 reserved    : 6;
-      };
-      u8 word;
-    }status;
-  }info;
-
-} tMainSystemStatus;
+  tBsp  bsp;
+  tApp  app;
+  tRtos rtos;
+} tMetope;
 
 
-extern tMainSystemStatus   metope;
+extern tMetope metope;
 
 extern ADC_HandleTypeDef   hadc1;
 extern SPI_HandleTypeDef   hspi2;

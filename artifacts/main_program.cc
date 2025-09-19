@@ -142,7 +142,6 @@ int main(int argc, char *argv[]){
     }
     uint32_t f_apb1 = f_ahb >> (ppre1 + 1 - 0b100);
 
-
     TRACE_DEBUG("System Clock Info:");
     TRACE_DEBUG("\tHSI                 %d MHz", f_hsi / 1000000);
     TRACE_DEBUG("\tHSE                 %d MHz", f_hse / 1000000);
@@ -157,12 +156,13 @@ int main(int argc, char *argv[]){
 #endif
 
 #if 1
-  TRACE_DEBUG("Application Size in bytes:");
-  TRACE_DEBUG("\tmetope         %d bytes", sizeof(metope));
-  TRACE_DEBUG("\tmetope.bsp     %d bytes", sizeof(metope.bsp));
-  TRACE_DEBUG("\tmetope.dev     %d bytes", sizeof(metope.dev));
-  TRACE_DEBUG("\tmetope.app     %d bytes", sizeof(metope.app));
-  TRACE_DEBUG("\tmetope.info    %d bytes", sizeof(metope.info));
+  {
+    TRACE_DEBUG("Application Size in bytes:");
+    TRACE_DEBUG("\tmetope         %d bytes", sizeof(metope));
+    TRACE_DEBUG("\tmetope.bsp     %d bytes", sizeof(metope.bsp));
+    TRACE_DEBUG("\tmetope.app     %d bytes", sizeof(metope.app));
+    TRACE_DEBUG("\tmetope.rtos    %d bytes", sizeof(metope.rtos));
+  }
 #endif
 
   app_rtos_start();

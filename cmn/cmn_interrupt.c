@@ -296,7 +296,7 @@ void SysTick_Handler( void){
   /* Clear overflow flag */
   SysTick->CTRL;
 
-  if (metope.app.rtos.status.running) {
+  if (metope.rtos.status.running) {
     /* Call tick handler */
     FreeRTOS_SysTick_Handler();
   }
@@ -310,21 +310,21 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
    * @note: B5 QMI8658C INT1 Rising Edge Trigger
    */
   if(GPIO_Pin==GYRO_INT1_Pin){
-    metope.dev.status.B5 = 1;
+    metope.bsp.status.B5 = 1;
   }
 
   /**
    * @note: B6 QMI8658C INT2 Rising Edge Trigger
    */
   if(GPIO_Pin==GYRO_INT2_Pin){
-    metope.dev.status.B6 = 1;
+    metope.bsp.status.B6 = 1;
   }
   
   /**
    * @note: A9 Screen Touch Trigger
    */
   if(GPIO_Pin==TP_INT_Pin){
-    metope.dev.status.A9 = 1;
+    metope.bsp.status.A9 = 1;
   }
 }
 
@@ -343,12 +343,12 @@ void TIM1_BRK_TIM9_IRQHandler(void){
 #else
   HAL_TIM_IRQHandler(&htim9);
 #endif
-  metope.dev.status.tim9 = 1;
+  metope.bsp.status.tim9 = 1;
   TIM9_FLAG = 1;
-  if(metope.app.rtos.status.running){
+  if(metope.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
-    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_TIM9, &xHigherPriorityTaskWoken );
+    xResult = xEventGroupSetBitsFromISR( metope.rtos.event._handle, CMN_EVENT_TIM9, &xHigherPriorityTaskWoken );
     if( xResult != pdFAIL ){
       portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
     }
@@ -365,11 +365,11 @@ void TIM2_IRQHandler(void){
 #else
   HAL_TIM_IRQHandler(&htim2);
 #endif
-  metope.dev.status.tim2 = 1;
-  if(metope.app.rtos.status.running){
+  metope.bsp.status.tim2 = 1;
+  if(metope.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
-    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_TIM2, &xHigherPriorityTaskWoken );
+    xResult = xEventGroupSetBitsFromISR( metope.rtos.event._handle, CMN_EVENT_TIM2, &xHigherPriorityTaskWoken );
     if( xResult != pdFAIL ){
       portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
     }
@@ -444,10 +444,10 @@ void USART2_IRQHandler(void) {
   /* Always set the '\0' after the string */
   p_uart->rx_buf[p_uart->rx_idx] = '\0';
 
-  if(metope.app.rtos.status.running){
+  if(metope.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
-    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_UART_INPUT, &xHigherPriorityTaskWoken );
+    xResult = xEventGroupSetBitsFromISR( metope.rtos.event._handle, CMN_EVENT_UART_INPUT, &xHigherPriorityTaskWoken );
     if( xResult != pdFAIL ){
       portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
     }
@@ -494,7 +494,7 @@ void EXTI4_IRQHandler( void){}
 void DMA1_Stream0_IRQHandler( void){
   extern DMA_HandleTypeDef hdma_i2c1_rx;
   HAL_DMA_IRQHandler(&hdma_i2c1_rx);
-  metope.dev.status.i2c1 = IDLE;
+  metope.bsp.status.i2c1 = IDLE;
 }
 
 /**
@@ -503,15 +503,15 @@ void DMA1_Stream0_IRQHandler( void){
 void DMA1_Stream1_IRQHandler( void){
   // extern DMA_HandleTypeDef hdma_i2c1_tx;
   // HAL_DMA_IRQHandler(&hdma_i2c1_tx);
-  // if(metope.app.rtos.status.running){
+  // if(metope.rtos.status.running){
   //   BaseType_t xHigherPriorityTaskWoken, xResult;
   //   xHigherPriorityTaskWoken = pdFALSE;
-  //   xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_QMI8658_TX_CPLT, &xHigherPriorityTaskWoken );
+  //   xResult = xEventGroupSetBitsFromISR( metope.rtos.event._handle, CMN_EVENT_QMI8658_TX_CPLT, &xHigherPriorityTaskWoken );
   //   if( xResult != pdFAIL ){
   //     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
   //   }
   // }
-  // metope.dev.status.i2c1 = IDLE;
+  // metope.bsp.status.i2c1 = IDLE;
 }
 
 void DMA1_Stream2_IRQHandler( void){}
@@ -538,15 +538,15 @@ void DEFAULT DMA1_Stream4_IRQHandler(void){
      */
     cmn_callback_screen_spi_completed(&hspi2);
   }
-  if(metope.app.rtos.status.running){
+  if(metope.rtos.status.running){
     BaseType_t xHigherPriorityTaskWoken, xResult;
     xHigherPriorityTaskWoken = pdFALSE;
-    xResult = xEventGroupSetBitsFromISR( metope.app.rtos.event._handle, CMN_EVENT_SCREEN_REFRESH_CPLT, &xHigherPriorityTaskWoken );
+    xResult = xEventGroupSetBitsFromISR( metope.rtos.event._handle, CMN_EVENT_SCREEN_REFRESH_CPLT, &xHigherPriorityTaskWoken );
     if( xResult != pdFAIL ){
       portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
     }
   }
-  metope.dev.status.spi2 = IDLE;
+  metope.bsp.status.spi2 = IDLE;
 #else
   HAL_DMA_IRQHandler(&hdma_spi2_tx);
   cmn_callback_screen_spi_completed(&hspi2);

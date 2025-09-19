@@ -60,13 +60,13 @@ static void bsp_timer_init_register( TIM_TypeDef *TIMx, uint32_t psc){
   u16 cnt  = 0xFFFF;
   switch((u32)(TIMx)){
     case TIM2_BASE:{
-      while( metope.dev.status.tim2==0 && --cnt!=0);
-      metope.dev.status.tim2 = 0;
+      while( metope.bsp.status.tim2==0 && --cnt!=0);
+      metope.bsp.status.tim2 = 0;
       break;
     }
     case TIM9_BASE:{
-      while( metope.dev.status.tim9==0 && --cnt!=0);
-      metope.dev.status.tim9 = 0;
+      while( metope.bsp.status.tim9==0 && --cnt!=0);
+      metope.bsp.status.tim9 = 0;
       extern uint32_t TIM9_FLAG;
       TIM9_FLAG = 0;
       break;

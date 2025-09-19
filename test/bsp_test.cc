@@ -479,8 +479,8 @@ public:
           this->_err_msg<<"User objection."<<endl;
           break;
         }else if (s[0]=='T' || s[0]=='t'){
-          metope.dev.status.A9 = 0;
-          while(metope.dev.status.A9==0){
+          metope.bsp.status.A9 = 0;
+          while(metope.bsp.status.A9==0){
             tBspGyroData data = {0};
             cmnBoolean_t ret = bsp_qmi8658_update( &data);
             if(ret==SUCCESS){
@@ -531,12 +531,12 @@ public:
           this->_err_msg<<"User objection."<<endl;
           break;
         }else if (s[0]=='T' || s[0]=='t'){
-          metope.dev.status.A9 = 0;
-          while(metope.dev.status.A9==0){
+          metope.bsp.status.A9 = 0;
+          while(metope.bsp.status.A9==0){
             cmnBoolean_t ret = ERROR;
 
-            if(metope.dev.status.i2c1!=BUSY){
-              metope.dev.status.i2c1 = BUSY;
+            if(metope.bsp.status.i2c1!=BUSY){
+              metope.bsp.status.i2c1 = BUSY;
               ret = bsp_qmi8658_dma_update(&data);
             }
 

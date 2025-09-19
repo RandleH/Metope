@@ -28,19 +28,17 @@
 extern "C"{
 #endif
 
-tMainSystemStatus  metope = {
+tMetope  metope = {
   .bsp = {
-    .screen = {
-      .brightness      = BSP_SCREEN_DEFAULT_BRIGHTNESS,
-      .refresh_rate_ms = BSP_SCREEN_DEFAULT_REFREASHRATE
-    },
-  },
-  .dev = {
     .pHspi2  = &hspi2,
     .pHuart2 = &huart2,
     .pHtim3  = &htim3,
     .pHi2c1  = &hi2c1,
     .pHadc1  = &hadc1,
+    .screen = {
+      .brightness      = BSP_SCREEN_DEFAULT_BRIGHTNESS,
+      .refresh_rate_ms = BSP_SCREEN_DEFAULT_REFREASHRATE
+    },
     .status  = {.word=0}
   },
   .app = {
@@ -57,21 +55,12 @@ tMainSystemStatus  metope = {
 #endif
       .default_scr  = NULL
     },
-    .rtos = {.status = {0}},
     .clock = {
       ._handle = NULL,
-      .style   = kAppGuiClock_ClockModern,
-      .gui     = {0},
+      .style   = kAppGuiClock_ClockModern
     }
   },
-  .info = {
-    .status = {
-      {
-        .scroff   = 0,
-        .reserved = 0
-      }
-    }
-  }
+  .rtos = {.status = {0}}
 };
 
 volatile u32 gDummy = 0;
