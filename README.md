@@ -73,7 +73,7 @@ The output files will be the following items:
 
 - `build/model1.elf` - Executable Linkable File
 - `build/model1.hex` - Hex file for USART download
-- `build/model1.bin`
+- `build/model1.bin` - Compact binary to flash the target memory
 
 
 
