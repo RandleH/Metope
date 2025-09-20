@@ -31,8 +31,13 @@ download() {
 
 
 while true; do
-    echo "Sleep for 10 minutes..."
-    sleep 10m
+    if [ $# -gt 0 ]; then
+        echo "Sleep for $1 seconds..."
+        sleep $1
+    else
+        echo "Sleep for 10 minutes..."
+        sleep 600
+    fi
     echo "Check remote master branch status..."
     
     REMOTE_UPDATES=$(git rev-list --count HEAD..origin/master)
