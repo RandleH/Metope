@@ -363,9 +363,7 @@ void app_cmdbox_main(void *param) RTOSTHREAD {
   }
 #undef CAST
 }
-#endif
 
-#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 void app_cmdbox_idle(void *param) RTOSIDLE {
 
 }

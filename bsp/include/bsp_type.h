@@ -38,7 +38,7 @@ typedef u16 bspScreenCood_t;
 #define BSP_SCREEN_DEFAULT_BRIGHTNESS   (1024U)
 #define BSP_SCREEN_DEFAULT_REFREASHRATE (10)
 
-#define BSP_SCREEN_USE_HARDWARE_NSS   1
+#define BSP_SCREEN_USE_HARDWARE_NSS     1
 
 #define BSP_CFG_UART_TX_BUF_SIZE        256
 #define BSP_CFG_UART_RX_BUF_SIZE        32
@@ -48,20 +48,7 @@ extern "C"{
 #endif
 
 
-typedef u16 bspScreenBrightness_t;
 
-typedef u8 bspScreenRotate_t;
-
-typedef union{
-  struct{
-    u16 r : 5;
-    u16 g : 6;
-    u16 b : 5;
-  };
-  u16 word;
-}bspScreenPixelUnion_t;
-
-typedef u16 bspScreenPixel_t;
 
 #ifdef __cplusplus
 }

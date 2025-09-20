@@ -140,7 +140,7 @@ void os_init(void){
     "bsp_screen_main",\
     sizeof(p_task->screen_refresh._stack) / sizeof(p_task->screen_refresh._stack[0]),\
     &metope.bsp.screen ,\
-    kAppPriority_VERY_IMPORTANT,\
+    kRtosTaskPriority_VERY_IMPORTANT,\
     &p_task->screen_refresh._stack[0],\
     &p_task->screen_refresh._tcb\
   );
@@ -150,7 +150,7 @@ void os_init(void){
     "app_clock_main",\
     sizeof(p_task->clock_ui._stack) / sizeof(p_task->clock_ui._stack[0]),\
     &metope.app.clock ,\
-    kAppPriority_IMPORTANT,\
+    kRtosTaskPriority_IMPORTANT,\
     &p_task->clock_ui._stack[0],\
     &p_task->clock_ui._tcb\
   );
@@ -160,7 +160,7 @@ void os_init(void){
     "bsp_screen_onoff",\
     sizeof(p_task->screen_onoff._stack) / sizeof(p_task->screen_onoff._stack[0]),\
     &metope.bsp.screen ,\
-    kAppPriority_VERY_IMPORTANT,\
+    kRtosTaskPriority_VERY_IMPORTANT,\
     &p_task->screen_onoff._stack[0],\
     &p_task->screen_onoff._tcb\
   );
@@ -170,13 +170,13 @@ void os_init(void){
     "app_cmdbox_main",\
     sizeof(p_task->cmd_box._stack) / sizeof(p_task->cmd_box._stack[0]),\
     &metope.app.cmdbox ,\
-    kAppPriority_NORMAL,\
+    kRtosTaskPriority_NORMAL,\
     &p_task->cmd_box._stack[0],\
     &p_task->cmd_box._tcb\
   );
 
   TaskHandle_t _handle;
-  xTaskCreate( app_rtos_checkpoint, "app_rtos_checkpoint", 256U, NULL, kAppPriority_NORMAL, &_handle);
+  xTaskCreate( app_rtos_checkpoint, "app_rtos_checkpoint", 256U, NULL, kRtosTaskPriority_NORMAL, &_handle);
   
 #endif
 

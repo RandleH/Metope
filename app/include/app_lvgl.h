@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "cmn_type.h"
+#include "bsp_type.h"
 #include "lvgl.h"
 
 #ifndef APP_LVGL_H

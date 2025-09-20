@@ -29,8 +29,7 @@
 #include "cmn_utility.h"
 #include "cmn_callback.h"
 #include "bsp_led.h"
-#include "FreeRTOS.h"
-#include "event_groups.h"
+#include "bsp_screen.h"
 #ifdef __cplusplus
 extern "C"{
 #endif

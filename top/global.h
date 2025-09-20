@@ -16,14 +16,18 @@
  *
  ******************************************************************************
 */
-
 #ifndef GLOBAL_H
 #define GLOBAL_H
+
+#define RTOSTHREAD      /*!< Running on a FreeRTOS Thread */
+#define RTOSIDLE        /*!< Running on a FreeRTOS Idle Thread */
+#define RTOSTIMER       /*!< Running on a FreeRTOS Timer Callback */
 
 #include "device.h"
 #include "bsp_type.h"
 #include "cmn_type.h"
 #include "app_type.h"
+#include "bsp_screen.h"
 #if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 #include "lvgl.h"
 #include "FreeRTOS.h"
@@ -38,11 +42,6 @@
 #endif
 
 
-#define RTOSTHREAD      /*!< Running on a FreeRTOS Thread */
-#define RTOSIDLE        /*!< Running on a FreeRTOS Idle Thread */
-#define RTOSTIMER       /*!< Running on a FreeRTOS Timer Callback */
-
-
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -51,57 +50,12 @@ extern "C"{
 /* ////////////////////////////////////////////////////////////////////////// */
 /*                             BSP Screen Objects                             */
 /* ////////////////////////////////////////////////////////////////////////// */
-
-typedef union stBspScreenStatusBitmap {
-  struct {
-    uint16_t is_disp_off : 1;
-    uint16_t reserved    : 15;
-  };
-  uint16_t word;
-} tBspScreenStatusBitmap;
-
-typedef union stBspScreenStatusBitbandmap {
-  uint16_t is_disp_off [1];
-  uint16_t reserved    [15];
-} tBspScreenStatusBitbandmap;
-
-typedef struct stBspScreen{
-  bspScreenBrightness_t  brightness;
-  bspScreenRotate_t      rotation;
-  TickType_t             refresh_rate_ms;
-  tBspScreenStatusBitmap     _status;
-  tBspScreenStatusBitbandmap *status;
-} tBspScreen;
+#include "bsp_screen.h"
 
 /* ////////////////////////////////////////////////////////////////////////// */
 /*                              BSP Uart Objects                              */
 /* ////////////////////////////////////////////////////////////////////////// */
-typedef union stBspUartTxStatus {
-  struct {
-    uint16_t escape_ticks : 8;
-    uint16_t msg_len      : 8;
-  };
-  uint16_t word;
-} tBspUartTxStatus;
-
-typedef union stBspUartRxStatus {
-  struct {
-    uint8_t is_locked     : 1;
-    uint8_t is_overflowed : 1;
-    uint8_t has_new_msg   : 1;
-    uint8_t error_code    : 5;
-  };
-  uint8_t word;
-} tBspUartRxStatus;
-
-typedef struct stBspUart{
-  char             tx_buf[BSP_CFG_UART_TX_BUF_SIZE+1];
-  tBspUartTxStatus tx_status;
-  char             rx_buf[BSP_CFG_UART_RX_BUF_SIZE+1];
-  uint8_t          rx_idx;
-  tBspUartRxStatus rx_status;
-  //...//
-} tBspUart;
+#include "bsp_uart.h"
 
 /* ////////////////////////////////////////////////////////////////////////// */
 /*                                 BSP Objects                                */
