@@ -18,24 +18,16 @@
 */
 
 /* ************************************************************************** */
-/*                                  Includes                                  */
-/* ************************************************************************** */
-#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
-#include "lvgl.h"
-#include "FreeRTOS.h"
-#include "semphr.h"
-#include "timers.h"
-#elif (defined SYS_TARGET_NATIVE)
-typedef uint32_t lv_obj_t;
-typedef void*    TimerHandle_t;
-typedef void*    SemaphoreHandle_t;
-#endif
-
-/* ************************************************************************** */
 /*                              Headfile Guards                               */
 /* ************************************************************************** */
 #ifndef APP_TYPE_H
 #define APP_TYPE_H
+
+
+/* ************************************************************************** */
+/*                                  Includes                                  */
+/* ************************************************************************** */
+
 
 #define APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE (2048U)
 #define APP_CFG_TASK_CLOCK_UI_STACK_SIZE     ( 512U)
@@ -47,44 +39,6 @@ typedef void*    SemaphoreHandle_t;
 #define APP_IDLE_BATTERY     
 #define APP_IDLE_SYSINFO     
 
-#define RTOSTHREAD      /*!< Running on a FreeRTOS Thread */
-#define RTOSIDLE        /*!< Running on a FreeRTOS Idle Thread */
-#define RTOSTIMER       /*!< Running on a FreeRTOS Timer Callback */
-
-typedef enum AppTaskPriority{
-  kAppPriority_VERY_IMPORTANT = 50,
-  kAppPriority_IMPORTANT      = 40,
-  kAppPriority_INTERMEDIATE   = 30,
-  kAppPriority_NORMAL         = 20,
-  kAppPriority_DOCUMENTATION  = 5
-}AppTaskPriority_t;
-
-typedef struct{
-  lv_obj_t *pScreen;
-  lv_obj_t *pPinHour;
-  lv_obj_t *pPinMinute;
-
-  cmnDateTime_t time;
-
-  TimerHandle_t _idle_task_timer;
-
-  struct{
-    SemaphoreHandle_t  _semphr;
-    void              *p_anything;
-  }customized;
-} tAppGuiClockParam;
-
-
-/**
- * @brief List of all supported clock ui
- */
-typedef enum{
-  kAppGuiClock_None   = 255,
-  kAppGuiClock_ClockModern = 0,
-  kAppGuiClock_NANA   = 1,
-  kAppGuiClock_LVVVW  = 2,
-  NUM_OF_AppGuiClock
-} AppGuiClockEnum_t;
 
 
 #endif

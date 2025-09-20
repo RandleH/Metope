@@ -24,10 +24,24 @@
 #include "bsp_type.h"
 #include "cmn_type.h"
 #include "app_type.h"
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 #include "lvgl.h"
 #include "FreeRTOS.h"
+#include "semphr.h"
+#include "timers.h"
 #include "task.h"
 #include "event_groups.h"
+#elif (defined SYS_TARGET_NATIVE)
+  typedef uint32_t lv_obj_t;
+  typedef void*    TimerHandle_t;
+  typedef void*    SemaphoreHandle_t;
+#endif
+
+
+#define RTOSTHREAD      /*!< Running on a FreeRTOS Thread */
+#define RTOSIDLE        /*!< Running on a FreeRTOS Idle Thread */
+#define RTOSTIMER       /*!< Running on a FreeRTOS Timer Callback */
+
 
 #ifdef __cplusplus
 extern "C"{
@@ -136,45 +150,43 @@ typedef struct stBsp {
 
 
 /* ========================================================================== */
-/*                                 APP Objects                                */
+/*                             APP Clock Objects                              */
 /* ========================================================================== */
-typedef struct stAppClockFunc {
-  void (*init)(tAppGuiClockParam *);
-  void (*set_time)(tAppGuiClockParam *, uint32_t);
-  void (*inc_time)(tAppGuiClockParam *, uint32_t);
-  void (*idle)(tAppGuiClockParam *);
-  void (*deinit)(tAppGuiClockParam *);
-} tAppClockFunc;
+#include "app_clock.h"
 
-typedef struct stAppClock{
-  TaskHandle_t      _handle;
-  AppGuiClockEnum_t style;
-  tAppGuiClockParam param;
-  tAppClockFunc     func;
-} tAppClock;
 
-typedef struct stAppLvgl{
-#if LVGL_VERSION==836
-  lv_disp_drv_t      disp_drv;
-  lv_disp_t         *disp;
-  lv_disp_draw_buf_t disp_draw_buf;
-  lv_color_t         gram[2][BSP_SCREEN_WIDTH*6];
-  cmnBoolean_t       isFlushDone;
-#elif LVGL_VERSION==922
-  lv_display_t *pDisplayHandle;
-  lv_theme_t   *pLvglTheme;
-#endif
-  lv_obj_t *default_scr;
-} tAppLvgl;
+/* ========================================================================== */
+/*                              APP LVGL Objects                              */
+/* ========================================================================== */
+#include "app_lvgl.h"
+
 
 /* ========================================================================== */
 /*                             APP CmdBox Objects                             */
 /* ========================================================================== */
 #include "app_cmdbox.h"
 
+/* ========================================================================== */
+/*                                 APP Objects                                */
+/* ========================================================================== */
+typedef struct stApp {
+  tAppLvgl   lvgl;
+  tAppClock  clock;
+  tAppCmdBox cmdbox;
+} tApp;
+
+
 /* ************************************************************************** */
 /*                             RTOS Task Objects                              */
 /* ************************************************************************** */
+typedef enum RtosTaskPriority_t {
+  kRtosTaskPriority_VERY_IMPORTANT = 50,
+  kRtosTaskPriority_IMPORTANT      = 40,
+  kRtosTaskPriority_INTERMEDIATE   = 30,
+  kRtosTaskPriority_NORMAL         = 20,
+  kRtosTaskPriority_DOCUMENTATION  = 5
+} RtosTaskPriority_t;
+
 typedef struct stRtosTask_ScreenRefreash {
   TaskHandle_t _handle;
   StaticTask_t _tcb;
@@ -252,13 +264,6 @@ typedef struct stRtos {
   tRtosStatusBitmap     _status;
   tRtosStatusBitbandmap *status;
 } tRtos;
-
-
-typedef struct stApp {
-    tAppLvgl   lvgl;
-    tAppClock  clock;
-    tAppCmdBox cmdbox;
-} tApp;
 
 /**
  * @note
