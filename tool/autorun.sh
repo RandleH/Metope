@@ -39,7 +39,7 @@ while true; do
         sleep 600
     fi
     echo "Check remote master branch status..."
-    
+    git fetch
     REMOTE_UPDATES=$(git rev-list --count HEAD..origin/master)
     if [ "$REMOTE_UPDATES" -gt 0 ]; then
         echo "Remote branch 'origin/master' has updates."
