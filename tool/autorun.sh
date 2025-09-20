@@ -23,6 +23,15 @@ pause() {
     done
 }
 
+install_stlink() {
+    git clone https://github.com/stlink-org/stlink.git ${PRJ_TOP}/lib/stlink
+    cd ${PRJ_TOP}/lib/stlink
+    git reset --hard 179650df40295b0af3a148ddfb2c467a0334f54a
+
+    make clean
+    make release
+}
+
 download() {
     st-info --probe
     st-flash --version

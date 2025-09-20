@@ -514,7 +514,7 @@ void bsp_screen_refresh( const bspScreenPixel_t *buf, bspScreenCood_t xs, bspScr
   PIN_CS(1);
 }
 
-
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 /**
  * @brief Screen Circular Refresh Function
  * @note  Recommanded stack depth: 512 Bytes
@@ -577,6 +577,7 @@ void bsp_screen_onoff(void *param) RTOSTHREAD {
 #undef CAST
 }
 
+#endif
 
 #ifdef __cplusplus
 }

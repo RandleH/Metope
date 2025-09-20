@@ -21,6 +21,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stddef.h>
+#include "cmn_type.h"
+#include "bsp_type.h"
 #include "lvgl.h"
 
 #ifndef APP_LVGL_H
@@ -29,6 +31,21 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+typedef struct stAppLvgl{
+#if LVGL_VERSION==836
+  lv_disp_drv_t      disp_drv;
+  lv_disp_t         *disp;
+  lv_disp_draw_buf_t disp_draw_buf;
+  lv_color_t         gram[2][BSP_SCREEN_WIDTH*6];
+  cmnBoolean_t       isFlushDone;
+#elif LVGL_VERSION==922
+  lv_display_t *pDisplayHandle;
+  lv_theme_t   *pLvglTheme;
+#endif
+  lv_obj_t *default_scr;
+} tAppLvgl;
+
 
 uint32_t app_lvgl_get_tick(void);
 

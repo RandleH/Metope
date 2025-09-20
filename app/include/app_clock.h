@@ -23,7 +23,7 @@
 /* ************************************************************************** */
 #include "cmn_type.h"
 #include "app_type.h"
-
+#include "lvgl.h"
 
 /* ************************************************************************** */
 /*                              Headfile Guards                               */
@@ -35,6 +35,49 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+typedef struct{
+  lv_obj_t *pScreen;
+  lv_obj_t *pPinHour;
+  lv_obj_t *pPinMinute;
+
+  cmnDateTime_t time;
+
+  TimerHandle_t _idle_task_timer;
+
+  struct{
+    SemaphoreHandle_t  _semphr;
+    void              *p_anything;
+  }customized;
+} tAppGuiClockParam;
+
+/**
+ * @brief List of all supported clock ui
+ */
+typedef enum{
+  kAppGuiClock_None        = 255,
+  kAppGuiClock_ClockModern = 0,
+  kAppGuiClock_NANA        = 1,
+  kAppGuiClock_LVVVW       = 2,
+  NUM_OF_AppGuiClock
+} AppGuiClockEnum_t;
+
+typedef struct stAppClockFunc {
+  void (*init)(tAppGuiClockParam *);
+  void (*set_time)(tAppGuiClockParam *, uint32_t);
+  void (*inc_time)(tAppGuiClockParam *, uint32_t);
+  void (*idle)(tAppGuiClockParam *);
+  void (*deinit)(tAppGuiClockParam *);
+} tAppClockFunc;
+
+typedef struct stAppClock{
+  TaskHandle_t      _handle;
+  AppGuiClockEnum_t style;
+  tAppGuiClockParam param;
+  tAppClockFunc     func;
+} tAppClock;
+
+
 
 void app_clock_main(void *param) RTOSTHREAD;
 void app_clock_idle(void *param) RTOSIDLE;

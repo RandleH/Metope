@@ -16,6 +16,9 @@
  *
  ******************************************************************************
 */
+#ifndef APP_CMDBOX_H
+#define APP_CMDBOX_H
+
 
 /* ************************************************************************** */
 /*                                  Includes                                  */
@@ -24,11 +27,7 @@
 #include "app_type.h"
 #include "bsp_type.h"
 
-/* ************************************************************************** */
-/*                              Headfile Guards                               */
-/* ************************************************************************** */
-#ifndef APP_CMDBOX_H
-#define APP_CMDBOX_H
+
 
 /* ************************************************************************** */
 /*                              Public Macros                                 */
@@ -67,8 +66,10 @@ typedef struct stAppCmdBox {
   tAppCmdBoxPendingExe pending_exe[MAX_NUM_PENDING];
 } tAppCmdBox;
 
+#if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
 void app_cmdbox_main(void *param) RTOSTHREAD;
 void app_cmdbox_idle(void *param) RTOSIDLE;
+#endif
 void app_cmdbox_parse(tAppCmdBox *p_cmdbox, const char *cmd);
 
 #ifdef __cplusplus

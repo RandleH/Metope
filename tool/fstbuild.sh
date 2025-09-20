@@ -14,4 +14,9 @@ fi
 # Execution Zone
 ################################################################
 cd ${PRJ_TOP}/build
-make -j32
+
+if [ $# -gt 0 ]; then
+    make -j$1
+else
+    make -j32
+fi

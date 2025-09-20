@@ -139,7 +139,7 @@ public:
         "0",\
         input[i].second,\
         NULL,\
-        kAppPriority_IMPORTANT,\
+        kRtosTaskPriority_IMPORTANT,\
         &_handle[i]
       );
 
