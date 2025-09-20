@@ -143,6 +143,7 @@ Note that the main entrance of native program is different than others.
 
 - Native Program: `${PRJ_TOP}/artifacts/main_native.cc`
 - Target Program: `${PRJ_TOP}/artifacts/main_program.cc`
+- Emulator Program: `${PRJ_TOP}/artifacts/main_emulator.cc`
 
 
 
