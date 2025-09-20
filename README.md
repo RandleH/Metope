@@ -228,7 +228,8 @@ Step 3: Select a specific debugging mode
 >- `STLink Attach` - Same as the J-Link but use ST-Link Port
 >
 >- `Native` - This will call native cppdbg. Make sure you have your local compiler installed
-
+>
+>- `Emulator` - Run the program via qemu emulator environment
 
 
 
