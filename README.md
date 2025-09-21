@@ -402,7 +402,7 @@ Sep 3rd, 2025
 
 - [**Online GDB**](https://www.onlinegdb.com/)
 - [**Simulator**](https://wokwi.com)
-
+- [**Hex Viewer**](https://hexed.it)
 
 ## Reference
 
