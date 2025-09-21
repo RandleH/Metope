@@ -28,6 +28,10 @@
 #ifndef ASSERT_H
 #define ASSERT_H
 
+#if !defined(UNUSED)
+  #define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
+#endif /* UNUSED */
+
 
 #ifdef DEBUG
   #if (defined SYS_TARGET_STM32F411CEU6) || (defined SYS_TARGET_STM32F405RGT6) || (defined EMULATOR_STM32F411CEU6) || (defined EMULATOR_STM32F405RGT6)
@@ -51,7 +55,9 @@
         }while(0)
     #endif
 #else
-  #define ASSERT( expr, msg)
+  #define ASSERT( expr, msg, ...)                                 \
+    do{                                                           \
+    }while(0)
 #endif
 
 
