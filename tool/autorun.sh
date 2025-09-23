@@ -54,17 +54,22 @@ while true; do
         echo "Remote branch 'origin/master' has updates."
         git pull
         sh tool/clean.sh
+
+        if [[ PID_CATCH_HARDFAULT ]]; then
+            kill -9 ${PID_CATCH_HARDFAULT}
+        fi
+
         source setup.env && sh tool/rebuild.sh
         if [ ! -e "${PRJ_TOP}/build/model1.bin" ]; then
             echo ".bin file was NOT found!"
             pause
         else
             download_via_stlink ${PRJ_TOP}/build/model1.bin
+            sh ${PRJ_TOP}/dbg/catch_hardfault.sh --adapter stlink &
+            PID_CATCH_HARDFAULT=$!
         fi
     else
         echo "Local branch is up to date with 'origin/master'."
     fi
 done
-
-
 
