@@ -15,6 +15,9 @@ sqlstudio/**/cache
 sqlstudio/**/assets
 !sqlstudio/assets
 !sqlstudio/**/export/.keep
+dbg/.gdbinit
+dbg/generated
+dbg/outputs
 
 ################################################################################################
 # Vscode

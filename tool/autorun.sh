@@ -32,7 +32,7 @@ install_stlink() {
     make release
 }
 
-download() {
+download_via_stlink() {
     st-info --probe
     st-flash --version
     st-flash --reset write $1 0x08000000
@@ -59,7 +59,7 @@ while true; do
             echo ".bin file was NOT found!"
             pause
         else
-            download ${PRJ_TOP}/build/model1.bin
+            download_via_stlink ${PRJ_TOP}/build/model1.bin
         fi
     else
         echo "Local branch is up to date with 'origin/master'."
