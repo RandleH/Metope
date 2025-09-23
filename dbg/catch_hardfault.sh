@@ -27,31 +27,38 @@ _generate_gdb_memory_dump_script() {
 }
 
 generate_gdb_hardfault_detection_script() {
-    if [ -e "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb" ]; then
-        rm "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
+    if [ -e "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb" ]; then
+        rm "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
     fi
-    echo "pwd"                                                            >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "set pagination off"                                             >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "target extended-remote localhost:50000"                         >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "monitor reset"                                                  >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "b main"                                                         >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "continue"                                                       >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "b HardFault_Handler"                                            >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "define hook-stop"                                               >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "  backtrace"                                                    >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    _generate_gdb_memory_dump_script                                         "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "  quit"                                                         >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "end"                                                            >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "continue"                                                       >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
-    echo "quit"                                                           >> "${PRJ_TOP}/dbg/generated/detect_hardfault.gdb"
+    echo "pwd"                                          >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "set pagination off"                           >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "target extended-remote localhost:${GDB_PORT}" >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "monitor reset"                                >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "b main"                                       >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "continue"                                     >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "b HardFault_Handler"                          >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "define hook-stop"                             >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "  backtrace"                                  >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    _generate_gdb_memory_dump_script                       "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "  quit"                                       >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "end"                                          >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "continue"                                     >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "quit"                                         >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+}
+
+run_stlink() {
+    echo $(st-flash --version)
+    echo $(st-util --version)
+    echo $(stlink-server --version)
+    st-util -p 4242 -v  > ${PRJ_TOP}/dbg/outputs/stlink.log 2>&1
 }
 
 run_jlink() {
-    /usr/local/bin/JLinkGDBServer -singlerun -nogui -if swd -port 50000 -swoport 50001 -telnetport 50002 -device STM32F411CE > ${PRJ_TOP}/dbg/outputs/jlinkrun.log 2>&1
+    /usr/local/bin/JLinkGDBServer -singlerun -nogui -if swd -port 50000 -swoport 50001 -telnetport 50002 -device STM32F411CE > ${PRJ_TOP}/dbg/outputs/jlink.log 2>&1
 }
 
 run_gdb() {
-    ${METOPE_ARM_TOOLCHAIN_REPO}/bin/arm-none-eabi-gdb -x ${PRJ_TOP}/dbg/generated/detect_hardfault.gdb ${PRJ_TOP}/build/model1.elf > ${PRJ_TOP}/dbg/outputs/gdbrun.log 2>&1
+    ${METOPE_ARM_TOOLCHAIN_REPO}/bin/arm-none-eabi-gdb -x ${PRJ_TOP}/dbg/generated/catch_hardfault.gdb ${PRJ_TOP}/build/model1.elf > ${PRJ_TOP}/dbg/outputs/gdb.log 2>&1
 }
 
 run_uart() {
@@ -73,10 +80,27 @@ echo "--- Start monitoring the target ---"
 rm -rf ${PRJ_TOP}/dbg/generated && mkdir ${PRJ_TOP}/dbg/generated
 rm -rf ${PRJ_TOP}/dbg/outputs   && mkdir ${PRJ_TOP}/dbg/outputs
 
-generate_gdb_hardfault_detection_script
 
-run_jlink &
-PID_JLINK=$!
+if [ $1 == "--adaptor" ]; then
+    if [ $2 == "jlink" ]; then
+        GDB_PORT=50000
+        run_jlink &
+        PID_ADAPTOR=$!
+        echo "Launch J-Link server PID=${PID_ADAPTOR}. GDB Port was set to ${GDB_PORT}"
+    elif [ $2 == "stlink" ]; then
+        GDB_PORT=4242
+        run_stlink &
+        PID_ADAPTOR=$!
+        echo "Launch ST-Link server PID=${PID_ADAPTOR}. GDB Port was set to ${GDB_PORT}"
+    else
+        echo "Unknown adaptor $1"
+        exit 1
+    fi
+else
+    echo "Please provide the adaptor: --adaptor < stlink | jlink >"
+fi
+
+generate_gdb_hardfault_detection_script
 
 run_uart &
 PID_UART=$!
@@ -85,12 +109,11 @@ run_gdb &
 PID_GDB=$!
 
 
-echo "Launch J-Link server PID=${PID_JLINK}"
 echo "Launch UART listener PID=${PID_UART}"
 echo "Launch GDB server PID=${PID_GDB}"
 
 wait $PID_GDB
-wait $PID_JLINK
+wait $PID_ADAPTOR
 close_uart
 
 echo "--- End of the monitor program ---"

@@ -18,6 +18,8 @@ sqlstudio/**/assets
 dbg/.gdbinit
 dbg/generated
 dbg/outputs
+tool/generated
+tool/outputs
 
 ################################################################################################
 # Vscode
