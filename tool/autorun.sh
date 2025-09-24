@@ -33,6 +33,12 @@ install_stlink() {
 }
 
 
+run_async_catch_hardfault() {
+    sh ${PRJ_TOP}/dbg/catch_hardfault.sh --adaptor jlink &
+    PID_CATCH_HARDFAULT=$!
+    echo "Launched catch_hardfault.sh PID={$PID_CATCH_HARDFAULT}"
+}
+
 
 while true; do
     if [ $# -gt 0 ]; then
@@ -52,6 +58,7 @@ while true; do
 
         if [[ $PID_CATCH_HARDFAULT ]]; then
             kill -9 ${PID_CATCH_HARDFAULT}
+            echo "Killed catch_hardfault.sh PID={$PID_CATCH_HARDFAULT}"
             unset PID_CATCH_HARDFAULT
         fi
 
@@ -64,11 +71,13 @@ while true; do
         else
             sh ${PRJ_TOP}/tool/download.sh --adaptor jlink
             echo "Sleep for 11 seconds..." && sleep 11
-            sh ${PRJ_TOP}/dbg/catch_hardfault.sh --adapter jlink &
-            PID_CATCH_HARDFAULT=$!
+            run_async_catch_hardfault
         fi
     else
         echo "Local branch is up to date with 'origin/master'."
+        if [[ ! $PID_CATCH_HARDFAULT ]]; then
+            run_async_catch_hardfault
+        fi
     fi
 done
 

@@ -57,18 +57,17 @@ run_jlink() {
 }
 
 run_gdb() {
-    ${METOPE_ARM_TOOLCHAIN_REPO}/bin/arm-none-eabi-gdb -silent -batch -x ${PRJ_TOP}/dbg/generated/catch_hardfault.gdb ${PRJ_TOP}/build/model1.elf > ${PRJ_TOP}/dbg/outputs/gdb.log 2>&1
+    ${METOPE_ARM_TOOLCHAIN_REPO}/bin/arm-none-eabi-gdb -batch -x ${PRJ_TOP}/dbg/generated/catch_hardfault.gdb ${PRJ_TOP}/build/model1.elf > ${PRJ_TOP}/dbg/outputs/gdb.log 2>&1
 }
 
 run_uart() {
     UART_NAME="screen-usbserial"
     UART_DEV=$(ls -a /dev | grep 'tty.usbserial-' -m 1)
-    screen -d -m -S $UART_NAME -L $UART_DEV 115200
+    screen -d -m -S $UART_NAME -L /dev/$UART_DEV 115200
 }
 
 close_uart() {
-    screen -r $UART_NAME -X quit
-    kill -9 $PID_UART
+    screen -r $1 -X quit
     mv ${PRJ_TOP}/screenlog.0 ${PRJ_TOP}/dbg/outputs/uart_outputs.log
 }
 
@@ -109,13 +108,11 @@ PID_UART=$!
 run_gdb &
 PID_GDB=$!
 
-run_gdb
-
 echo "Launch UART listener PID=${PID_UART}"
 echo "Launch GDB server PID=${PID_GDB}"
 
 wait $PID_GDB
 wait $PID_ADAPTOR
-close_uart
+close_uart $UART_NAME
 
 echo "--- End of the monitor program ---"
