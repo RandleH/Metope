@@ -33,8 +33,11 @@ download_via_jlink() {
 
 
 download_via_stlink() {
+    # command line:   ./st-flash [--debug] [--reset] [--connect-under-reset] [--hot-plug] [--opt] [--serial <serial>] [--format <format>] [--flash=<fsize>] [--freq=<kHz>] [--area=<area>] {read|write} [path] [addr] [size]
+    # command line:   ./st-flash [--debug] [--connect-under-reset] [--hot-plug] [--freq=<kHz>] [--serial <serial>] erase [addr] [size]
+    # command line:   ./st-flash [--debug] [--freq=<kHz>] [--serial <serial>] reset
     echo $(st-flash --version)
-    st-flash write ${PRJ_TOP}/build/model1.bin 0x08000000 --reset --freq=4000
+    st-flash --debug --reset write ${PRJ_TOP}/build/model1.bin 0x08000000 > ${PRJ_TOP}/tool/outputs/stlink.log 2>&1
 }
 
 
