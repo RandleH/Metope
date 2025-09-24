@@ -38,7 +38,7 @@ generate_gdb_hardfault_detection_script() {
     echo "continue"                                     >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
     echo "b HardFault_Handler"                          >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
     echo "define hook-stop"                             >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
-    echo "  backtrace"                                  >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
+    echo "  backtrace full"                             >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
     _generate_gdb_memory_dump_script                       "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
     echo "  quit"                                       >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
     echo "end"                                          >> "${PRJ_TOP}/dbg/generated/catch_hardfault.gdb"
@@ -49,7 +49,6 @@ generate_gdb_hardfault_detection_script() {
 run_stlink() {
     echo $(st-flash --version)
     echo $(st-util --version)
-    echo $(stlink-server --version)
     st-util -p 4242 -v  > ${PRJ_TOP}/dbg/outputs/stlink.log 2>&1
 }
 
@@ -58,15 +57,17 @@ run_jlink() {
 }
 
 run_gdb() {
-    ${METOPE_ARM_TOOLCHAIN_REPO}/bin/arm-none-eabi-gdb -x ${PRJ_TOP}/dbg/generated/catch_hardfault.gdb ${PRJ_TOP}/build/model1.elf > ${PRJ_TOP}/dbg/outputs/gdb.log 2>&1
+    ${METOPE_ARM_TOOLCHAIN_REPO}/bin/arm-none-eabi-gdb -silent -batch -x ${PRJ_TOP}/dbg/generated/catch_hardfault.gdb ${PRJ_TOP}/build/model1.elf > ${PRJ_TOP}/dbg/outputs/gdb.log 2>&1
 }
 
 run_uart() {
-    screen -d -m -S "screen-usbserial-A50285BI" -L /dev/tty.usbserial-A50285BI 115200
+    UART_NAME="screen-usbserial"
+    UART_DEV=$(ls -a /dev | grep 'tty.usbserial-' -m 1)
+    screen -d -m -S $UART_NAME -L $UART_DEV 115200
 }
 
 close_uart() {
-    screen -r "screen-usbserial-A50285BI" -X quit
+    screen -r $UART_NAME -X quit
     kill -9 $PID_UART
     mv ${PRJ_TOP}/screenlog.0 ${PRJ_TOP}/dbg/outputs/uart_outputs.log
 }
@@ -108,6 +109,7 @@ PID_UART=$!
 run_gdb &
 PID_GDB=$!
 
+run_gdb
 
 echo "Launch UART listener PID=${PID_UART}"
 echo "Launch GDB server PID=${PID_GDB}"
