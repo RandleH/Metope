@@ -18,5 +18,7 @@ rm     ${PRJ_TOP}/main.cc;
 rm     ${PRJ_TOP}/*.log;
 rm -rf ${PRJ_TOP}/STM32CubeMX/;
 rm -rf ${PRJ_TOP}/.vscode/;
+rm -rf ${PRJ_TOP}/dbg/generated;
+rm -rf ${PRJ_TOP}/dbg/outputs;
 
 cd ${PRJ_TOP}
