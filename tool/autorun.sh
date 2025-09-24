@@ -32,11 +32,6 @@ install_stlink() {
     make release
 }
 
-download_via_stlink() {
-    st-info --probe
-    st-flash --version
-    st-flash --reset write $1 0x08000000
-}
 
 
 while true; do
@@ -55,17 +50,21 @@ while true; do
         git pull
         sh tool/clean.sh
 
-        if [[ PID_CATCH_HARDFAULT ]]; then
+        if [[ $PID_CATCH_HARDFAULT ]]; then
             kill -9 ${PID_CATCH_HARDFAULT}
+            unset PID_CATCH_HARDFAULT
         fi
+
+        echo "Sleep for 10 seconds..." && sleep 10
 
         source setup.env && sh tool/rebuild.sh
         if [ ! -e "${PRJ_TOP}/build/model1.bin" ]; then
             echo ".bin file was NOT found!"
             pause
         else
-            download_via_stlink ${PRJ_TOP}/build/model1.bin
-            sh ${PRJ_TOP}/dbg/catch_hardfault.sh --adapter stlink &
+            sh ${PRJ_TOP}/tool/download.sh --adaptor jlink
+            echo "Sleep for 11 seconds..." && sleep 11
+            sh ${PRJ_TOP}/dbg/catch_hardfault.sh --adapter jlink &
             PID_CATCH_HARDFAULT=$!
         fi
     else
