@@ -61,14 +61,12 @@ run_gdb() {
 }
 
 run_uart() {
-    UART_NAME="screen-usbserial"
     UART_DEV=$(ls -a /dev | grep 'tty.usbserial-' -m 1)
-    screen -d -m -S $UART_NAME -L /dev/$UART_DEV 115200
+    python tool/uart.py -b 115200 -p /dev/${UART_DEV} -l ${PRJ_TOP}/dbg/outputs/uart.log
 }
 
 close_uart() {
-    screen -r $1 -X quit
-    mv ${PRJ_TOP}/screenlog.0 ${PRJ_TOP}/dbg/outputs/uart_outputs.log
+    kill -9 $PID_UART
 }
 
 
@@ -113,6 +111,6 @@ echo "Launch GDB server PID=${PID_GDB}"
 
 wait $PID_GDB
 wait $PID_ADAPTOR
-close_uart $UART_NAME
+close_uart $PID_UART
 
 echo "--- End of the monitor program ---"

@@ -32,6 +32,9 @@ Color Capsule contributes to the firmware program. Grey rectangulars are only th
 
 - `CMake>=3.19.2`
 - `make==3.81`
+- `pyenv==2.6.8          (brew)`
+- `pyserial==3.5         (pip package)`
+- `pyserial-asyncio==0.6 (pip package)`
 
 Metope project dosen't require to install the `arm-gnu-tool-chain` on the host system. Tool chain will be provided via `lib/arm-toolchain`
 
@@ -386,6 +389,28 @@ extern "C"{
 
 
 
+## Python Environment Setup
+
+### Create pyenv folder
+
+If the following directory doesn't exist, make one.
+```
+mkdir ~/.pyenv
+mkdir ~/.pyenv/versions/
+```
+
+### Link Python
+Link python package to the one installed by brew
+```
+ln -s $(brew --cellar python)/* ~/.pyenv/versions/
+```
+
+### Install Python
+It's better to install the python via pyenv. More user friendly when switching to either local or global.
+```
+brew install libxml2 libxslt
+pyenv install 3.11.5
+```
 
 
 ## Lesson Learnt
