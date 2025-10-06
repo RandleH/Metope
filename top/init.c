@@ -145,6 +145,7 @@ void os_init(void){
     &p_task->screen_refresh._tcb\
   );
   
+#if RTOS_APP_ENABLE_CLOCK
   p_task->clock_ui._handle = xTaskCreateStatic(\
     app_clock_main,\
     "app_clock_main",\
@@ -154,6 +155,7 @@ void os_init(void){
     &p_task->clock_ui._stack[0],\
     &p_task->clock_ui._tcb\
   );
+#endif
   
   p_task->screen_onoff._handle = xTaskCreateStatic(\
     bsp_screen_onoff,\
@@ -173,6 +175,16 @@ void os_init(void){
     kRtosTaskPriority_NORMAL,\
     &p_task->cmd_box._stack[0],\
     &p_task->cmd_box._tcb\
+  );
+
+  p_task->snooker._handle = xTaskCreateStatic(\
+    app_snooker_main,\
+    "app_snooker_main",\
+    sizeof(p_task->snooker._stack) / sizeof(p_task->snooker._stack[0]),\
+    &metope.app.snooker ,\
+    kRtosTaskPriority_NORMAL,\
+    &p_task->snooker._stack[0],\
+    &p_task->snooker._tcb\
   );
 
   TaskHandle_t _handle;

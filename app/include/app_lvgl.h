@@ -32,6 +32,8 @@
 extern "C"{
 #endif
 
+#define LV_COLOR_HEX(c) ((uint16_t)(((c & 0xF80000) >> 16) | ((c & 0xFC00) >> 13) | ((c & 0x1C00) << 3) | ((c & 0xF8) << 5)))
+
 typedef struct stAppLvgl{
 #if LVGL_VERSION==836
   lv_disp_drv_t      disp_drv;

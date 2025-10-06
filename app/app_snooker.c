@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file    app_clock.c
+ * @file    app_snooker.c
  * @author  RandleH
- * @brief   Application Program - Clock
+ * @brief   Application Program - Snooker Meters
  ******************************************************************************
  * @attention
  *
@@ -25,81 +25,19 @@
 #include "trace.h"
 #include "FreeRTOS.h"
 #include "timers.h"
-#include "lvgl.h"
 #include "app_lvgl.h"
-#include "app_clock.h"
-#include "cmn_utility.h"
-#include "cmn_color.h"
-
-
-#define MAX_POSSIBLE_PER_FRAME   (147)
-
-typedef enum etAppSnookerPlayer {
-  kSnookerPlayer1,
-  kSnookerPlayer2,
-  kNumSnookerPlayer
-} AppSnookerPlayer_t;
-
-
-typedef enum etAppSnookerBall {
-  kSnookerBall_R  ,
-  kSnookerBall_Y  ,
-  kSnookerBall_G  ,
-  kSnookerBall_BRN,
-  kSnookerBall_BLU,
-  kSnookerBall_P  ,
-  kSnookerBall_BLK,
-  kSnookerBall_W  ,
-  kNumSnookerBall
-} AppSnookerBall_t;
 
 
 
-typedef struct stAppSnookerStaticBallInfo {
-  const lv_color_t color;
-  const char       *point;
-  const lv_coord_t pos[2];
-} tAppSnookerStaticBallInfo;
 
-typedef struct stAppSnookerStaticPlayerInfo {
-  const lv_coord_t pos[2];
-} tAppSnookerStaticPlayerInfo;
-
-typedef struct stAppSnookerStaticCmn {
-  const lv_coord_t ballsize;
-  const lv_color_t playercolor_active;
-  const lv_color_t playercolor_inactive;
-  const lv_color_t shadow_color;
-  const lv_coord_t shadow_width;
-  const lv_coord_t shadow_spread;
-} tAppSnookerStaticCmn;
-
-typedef struct stAppSnookerStatic {
-  const tAppSnookerStaticBallInfo   balls[kNumSnookerBall];
-  const tAppSnookerStaticPlayerInfo players[kNumSnookerPlayer];
-  const tAppSnookerStaticCmn        common;
-} tAppSnookerStatic;
-
-typedef struct stAppSnookerDynamicPoints {
-  char    str[3+1]; // 3 digits plus '\0' charactor
-  uint8_t val;
-} tAppSnookerDynamicPoints;
-
-typedef struct stAppSnookerDynamic {
-  lv_obj_t *p_screen;
-  tAppSnookerDynamicPoints points[kNumSnookerPlayer];
-  tAppSnookerDynamicPoints points_rem;
-  uint8_t  selected_ball;
-  uint8_t  selected_player;
-  uint8_t  last_operation;
-} tAppSnookerDynamic;
-
-
-typedef struct stAppSnooker {
-  tAppSnookerDynamic       *_dynamic;
-  const tAppSnookerStatic  *_static;
-} tAppSnooker;
-
+/* ************************************************************************** */
+/*                                   Globals                                  */
+/* ************************************************************************** */
+#if 0
+  #define THIS (&metope.app.snooker)
+#else
+  tAppSnooker * const THIS = &metope.app.snooker;
+#endif
 
 
 tAppSnookerDynamic g_app_snooker_dynamic = { 0 };
@@ -107,14 +45,14 @@ tAppSnookerDynamic g_app_snooker_dynamic = { 0 };
 
 const tAppSnookerStatic g_app_snooker_static = {
   .balls = {
-    [kSnookerBall_R  ] = { .color = lv_color_hex(0xBF0202), .point =  "1", .pos = {  0, 95} },
-    [kSnookerBall_Y  ] = { .color = lv_color_hex(0xFFC300), .point =  "2", .pos = { 48,-82} },
-    [kSnookerBall_G  ] = { .color = lv_color_hex(0x297700), .point =  "3", .pos = { 82,-48} },
-    [kSnookerBall_BRN] = { .color = lv_color_hex(0x7F3B03), .point =  "4", .pos = { 95,  0} },
-    [kSnookerBall_BLU] = { .color = lv_color_hex(0x0800F8), .point =  "5", .pos = {-95,  0} },
-    [kSnookerBall_P  ] = { .color = lv_color_hex(0xF800E3), .point =  "6", .pos = {-48,-82} },
-    [kSnookerBall_BLK] = { .color = lv_color_hex(0x464646), .point =  "7", .pos = {-82,-48} },
-    [kSnookerBall_W  ] = { .color = lv_color_hex(0xFFFFFF), .point = "-4", .pos = {  0, 90} }
+    [kSnookerBall_R  ] = { .color = {.full=LV_COLOR_HEX(0xBF0202)}, .point =  "1", .pos = {  0,-95} },
+    [kSnookerBall_Y  ] = { .color = {.full=LV_COLOR_HEX(0xFFC300)}, .point =  "2", .pos = { 48,-82} },
+    [kSnookerBall_G  ] = { .color = {.full=LV_COLOR_HEX(0x297700)}, .point =  "3", .pos = { 82,-48} },
+    [kSnookerBall_BRN] = { .color = {.full=LV_COLOR_HEX(0x7F3B03)}, .point =  "4", .pos = { 95,  0} },
+    [kSnookerBall_BLU] = { .color = {.full=LV_COLOR_HEX(0x0800F8)}, .point =  "5", .pos = {-95,  0} },
+    [kSnookerBall_P  ] = { .color = {.full=LV_COLOR_HEX(0xF800E3)}, .point =  "6", .pos = {-48,-82} },
+    [kSnookerBall_BLK] = { .color = {.full=LV_COLOR_HEX(0x464646)}, .point =  "7", .pos = {-82,-48} },
+    [kSnookerBall_W  ] = { .color = {.full=LV_COLOR_HEX(0xFFFFFF)}, .point = "-4", .pos = {  0, 95} }
   },
   .players = {
     [kSnookerPlayer1] = { .pos = {-30, 30}},
@@ -122,21 +60,24 @@ const tAppSnookerStatic g_app_snooker_static = {
   },
   .common = {
     .ballsize             = 32,
-    .playercolor_active   = lv_color_hex(0xFFFFFF),
-    .playercolor_inactive = lv_color_hex(0x646464),
+    .playercolor_active   = {.full=LV_COLOR_HEX(0xFFFFFF)},
+    .playercolor_inactive = {.full=LV_COLOR_HEX(0x646464)},
     .player_icon_rounded_radius  = 12,
     .player_head_size     = 24,
     .player_head_pos      = {0, -10},
     .player_body_size     = 50,
     .player_body_pos      = {0, 30},
     .player_body_arc      = {220,330},
-    .shadow_color         = lv_color_hex(0x60FFE8),
+    .shadow_color         = {.full=LV_COLOR_HEX(0x60FFE8)},
     .shadow_width         = 8,
     .shadow_spread        = 4,
     .point_remain_txt_pos = {10,48}
   }
 };
 
+/* ************************************************************************** */
+/*                                   Macros                                   */
+/* ************************************************************************** */
 #if 1
   #define SNOOKER_OBJ_BALL_SIZE                       (32)
   #define SNOOKER_OBJ_PLAYER_COLOR_ACTIVE             (lv_color_hex(0xFFFFFF))
@@ -172,8 +113,8 @@ const tAppSnookerStatic g_app_snooker_static = {
   #define SNOOKER_OBJ_SHADOW_COLOR                    (g_app_snooker_static.common.shadow_color)
   #define SNOOKER_OBJ_SHADOW_WIDTH                    (g_app_snooker_static.common.shadow_width)
   #define SNOOKER_OBJ_SHADOW_SPREAD                   (g_app_snooker_static.common.shadow_spread)
-  #define SNOOKER_OBJ_POINT_REMAINING_TXT_POS_X       (g_app_snooker_static.common..point_remain_txt_pos[0])
-  #define SNOOKER_OBJ_POINT_REMAINING_TXT_POS_Y       (g_app_snooker_static.common..point_remain_txt_pos[1])
+  #define SNOOKER_OBJ_POINT_REMAINING_TXT_POS_X       (g_app_snooker_static.common.point_remain_txt_pos[0])
+  #define SNOOKER_OBJ_POINT_REMAINING_TXT_POS_Y       (g_app_snooker_static.common.point_remain_txt_pos[1])
 #endif
 #define SNOOKER_OBJ_BALL_COLOR(idx)         (g_app_snooker_static.balls[(idx)].color)
 #define SNOOKER_OBJ_BALL_POS_X(idx)         (g_app_snooker_static.balls[(idx)].pos[0])
@@ -183,10 +124,17 @@ const tAppSnookerStatic g_app_snooker_static = {
 #define SNOOKER_OBJ_DEFAULT_DARK_COLOR      lv_color_hex(0x000000)
 #define SNOOKER_OBJ_NO_OPAQUE               (0xFF)
 #define SNOOKER_OBJ_INVISIBLE               (0x00)
+#define SNOOKER_OBJ_INITIAL_ACTIVE_BALL     (kSnookerBall_R)
+#define SNOOKER_OBJ_INITIAL_ACTIVE_PLAYER   (kSnookerPlayer1)
 
 
+
+/* ************************************************************************** */
+/*                             Private Functions                              */
+/* ************************************************************************** */
 
 static void ui_snooker_draw_ball();
+
 static void ui_snooker_draw_ballshadow();
 
 static void ui_snooker_draw_players(lv_obj_t *p_screen) {
@@ -252,6 +200,13 @@ static void ui_snooker_draw_players(lv_obj_t *p_screen) {
       lv_obj_set_style_bg_color ( ui_player_body, SNOOKER_OBJ_DEFAULT_LIGHT_COLOR  , LV_PART_KNOB | LV_STATE_DEFAULT );
       lv_obj_set_style_bg_opa   ( ui_player_body, SNOOKER_OBJ_INVISIBLE            , LV_PART_KNOB | LV_STATE_DEFAULT );
     }
+
+    if ( i == SNOOKER_OBJ_INITIAL_ACTIVE_PLAYER) {
+      lv_obj_set_style_shadow_color (ui_player, SNOOKER_OBJ_SHADOW_COLOR , LV_PART_MAIN | LV_STATE_DEFAULT );
+      lv_obj_set_style_shadow_opa   (ui_player, SNOOKER_OBJ_NO_OPAQUE    , LV_PART_MAIN | LV_STATE_DEFAULT );
+      lv_obj_set_style_shadow_width (ui_player, SNOOKER_OBJ_SHADOW_WIDTH , LV_PART_MAIN | LV_STATE_DEFAULT );
+      lv_obj_set_style_shadow_spread(ui_player, SNOOKER_OBJ_SHADOW_SPREAD, LV_PART_MAIN | LV_STATE_DEFAULT );
+    }
   }
 }
 
@@ -300,25 +255,29 @@ static void ui_snooker_draw_rempoints_icon(lv_obj_t *p_screen) {
 
 
 
-
-void ui_snooker_screen_init(void)
+/* ************************************************************************** */
+/*                              Public Functions                              */
+/* ************************************************************************** */
+void ui_snooker_screen_init(tAppSnooker *pApplication)
 {
   lv_obj_t *p_screen = lv_obj_create(NULL);
-
-  g_app_snooker_dynamic.p_screen = p_screen;
-  g_app_snooker_dynamic.points[kSnookerPlayer1].val    = g_app_snooker_dynamic.points[kSnookerPlayer2].val    = 0;
-  g_app_snooker_dynamic.points[kSnookerPlayer1].str[0] = g_app_snooker_dynamic.points[kSnookerPlayer2].str[0] = '0';
-  g_app_snooker_dynamic.points[kSnookerPlayer1].str[1] = g_app_snooker_dynamic.points[kSnookerPlayer2].str[1] = '\0';
-  g_app_snooker_dynamic.points_rem.val    = 147;
-  g_app_snooker_dynamic.points_rem.str[0] = '1';
-  g_app_snooker_dynamic.points_rem.str[1] = '4';
-  g_app_snooker_dynamic.points_rem.str[2] = '7';
-  g_app_snooker_dynamic.points_rem.str[2] = '\0';
+  
+  TRACE_DEBUG("Snooker APP: Initialize dynamic info");
+  pApplication->_dynamic->p_screen = p_screen;
+  pApplication->_dynamic->points[kSnookerPlayer1].val    = pApplication->_dynamic->points[kSnookerPlayer2].val    = 0;
+  pApplication->_dynamic->points[kSnookerPlayer1].str[0] = pApplication->_dynamic->points[kSnookerPlayer2].str[0] = '0';
+  pApplication->_dynamic->points[kSnookerPlayer1].str[1] = pApplication->_dynamic->points[kSnookerPlayer2].str[1] = '\0';
+  pApplication->_dynamic->points_rem.val    = 147;
+  pApplication->_dynamic->points_rem.str[0] = '1';
+  pApplication->_dynamic->points_rem.str[1] = '4';
+  pApplication->_dynamic->points_rem.str[2] = '7';
+  pApplication->_dynamic->points_rem.str[3] = '\0';
 
   lv_obj_clear_flag        ( p_screen, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
   lv_obj_set_style_bg_color( p_screen, SNOOKER_OBJ_DEFAULT_DARK_COLOR, LV_PART_MAIN | LV_STATE_DEFAULT );
   lv_obj_set_style_bg_opa  ( p_screen, SNOOKER_OBJ_NO_OPAQUE         , LV_PART_MAIN | LV_STATE_DEFAULT );
 
+  TRACE_DEBUG("Snooker APP: Initialize balls ui");
   for( int i = 0; i < kNumSnookerBall; ++i) {
     lv_obj_t *ui_ball = lv_obj_create(p_screen);
     lv_obj_set_width             ( ui_ball, SNOOKER_OBJ_BALL_SIZE);
@@ -332,18 +291,20 @@ void ui_snooker_screen_init(void)
     lv_obj_set_style_bg_opa      ( ui_ball, SNOOKER_OBJ_NO_OPAQUE    , LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_border_width( ui_ball, SNOOKER_OBJ_INVISIBLE    , LV_PART_MAIN | LV_STATE_DEFAULT );
 
-    lv_obj_set_style_shadow_color ( ui_ball, SNOOKER_OBJ_SHADOW_COLOR , LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_opa   ( ui_ball, SNOOKER_OBJ_NO_OPAQUE    , LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_width ( ui_ball, SNOOKER_OBJ_SHADOW_WIDTH , LV_PART_MAIN | LV_STATE_DEFAULT );
-    lv_obj_set_style_shadow_spread( ui_ball, SNOOKER_OBJ_SHADOW_SPREAD, LV_PART_MAIN | LV_STATE_DEFAULT );
+    if ( i == SNOOKER_OBJ_INITIAL_ACTIVE_BALL) {
+      lv_obj_set_style_shadow_color ( ui_ball, SNOOKER_OBJ_SHADOW_COLOR , LV_PART_MAIN | LV_STATE_DEFAULT );
+      lv_obj_set_style_shadow_opa   ( ui_ball, SNOOKER_OBJ_NO_OPAQUE    , LV_PART_MAIN | LV_STATE_DEFAULT );
+      lv_obj_set_style_shadow_width ( ui_ball, SNOOKER_OBJ_SHADOW_WIDTH , LV_PART_MAIN | LV_STATE_DEFAULT );
+      lv_obj_set_style_shadow_spread( ui_ball, SNOOKER_OBJ_SHADOW_SPREAD, LV_PART_MAIN | LV_STATE_DEFAULT );
+    }
 
     lv_obj_t *ui_balltxt = lv_label_create(ui_ball);
     lv_obj_set_width           ( ui_balltxt, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height          ( ui_balltxt, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align           ( ui_balltxt, LV_ALIGN_CENTER );
-    lv_label_set_text_static   ( ui_balltxt, SNOOKER_OBJ_BALL_TEXT(idx));
+    lv_label_set_text_static   ( ui_balltxt, SNOOKER_OBJ_BALL_TEXT(i));
 
-    if( i == kSnookerBall_Y) {
+    if( i == kSnookerBall_Y || i == kSnookerBall_W) {
       lv_obj_set_style_text_color( ui_balltxt, SNOOKER_OBJ_DEFAULT_DARK_COLOR, LV_PART_MAIN | LV_STATE_DEFAULT );
     }else {
       lv_obj_set_style_text_color( ui_balltxt, SNOOKER_OBJ_DEFAULT_LIGHT_COLOR, LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -517,6 +478,7 @@ void ui_snooker_screen_init(void)
   lv_label_set_text(ui_whitetxt,"-4");
 #endif
 
+  TRACE_DEBUG("Snooker APP: Initialize players ui");
   ui_snooker_draw_players(p_screen);
 
 #if 0
@@ -570,6 +532,7 @@ void ui_snooker_screen_init(void)
   lv_obj_set_style_text_color(ui_player2score, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
   lv_obj_set_style_text_opa(ui_player2score, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 #endif
+  TRACE_DEBUG("Snooker APP: Initialize icons ui");
   ui_snooker_draw_rempoints_icon(p_screen);
 #if 0
   lv_obj_t *ui_remainingicon = lv_arc_create(ui_snooker);
@@ -597,7 +560,7 @@ void ui_snooker_screen_init(void)
   lv_obj_set_style_bg_opa(ui_remainingicon, 0, LV_PART_KNOB| LV_STATE_DEFAULT);
 #endif
   
-  ui_snooker_draw_rempoints(p_screen, g_app_snooker_dynamic.points_rem.str);
+  ui_snooker_draw_rempoints(p_screen, pApplication->_dynamic->points_rem.str);
 #if 0
   lv_obj_t *ui_remainingpts = lv_label_create(ui_snooker);
   lv_obj_set_width( ui_remainingpts, LV_SIZE_CONTENT);  /// 1
@@ -609,6 +572,7 @@ void ui_snooker_screen_init(void)
   lv_obj_set_style_text_color(ui_remainingpts, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
   lv_obj_set_style_text_opa(ui_remainingpts, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 #endif
+  lv_scr_load(p_screen);
 }
 
 
@@ -622,4 +586,17 @@ void ui_snooker_switch_ball(void) {
 
 void ui_snooker_update_remaining(void) {
 
+}
+
+/**
+ * @brief Clock Application Main Entrance
+ * @param [in] param - will cast to `tAppClock*`
+ */
+void app_snooker_main(void *param) RTOSTHREAD {
+#define CAST(x) ((tAppSnooker*)(x))
+  ui_snooker_screen_init(CAST(param));
+  while(1){
+    vTaskDelay(100);
+  }
+#undef CAST
 }

@@ -71,7 +71,6 @@ typedef struct stAppClockFunc {
 } tAppClockFunc;
 
 typedef struct stAppClock{
-  TaskHandle_t      _handle;
   AppGuiClockEnum_t style;
   tAppGuiClockParam param;
   tAppClockFunc     func;

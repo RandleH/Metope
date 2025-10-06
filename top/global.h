@@ -121,12 +121,18 @@ typedef struct stBsp {
 #include "app_cmdbox.h"
 
 /* ========================================================================== */
+/*                            APP Snooker Objects                             */
+/* ========================================================================== */
+#include "app_snooker.h"
+
+/* ========================================================================== */
 /*                                 APP Objects                                */
 /* ========================================================================== */
 typedef struct stApp {
-  tAppLvgl   lvgl;
-  tAppClock  clock;
-  tAppCmdBox cmdbox;
+  tAppLvgl    lvgl;
+  tAppClock   clock;
+  tAppCmdBox  cmdbox;
+  tAppSnooker snooker;
 } tApp;
 
 
@@ -141,29 +147,40 @@ typedef enum RtosTaskPriority_t {
   kRtosTaskPriority_DOCUMENTATION  = 5
 } RtosTaskPriority_t;
 
+#define RTOS_APP_ENABLE_SCREEN_REFREASH 1
 typedef struct stRtosTask_ScreenRefreash {
   TaskHandle_t _handle;
   StaticTask_t _tcb;
   StackType_t  _stack[APP_CFG_TASK_SCREEN_FRESH_STACK_SIZE];
 } tRtosTask_ScreenRefreash;
 
+#define RTOS_APP_ENABLE_CLOCK 0
 typedef struct stRtosTask_ClockUi {
   TaskHandle_t _handle;
   StaticTask_t _tcb;
   StackType_t  _stack[APP_CFG_TASK_CLOCK_UI_STACK_SIZE];
 } tRtosTask_ClockUi;
 
+#define RTOS_APP_ENABLE_SCREEN_ONOFF 1
 typedef struct stRtosTask_ScreenOnOff {
   TaskHandle_t _handle;
   StaticTask_t _tcb;
   StackType_t  _stack[APP_CFG_TASK_SCREEN_ONOFF_STACK_SIZE];
 } tRtosTask_ScreenOnOff;
 
+#define RTOS_APP_ENABLE_CMDBOX 1
 typedef struct stRtosTask_CmdBox {
   TaskHandle_t _handle;
   StaticTask_t _tcb;
   StackType_t  _stack[APP_CFG_TASK_CMD_BOX_STACK_SIZE];
 } tRtosTask_CmdBox;
+
+#define RTOS_APP_ENABLE_SNOOKER 1
+typedef struct stRtosTask_Snooker {
+  TaskHandle_t _handle;
+  StaticTask_t _tcb;
+  StackType_t  _stack[APP_CFG_TASK_SNOOKER_STACK_SIZE];
+} tRtosTask_Snooker;
 
 typedef union stRtosTaskIdleBitmap {
   struct{
@@ -178,6 +195,7 @@ typedef struct stRtosTask {
   tRtosTask_ClockUi         clock_ui;
   tRtosTask_ScreenOnOff     screen_onoff;
   tRtosTask_CmdBox          cmd_box;
+  tRtosTask_Snooker         snooker;
   tRtosTaskIdleBitmap       bitmap_idle;
 } tRtosTask;
 

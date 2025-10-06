@@ -57,11 +57,14 @@ tMetope  metope = {
       .default_scr  = NULL
     },
     .clock = {
-      ._handle = NULL,
-      .style   = kAppGuiClock_ClockModern
+      .style = kAppGuiClock_ClockModern
     },
     .cmdbox = {
       0
+    },
+    .snooker = {
+      ._dynamic = &g_app_snooker_dynamic,
+      ._static  = &g_app_snooker_static
     }
   },
   .rtos = {.status = {0}}

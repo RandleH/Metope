@@ -66,9 +66,11 @@ void app_rtos_checkpoint(void *param) RTOSTHREAD {
     vTaskDelay(10);
   }
 
+#if RTOS_APP_ENABLE_CLOCK
   while (eBlocked != eTaskGetState(p_task->clock_ui._handle)) {
     vTaskDelay(10);
   }
+#endif
 
   while (eBlocked != eTaskGetState(p_task->screen_onoff._handle)) {
     vTaskDelay(10);
